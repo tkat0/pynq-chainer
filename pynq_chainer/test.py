@@ -10,8 +10,10 @@ class TestLinear(unittest.TestCase):
         self.ffi = cffi.FFI()
 
     def test_mmult(self):
-        w = np.random.uniform(-1, 1, (4, 4)).astype(np.float32)
-        x = np.random.uniform(-1, 1, (2, 4)).astype(np.float32)
+        w_size = (1024, 32)
+        x_size = (512, 32)
+        w = np.random.uniform(-1, 1, w_size).astype(np.float32)
+        x = np.random.uniform(-1, 1, x_size).astype(np.float32)
 
         #w = np.ones((8,4)).astype(np.float32) + 2
         #x = np.ones((2,4)).astype(np.float32)
@@ -34,7 +36,8 @@ class TestLinear(unittest.TestCase):
         print("Expected(NumPy):")
         print(y_)
 
-        self.assertTrue(np.alltrue(y == y_))
+        #self.assertTrue(np.alltrue(y == y_))
+        self.assertTrue(np.allclose(y, y_, rtol=1e-04, atol=1e-04))
 
 """
 class Test(unittest.TestCase):

@@ -82,15 +82,14 @@ void y_write_cahce(float* output, int width, int height, float data) {
 		n_cache_line = height;
 	}
 
-	printf("[%s] cnt:%d, width:%d, height:%d, n_cache_line:%d, n_write:%d, data:%f\n", __func__, cnt, width, height, n_cache_line, n_write, data);
+	debug("[%s] cnt:%d, width:%d, height:%d, n_cache_line:%d, n_write:%d, data:%f\n", __func__, cnt, width, height, n_cache_line, n_write, data);
 	y_col_cache[cnt] = data;
 
 	// if cache is full then write to DRAM.
 	if (cnt == width*n_cache_line - 1) {
 		// write n lines
-		//printf("[%s] write to DRAM offset:%d. size:%d\n",__func__ , n_write*n_cache_line*width, n_cache_line*width);
-		printf("[%s] write to DRAM offset:%d. size:%d\n",__func__ , n_write*width, width);
-		memcpy(&output[n_write], y_col_cache, width * n_cache_line * sizeof(float));
+		debug("[%s] write to DRAM offset:%d. size:%d\n",__func__ , n_write*width, width);
+		memcpy(&output[n_write*width*n_cache_line], y_col_cache, width * n_cache_line * sizeof(float));
 		n_write++;
 		n_write_pix += n_cache_line * width;
 		if (n_write_pix == width*height) {
@@ -135,8 +134,8 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 				//result += in_A[row * a_ncols + k] * in_B[k * b_ncols + col];
 			}
 			//y_col_cache[x_row] = result;
-			printf("[%s] result:%f\n", __func__, result);
-			y_write_cahce(y, x_nrows, xw_ncols, result);
+			debug("[%s] result:%f\n", __func__, result);
+			y_write_cahce(y, x_nrows, w_nrows, result);
 			//y_write_cahce(y, xw_ncols, x_nrows, result);
 		}
 		// write 1 col to DRAM
