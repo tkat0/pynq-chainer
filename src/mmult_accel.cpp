@@ -1,7 +1,7 @@
 #include <string.h>
 #include "mmult_accel.h"
 
-#define CACHE_SIZE (4096)
+#define CACHE_SIZE (1024*16)
 
 #pragma SDS data sys_port(x:ACP, w:ACP, y:ACP)
 #pragma SDS data access_pattern(x:SEQUENTIAL)
