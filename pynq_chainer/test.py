@@ -24,11 +24,12 @@ class TestLinear(unittest.TestCase):
         w_cdata = self.ffi.from_buffer(w.data)
         y_cdata = self.ffi.from_buffer(y.data)
         overlay.lib.mmult_accel1(x_cdata, w_cdata, y_cdata, x_nrows, w_nrows, x_ncols)
-        y = y.T
 
         y_ = x.dot(w.T)
 
         print("Actual(C):")
+        #print(y)
+        y = y.T
         print(y)
         print("Expected(NumPy):")
         print(y_)

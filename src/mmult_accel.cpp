@@ -9,7 +9,7 @@
 
 float x_row_cache[CACHE_SIZE];
 float w_row_cache[CACHE_SIZE];
-float y_row_cache[CACHE_SIZE];
+float y_col_cache[CACHE_SIZE];
 
 float* x_get_next_line_offset(float* input, int width, int height) {
 	static int cnt = 0;
@@ -72,6 +72,37 @@ float* w_get_next_line_offset(float* input, int width, int height) {
 	return &w_row_cache[idx * width];
 }
 
+void y_write_cahce(float* output, int width, int height, float data) {
+	static int cnt = 0;
+	static int n_write = 0;
+	static int n_write_pix = 0;
+	int n_cache_line = CACHE_SIZE / width;
+
+	if (n_cache_line > height) {
+		n_cache_line = height;
+	}
+
+	printf("[%s] cnt:%d, width:%d, height:%d, n_cache_line:%d, n_write:%d, data:%f\n", __func__, cnt, width, height, n_cache_line, n_write, data);
+	y_col_cache[cnt] = data;
+
+	// if cache is full then write to DRAM.
+	if (cnt == width*n_cache_line - 1) {
+		// write n lines
+		//printf("[%s] write to DRAM offset:%d. size:%d\n",__func__ , n_write*n_cache_line*width, n_cache_line*width);
+		printf("[%s] write to DRAM offset:%d. size:%d\n",__func__ , n_write*width, width);
+		memcpy(&output[n_write], y_col_cache, width * n_cache_line * sizeof(float));
+		n_write++;
+		n_write_pix += n_cache_line * width;
+		if (n_write_pix == width*height) {
+			n_write = 0;
+			n_write_pix = 0;
+		}
+		cnt = 0;
+	} else {
+		cnt++;
+	}
+}
+
 #pragma SDS data sys_port(x:ACP, w:ACP, y:ACP)
 #pragma SDS data access_pattern(x:SEQUENTIAL)
 #pragma SDS data access_pattern(w:SEQUENTIAL)
@@ -83,8 +114,6 @@ float* w_get_next_line_offset(float* input, int width, int height) {
 int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_ncols) {
 	float *x_row_cache_;
 	float *w_row_cache_;
-	//float y_col_cache[CACHE_SIZE];
-	float *y_col_cache[CACHE_SIZE];
 
 	for (int w_row = 0; w_row < w_nrows; w_row++) {
 
@@ -105,11 +134,14 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 				result += x_row_cache_[k] * w_row_cache_[k];
 				//result += in_A[row * a_ncols + k] * in_B[k * b_ncols + col];
 			}
-			y_col_cache[x_row] = result;
+			//y_col_cache[x_row] = result;
+			printf("[%s] result:%f\n", __func__, result);
+			y_write_cahce(y, x_nrows, xw_ncols, result);
+			//y_write_cahce(y, xw_ncols, x_nrows, result);
 		}
 		// write 1 col to DRAM
 		//memcpy(&y[w_row*xw_ncols], y_col_cache, xw_ncols * sizeof(float));
-		memcpy(&y[w_row*x_nrows], y_col_cache, x_nrows * sizeof(float));
+		//memcpy(&y[w_row*x_nrows], y_col_cache, x_nrows * sizeof(float));
 	}
 	return 0;
 }
