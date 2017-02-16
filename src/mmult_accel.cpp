@@ -2,8 +2,8 @@
 #include <stdio.h>
 //#include "mmult_accel.h"
 
-//#define debug(...) {printf(__VA_ARGS__);}
-#define debug(...) {}
+#define debug(...) {printf(__VA_ARGS__);}
+//#define debug(...) {}
 
 #define CACHE_SIZE (1024*16)
 
@@ -21,13 +21,14 @@ float* x_get_next_line_offset(float* input, int width, int height) {
 		n_cache_line = height;
 	}
 
-	debug("cnt:%d, n_cache_line:%d, n_read:%d\n", cnt, n_cache_line, n_read);
+	debug("[%s]cnt:%d, cache_size: %d, width: %d, height: %d, n_cache_line:%d, n_read:%d\n", __func__, cnt, CACHE_SIZE, width, height, n_cache_line, n_read);
 	if (cnt == 0) {
-		debug("read from DRAM %d\n", n_read*n_cache_line*width);
+		debug("[%s]read from DRAM %d\n", __func__, n_read*n_cache_line*width);
 		memcpy(x_row_cache, &input[n_read * n_cache_line * width], n_cache_line * width * sizeof(float));
 		n_read++;
 		n_read_pix += n_cache_line * width;
 		if (n_read_pix == width*height) {
+		    debug("[%s] read all pixels\n", __func__);
 			n_read = 0;
 			n_read_pix = 0;
 		}
@@ -39,7 +40,7 @@ float* x_get_next_line_offset(float* input, int width, int height) {
 	} else {
 		cnt++;
 	}
-	debug("offset:%d\n", idx*width);
+	debug("[%s] offset:%d\n", __func__, idx*width);
 	return &x_row_cache[idx * width];
 }
 
@@ -53,6 +54,7 @@ float* w_get_next_line_offset(float* input, int width, int height) {
 		n_cache_line = height;
 	}
 
+	debug("[%s]cnt:%d, cache_size: %d, width: %d, height: %d, n_cache_line:%d, n_read:%d\n", __func__, cnt, CACHE_SIZE, width, height, n_cache_line, n_read);
 	if (cnt == 0) {
 		memcpy(w_row_cache, &input[n_read * n_cache_line * width], n_cache_line * width * sizeof(float));
 		n_read++;
@@ -113,6 +115,8 @@ void y_write_cahce(float* output, int width, int height, float data) {
 int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_ncols) {
 	float *x_row_cache_;
 	float *w_row_cache_;
+	
+	debug("[%s] x: (%d, %d), w: (%d, %d)\n",__func__ , x_nrows, xw_ncols, w_nrows, xw_ncols);
 
 	for (int w_row = 0; w_row < w_nrows; w_row++) {
 
@@ -124,7 +128,7 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 		for (int x_row = 0; x_row < x_nrows; x_row++) {
 #pragma HLS PIPELINE II=1
 			// read 1 col from DRAM
-			debug("[%s] i:%d, j%d\n", __func__, w_row, x_row);
+			debug("[%s] i:%d, j:%d\n", __func__, w_row, x_row);
 			x_row_cache_ = x_get_next_line_offset(x, xw_ncols, x_nrows);
 			//memcpy(x_row_cache, &x[x_row*xw_ncols], xw_ncols * sizeof(float));
 
@@ -136,7 +140,7 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 			//y_col_cache[x_row] = result;
 			debug("[%s] result:%f\n", __func__, result);
 			y_write_cahce(y, x_nrows, w_nrows, result);
-			//y_write_cahce(y, xw_ncols, x_nrows, result);
+			////y_write_cahce(y, xw_ncols, x_nrows, result);
 		}
 		// write 1 col to DRAM
 		//memcpy(&y[w_row*xw_ncols], y_col_cache, xw_ncols * sizeof(float));
