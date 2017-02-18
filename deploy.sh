@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir -p ./HLS/src
+mkdir -p ./pynq_chainer/HLS/src
 
 cp SDDebug/_sds/swstubs/*.{c*|h*} ./src/
 cp SDDebug/_sds/p0/ipi/pynq.runs/impl_1/bitstream.bit ./
