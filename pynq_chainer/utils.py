@@ -6,13 +6,13 @@ import cffi
 try:
     from pynq.drivers import xlnk
     IS_PYNQ = True
-    memmanager = xlnk.xlnk()
+    memmanager = xlnk.xlnk() # base overlayでないとException
 except:
     IS_PYNQ = False
 
-ffi = cffi.FFI()
 
 def malloc_cma_ndarray(shape, dtype="float"):
+    ffi = cffi.FFI()
     if IS_PYNQ:
         length = shape[0]*shape[1]
         buf = memmanager.cma_alloc(length, data_type=dtype)
