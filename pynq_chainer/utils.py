@@ -14,7 +14,8 @@ ffi = cffi.FFI()
 
 def malloc_cma_ndarray(shape, dtype="float"):
     if IS_PYNQ:
-        buf = memmanager.cma_alloc(shape, data_type=dtype)
+        length = shape[0]*shape[1]
+        buf = memmanager.cma_alloc(length, data_type=dtype)
         v_cdata = ffi.buffer(buf,  shape * ffi.sizeof(dtype))
         v = np.frombuffer(v_cdata, dtype=np.float32).reshape(shape)
         print("cma alloc")
