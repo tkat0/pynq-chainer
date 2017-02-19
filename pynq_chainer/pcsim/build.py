@@ -1,10 +1,10 @@
-# file "example_build.py"
-
 import cffi
+
+"""PC-build"""
 
 ffibuilder = cffi.FFI()
 
-fname = "../src/mmult_accel"
+fname = "../../src/mmult_accel"
 
 with open(fname + ".cpp") as f:
     impl = f.read()

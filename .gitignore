@@ -1,4 +1,4 @@
-SDDebug/
-.cproject
-.project
-*.sdsoc
+result/
+
+__pycache__/
+.ipynb_checkpoints/
