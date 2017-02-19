@@ -17,7 +17,7 @@ class Mmult():
             bitfile = "../pynq_chainer/HLS/bitstream.bit"
             libfile = "../pynq_chainer/HLS/src/libaccel.so"
             self.ffi.cdef("int _Z18_p0_mmult_accel1_0PfS_S_iii(float*, float*, float*, int, int, int);")
-            self.lib = ffi.dlopen(libfile)
+            self.lib = self.ffi.dlopen(libfile)
             self.accel_fn = lib._Z18_p0_mmult_accel1_0PfS_S_iii
             
             overlay = Overlay(bitfile)
