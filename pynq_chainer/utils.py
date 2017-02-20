@@ -10,9 +10,16 @@ try:
 except:
     IS_PYNQ = False
 
+ffi = cffi.FFI()
 
-def malloc_cma_ndarray(shape, cacheable=0, dtype="float"):
-    ffi = cffi.FFI()
+ffi.cdef("""
+void xlnkFlushCache(void *buf, int size);
+void xlnkInvalidateCache(void *buf, int size);
+""")
+
+libxlnk = ffi.dlopen("/usr/lib/libsds_lib.so")
+
+def malloc_cma_ndarray(shape, cacheable=1, dtype="float"):
     if IS_PYNQ:
         length = shape[0]*shape[1]
         buf = memmanager.cma_alloc(length, cacheable=cacheable, data_type=dtype)
@@ -27,22 +34,15 @@ def malloc_cma_ndarray(shape, cacheable=0, dtype="float"):
 
 def copy_cma_ndarray(array):
     x, cdata = malloc_cma_ndarray(array.shape)
-    np.copyto(x, array)
-    # memmanager.cma_copy(cdata, array.data)
+    #np.copyto(x, array)
+    array = ffi.cast("float*", array.ctypes.data)
+    memmanager.cma_memcopy(cdata, array, 4*x.size)
     return x, cdata
 
-
-ffi = cffi.FFI()
-
-ffi.cdef("""
-void xlnkFlushCache(void *buf, int size);
-void xlnkInvalidateCache(void *buf, int size);
-""")
-
-libxlnk = ffi.dlopen("/usr/lib/libsds_lib.so")
-
 def flush_cache(buf, size):
+    buf = ffi.cast("void*", buf)
     libxlnk.xlnkFlushCache(buf, size)
 
 def invalidate_cache(buf, size):
+    buf = ffi.cast("void*", buf)
     libxlnk.xlnkInvalidateCache(buf, size)
