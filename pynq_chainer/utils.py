@@ -25,16 +25,13 @@ def malloc_cma_ndarray(shape, cacheable=1, dtype="float"):
         buf = memmanager.cma_alloc(length, cacheable=cacheable, data_type=dtype)
         v_cdata = ffi.buffer(buf,  length * ffi.sizeof(dtype))
         v = np.frombuffer(v_cdata, dtype=np.float32).reshape(shape)
-        print("cma alloc")
     else:
         v = np.zeros(shape).astype(np.float32)
         buf = ffi.from_buffer(v.data)
-        print("cma alloc (dummy)")
     return v, buf
 
 def copy_cma_ndarray(array):
     x, cdata = malloc_cma_ndarray(array.shape)
-    #np.copyto(x, array)
     array = ffi.cast("float*", array.ctypes.data)
     memmanager.cma_memcopy(cdata, array, 4*x.size)
     return x, cdata
