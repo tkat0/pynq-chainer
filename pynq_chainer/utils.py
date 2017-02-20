@@ -11,11 +11,11 @@ except:
     IS_PYNQ = False
 
 
-def malloc_cma_ndarray(shape, dtype="float"):
+def malloc_cma_ndarray(shape, cacheable=0, dtype="float"):
     ffi = cffi.FFI()
     if IS_PYNQ:
         length = shape[0]*shape[1]
-        buf = memmanager.cma_alloc(length, data_type=dtype)
+        buf = memmanager.cma_alloc(length, cacheable=cacheable, data_type=dtype)
         v_cdata = ffi.buffer(buf,  length * ffi.sizeof(dtype))
         v = np.frombuffer(v_cdata, dtype=np.float32).reshape(shape)
         print("cma alloc")
@@ -28,4 +28,5 @@ def malloc_cma_ndarray(shape, dtype="float"):
 def copy_cma_ndarray(array):
     x, cdata = malloc_cma_ndarray(array.shape)
     np.copyto(x, array)
+    # memmanager.cma_copy(cdata, array.data)
     return x, cdata
