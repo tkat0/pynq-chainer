@@ -30,3 +30,19 @@ def copy_cma_ndarray(array):
     np.copyto(x, array)
     # memmanager.cma_copy(cdata, array.data)
     return x, cdata
+
+
+ffi = cffi.FFI()
+
+ffi.cdef("""
+void xlnkFlushCache(void *buf, int size);
+void xlnkInvalidateCache(void *buf, int size);
+""")
+
+libxlnk = ffi.dlopen("/usr/lib/libsds_lib.so")
+
+def flush_cache(buf, size):
+    libxlnk.xlnkFlushCache(buf, size)
+
+def invalidate_cache(buf, size):
+    libxlnk.xlnkInvalidateCache(buf, size)
