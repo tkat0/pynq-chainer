@@ -12,13 +12,13 @@ except:
 
 class Mmult():
     def __init__(self):
-        ffi = cffi.FFI()
+        self.ffi = cffi.FFI()
         if IS_PYNQ:
             bitfile = "../pynq_chainer/HLS/bitstream.bit"
             libfile = "../pynq_chainer/HLS/src/libaccel.so"
-            ffi.cdef("int _Z18_p0_mmult_accel1_0PfS_S_iii(float*, float*, float*, int, int, int);")
-            lib = ffi.dlopen(libfile)
-            self.accel_fn = lib._Z18_p0_mmult_accel1_0PfS_S_iii
+            self.ffi.cdef("int _Z18_p0_mmult_accel1_0PfS_S_iii(float*, float*, float*, int, int, int);")
+            self.lib = self.ffi.dlopen(libfile)
+            self.accel_fn = self.lib._Z18_p0_mmult_accel1_0PfS_S_iii
             
             overlay = Overlay(bitfile)
             if not overlay.is_loaded():
