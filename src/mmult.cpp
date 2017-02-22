@@ -85,7 +85,6 @@ int mmult_test(float *tin1Buf,  float *tin2Buf, float *toutBufSw, float *toutBuf
 
 int mmult_drv(float* a, float* b, float* c, int n1, int n2, int n3) {
 	mmult_accel1(a, b, c, n1, n2, n3);
-	return 0;
 }
 
 int main(int argc, char* argv[]){
