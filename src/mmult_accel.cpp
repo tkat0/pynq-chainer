@@ -2,10 +2,128 @@
 #include <stdio.h>
 //#include "mmult_accel.h"
 
+#ifndef __SYNTHESIS__
 #define debug(...) {printf(__VA_ARGS__);}
-//#define debug(...) {}
+#else
+#define debug(...) {}
+#endif
 
 #define CACHE_SIZE (1024*16)
+
+#define MAX_IN (1024)
+#define MAX_OUT (1024)
+
+#if 1
+class InCacheManager{
+private:
+	float* cache_addr_;
+	float* dram_addr_;
+
+	int width_;
+	int height_;
+	int n_cache_line_;
+	int cache_read_count_;
+	int dram_read_count_;
+	int is_read_once_;
+
+public:
+	void setup(float* dram_addr, float* cache_addr,  int cache_size, int width, int height) {
+
+		dram_addr_ = dram_addr;
+		cache_addr_ = cache_addr;
+		width_ = width;
+		height_ = height;
+
+		n_cache_line_ = cache_size / width_;
+		if (n_cache_line_ > height_) {
+			n_cache_line_ = height_;
+		}
+
+		if (width_*height_ <= cache_size) {
+			is_read_once_ = 1;
+			debug("[%s] read once height:%d, width: %d %d <= %d\n", __func__, height_, width_, width_*height_, cache_size);
+		}
+		
+		debug("[%s] read from DRAM (init) height:%d, width: %d n_cache_line: %d\n", __func__, height_, width_, n_cache_line_);
+		memcpy(cache_addr_, dram_addr_, width_*n_cache_line_ * sizeof(float));
+
+	}
+
+	float* get_line_offset() {
+
+		debug("[%s] call height:%d, width: %d, cache_read_count_: %d\n", __func__, height_, width_, cache_read_count_);
+
+		if (is_read_once_ != 1 && cache_read_count_ == 0) {
+		    debug("[%s] read from DRAM height:%d, width: %d n_cache_line: %d\n", __func__, height_, width_, n_cache_line_);
+			memcpy(cache_addr_, &dram_addr_[dram_read_count_*n_cache_line_*width_], n_cache_line_*width_ * sizeof(float));
+			// 先頭に戻る場合の分岐を追加
+			dram_read_count_++;
+			if (dram_read_count_*width_*n_cache_line_ == width_*height_) {
+			    debug("[%s] read all pixels\n", __func__);
+				dram_read_count_ = 0;
+			}
+		}
+
+		if (cache_read_count_ == n_cache_line_ - 1) {
+			cache_read_count_ = 0;
+		} else {
+			cache_read_count_++;
+		}
+		return &cache_addr_[(cache_read_count_-1) * width_];
+
+	}
+
+};
+class OutCacheManager{
+private:
+	float* cache_addr_;
+	float* dram_addr_;
+
+	int width_;
+	int height_;
+	int n_cache_line_;
+	int cache_write_count_;
+	int dram_write_count_;
+
+public:
+	void setup(float* dram_addr, float* cache_addr,  int cache_size, int width, int height) {
+
+		dram_addr_ = dram_addr;
+		cache_addr_ = cache_addr;
+		width_ = width;
+		height_ = height;
+
+		n_cache_line_ = cache_size / width_;
+		if (n_cache_line_ > height_) {
+			n_cache_line_ = height_;
+		}
+
+	}
+
+	void write(float data) {
+
+		cache_addr_[cache_write_count_] = data;
+
+		// if cache is full then write to DRAM.
+		if (cache_write_count_ == width_*n_cache_line_ - 1) {
+			// write n lines
+			debug("[%s] write to DRAM offset:%d. size:%d\n",__func__ , dram_write_count_*width_, width_);
+			memcpy(&dram_addr_[dram_write_count_*width_*n_cache_line_], cache_addr_, width_ * n_cache_line_ * sizeof(float));
+			dram_write_count_++;
+			if (dram_write_count_*n_cache_line_*width_ == width_*height_) {
+				dram_write_count_ = 0;
+			}
+			cache_write_count_ = 0;
+		} else {
+			cache_write_count_++;
+		}
+
+	}
+
+};
+#endif
+
+extern "C" {
 
 float x_row_cache[CACHE_SIZE];
 float w_row_cache[CACHE_SIZE];
@@ -134,6 +252,14 @@ void y_write_cahce(float* output, int width, int height, float data) {
 int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_ncols) {
 	float *x_row_cache_;
 	float *w_row_cache_;
+
+	InCacheManager* x_cache = new InCacheManager();
+	InCacheManager* w_cache = new InCacheManager();
+	OutCacheManager* y_cache = new OutCacheManager();
+
+	x_cache->setup(x, x_row_cache, CACHE_SIZE, xw_ncols, x_nrows);
+	w_cache->setup(w, w_row_cache, CACHE_SIZE, xw_ncols, w_nrows);
+	y_cache->setup(y, y_col_cache, CACHE_SIZE, w_nrows, x_nrows);
 	
 	debug("[%s] x: (%d, %d), w: (%d, %d) => y: (%d, %d)\n",__func__ , x_nrows, xw_ncols, w_nrows, xw_ncols, x_nrows, w_nrows);
 	r_xcnt = 0;
@@ -152,31 +278,26 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 
 		// read 1 row from DRAM
 		debug("[%s] i:%d\n", __func__, w_row);
-		w_row_cache_ = w_get_next_line_offset(w, xw_ncols, w_nrows);
-		//memcpy(w_row_cache, &w[w_row*xw_ncols], xw_ncols * sizeof(float));
+		//w_row_cache_ = w_get_next_line_offset(w, xw_ncols, w_nrows);
+		w_row_cache_ = w_cache->get_line_offset();
 
 		for (int x_row = 0; x_row < x_nrows; x_row++) {
 #pragma HLS PIPELINE II=1
 			// read 1 col from DRAM
 			debug("[%s] i:%d, j:%d\n", __func__, w_row, x_row);
-			x_row_cache_ = x_get_next_line_offset(x, xw_ncols, x_nrows);
-			//memcpy(x_row_cache, &x[x_row*xw_ncols], xw_ncols * sizeof(float));
+			//x_row_cache_ = x_get_next_line_offset(x, xw_ncols, x_nrows);
+			x_row_cache_ = x_cache->get_line_offset();
 
 			float result = 0.0;
 			for (int k = 0; k < xw_ncols; k++) {
-				//debug("[%s] %d x:%f, w:%f\n", __func__, k, x_row_cache_[k], w_row_cache_[k]);
 				result += x_row_cache_[k] * w_row_cache_[k];
-				//result += in_A[row * a_ncols + k] * in_B[k * b_ncols + col];
 			}
-			//y_col_cache[x_row] = result;
 			debug("[%s] result:%f\n", __func__, result);
-			y_write_cahce(y, w_nrows, x_nrows, result);
-			//y_write_cahce(y, x_nrows, w_nrows, result);
-			////y_write_cahce(y, xw_ncols, x_nrows, result);
+			//y_write_cahce(y, w_nrows, x_nrows, result);
+			y_cache->write(result);
 		}
-		// write 1 col to DRAM
-		//memcpy(&y[w_row*xw_ncols], y_col_cache, xw_ncols * sizeof(float));
-		//memcpy(&y[w_row*x_nrows], y_col_cache, x_nrows * sizeof(float));
 	}
 	return 0;
+}
+
 }
