@@ -30,7 +30,7 @@ float* x_get_next_line_offset(float* input, int width, int height) {
 		}
 	} else {
 		debug("[%s]r_xcnt:%d, cache_size: %d, width: %d, height: %d, n_cache_line:%d, n_xread:%d\n", __func__, r_xcnt, CACHE_SIZE, width, height, n_cache_line, n_xread);
-		if (r_xcnt == 0) {
+		if (r_xcnt == 0 && r_xflg!=1) {
 			debug("[%s]read from DRAM %d\n", __func__, n_xread*n_cache_line*width);
 			memcpy(x_row_cache, &input[n_xread * n_cache_line * width], n_cache_line * width * sizeof(float));
 			n_xread++;
@@ -72,7 +72,7 @@ float* w_get_next_line_offset(float* input, int width, int height) {
 		}
 	} else {
 		debug("[%s]r_wcnt:%d, cache_size: %d, width: %d, height: %d, n_cache_line:%d, n_wread:%d\n", __func__, r_wcnt, CACHE_SIZE, width, height, n_cache_line, n_wread);
-		if (r_wcnt == 0) {
+		if (r_wcnt == 0 && r_wflg != 1) {
 			memcpy(w_row_cache, &input[n_wread * n_cache_line * width], n_cache_line * width * sizeof(float));
 			n_wread++;
 			n_wread_pix += n_cache_line * width;
@@ -153,30 +153,21 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 		// read 1 row from DRAM
 		debug("[%s] i:%d\n", __func__, w_row);
 		w_row_cache_ = w_get_next_line_offset(w, xw_ncols, w_nrows);
-		//memcpy(w_row_cache, &w[w_row*xw_ncols], xw_ncols * sizeof(float));
 
 		for (int x_row = 0; x_row < x_nrows; x_row++) {
 #pragma HLS PIPELINE II=1
 			// read 1 col from DRAM
 			debug("[%s] i:%d, j:%d\n", __func__, w_row, x_row);
 			x_row_cache_ = x_get_next_line_offset(x, xw_ncols, x_nrows);
-			//memcpy(x_row_cache, &x[x_row*xw_ncols], xw_ncols * sizeof(float));
 
 			float result = 0.0;
 			for (int k = 0; k < xw_ncols; k++) {
-				//debug("[%s] %d x:%f, w:%f\n", __func__, k, x_row_cache_[k], w_row_cache_[k]);
+#pragma HLS unroll
 				result += x_row_cache_[k] * w_row_cache_[k];
-				//result += in_A[row * a_ncols + k] * in_B[k * b_ncols + col];
 			}
-			//y_col_cache[x_row] = result;
 			debug("[%s] result:%f\n", __func__, result);
 			y_write_cahce(y, w_nrows, x_nrows, result);
-			//y_write_cahce(y, x_nrows, w_nrows, result);
-			////y_write_cahce(y, xw_ncols, x_nrows, result);
 		}
-		// write 1 col to DRAM
-		//memcpy(&y[w_row*xw_ncols], y_col_cache, xw_ncols * sizeof(float));
-		//memcpy(&y[w_row*x_nrows], y_col_cache, x_nrows * sizeof(float));
 	}
 	return 0;
 }
