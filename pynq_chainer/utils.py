@@ -7,6 +7,7 @@ try:
     from pynq.drivers import xlnk
     IS_PYNQ = True
     memmanager = xlnk.xlnk() # base overlayでないとException
+    libxlnk = ffi.dlopen("/usr/lib/libsds_lib.so")
 except:
     IS_PYNQ = False
 
@@ -16,8 +17,6 @@ ffi.cdef("""
 void xlnkFlushCache(void *buf, int size);
 void xlnkInvalidateCache(void *buf, int size);
 """)
-
-libxlnk = ffi.dlopen("/usr/lib/libsds_lib.so")
 
 def malloc_cma_ndarray(shape, cacheable=1, dtype="float"):
     if IS_PYNQ:
@@ -33,7 +32,10 @@ def malloc_cma_ndarray(shape, cacheable=1, dtype="float"):
 def copy_cma_ndarray(array):
     x, cdata = malloc_cma_ndarray(array.shape)
     array = ffi.cast("float*", array.ctypes.data)
-    memmanager.cma_memcopy(cdata, array, 4*x.size)
+    if IS_PYNQ:
+        memmanager.cma_memcopy(cdata, array, 4*x.size)
+    else:
+        ffi.memmove(cdata, array, 4*x.size)
     return x, cdata
 
 def flush_cache(buf, size):

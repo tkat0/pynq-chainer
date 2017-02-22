@@ -24,7 +24,7 @@ class Mmult():
             if not overlay.is_loaded():
                 overlay.download()
         else:
-            self.accel_fn = pcsim.lib.mmult_accel1
+            self.accel_fn = pcsim.mmult_accel
     
     def __call__(self, x_cdata, w_cdata, y_cdata, x_nrows, w_nrows, xw_ncols):
         return self.accel_fn(x_cdata, w_cdata, y_cdata, x_nrows, w_nrows, xw_ncols)

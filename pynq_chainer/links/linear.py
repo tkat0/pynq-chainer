@@ -34,8 +34,6 @@ class Linear(L.Linear):
         if initializer is not None:
             raise AttributeError('initializer is not supported')
         
-        #data = self.xp.full(shape, numpy.nan, dtype=dtype)
-        
         data, cdata = utils.malloc_cma_ndarray(shape)
         var = Variable(data, volatile='auto', name=name)
         var.cdata = cdata
