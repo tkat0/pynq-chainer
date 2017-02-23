@@ -5,31 +5,33 @@
 #define debug(...) {printf(__VA_ARGS__);}
 //#define debug(...) {}
 
-#define CACHE_SIZE (1024*16)
+#define X_CACHE_SIZE (1024*2)
+#define W_CACHE_SIZE (1024*32)
+#define Y_CACHE_SIZE (1024*2)
 
-float x_row_cache[CACHE_SIZE];
-float w_row_cache[CACHE_SIZE];
-float y_col_cache[CACHE_SIZE];
+float x_row_cache[X_CACHE_SIZE];
+float w_row_cache[W_CACHE_SIZE];
+float y_col_cache[Y_CACHE_SIZE];
 
 static int r_xcnt = 0;
 static int n_xread = 0;
 static int n_xread_pix = 0;
 static int r_xflg = 0;
 float* x_get_next_line_offset(float* input, int width, int height) {
-	int n_cache_line = CACHE_SIZE / width;
+	int n_cache_line = X_CACHE_SIZE / width;
 
 	if (n_cache_line > height) {
 		n_cache_line = height;
 	}
 
-	if (width*height <= CACHE_SIZE) {
+	if (width*height <= X_CACHE_SIZE) {
 		if (r_xflg == 0) {
 			debug("[%s] read from DRAM %d (1 time)\n", __func__, height*width);
 			memcpy(x_row_cache, input, height * width * sizeof(float));
 			r_xflg = 1;
 		}
 	} else {
-		debug("[%s]r_xcnt:%d, cache_size: %d, width: %d, height: %d, n_cache_line:%d, n_xread:%d\n", __func__, r_xcnt, CACHE_SIZE, width, height, n_cache_line, n_xread);
+		debug("[%s]r_xcnt:%d, cache_size: %d, width: %d, height: %d, n_cache_line:%d, n_xread:%d\n", __func__, r_xcnt, X_CACHE_SIZE, width, height, n_cache_line, n_xread);
 		if (r_xcnt == 0 && r_xflg!=1) {
 			debug("[%s]read from DRAM %d\n", __func__, n_xread*n_cache_line*width);
 			memcpy(x_row_cache, &input[n_xread * n_cache_line * width], n_cache_line * width * sizeof(float));
@@ -58,20 +60,20 @@ static int n_wread = 0;
 static int n_wread_pix = 0;
 static int r_wflg = 0;
 float* w_get_next_line_offset(float* input, int width, int height) {
-	int n_cache_line = CACHE_SIZE / width;
+	int n_cache_line = W_CACHE_SIZE / width;
 
 	if (n_cache_line > height) {
 		n_cache_line = height;
 	}
 
-	if (width*height <= CACHE_SIZE) {
+	if (width*height <= W_CACHE_SIZE) {
 		if (r_wflg == 0) {
 			debug("[%s] read from DRAM %d (1 time)\n", __func__, height*width);
 			memcpy(w_row_cache, input, height * width * sizeof(float));
 			r_wflg = 1;
 		}
 	} else {
-		debug("[%s]r_wcnt:%d, cache_size: %d, width: %d, height: %d, n_cache_line:%d, n_wread:%d\n", __func__, r_wcnt, CACHE_SIZE, width, height, n_cache_line, n_wread);
+		debug("[%s]r_wcnt:%d, cache_size: %d, width: %d, height: %d, n_cache_line:%d, n_wread:%d\n", __func__, r_wcnt, W_CACHE_SIZE, width, height, n_cache_line, n_wread);
 		if (r_wcnt == 0 && r_wflg != 1) {
 			memcpy(w_row_cache, &input[n_wread * n_cache_line * width], n_cache_line * width * sizeof(float));
 			n_wread++;
@@ -97,7 +99,7 @@ static int w_cnt = 0;
 static int n_write = 0;
 static int n_write_pix = 0;
 void y_write_cahce(float* output, int width, int height, float data) {
-	int n_cache_line = CACHE_SIZE / width;
+	int n_cache_line = Y_CACHE_SIZE / width;
 
 	if (n_cache_line > height) {
 		n_cache_line = height;
@@ -160,7 +162,7 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 
 			float result = 0.0;
 			for (int k = 0; k < xw_ncols; k++) {
-#pragma HLS unroll factor = 1024
+#pragma HLS unroll factor = 4096
 				result += x_row_cache_[k] * w_row_cache_[k];
 			}
 			debug("[%s] result:%f\n", __func__, result);
