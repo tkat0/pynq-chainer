@@ -185,6 +185,8 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 }
 #endif
 
+//extern "C" {
+
 //C:\Xilinx\SDSoC\2015.4\samples\zc706_mem_apps\mmult_sp0_all
 #define A_NROWS 1
 #define A_NCOLS 2048
@@ -210,9 +212,9 @@ int mmult_accel (float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrow
 #pragma HLS PIPELINE II=1
       float result = 0.0;
       for (int k = 0; k < xw_ncols; k++) {
-        result += a_buf[row*xw_ncols+k] * b_buf[k*xw_ncols+col];
+        result += a_buf[col*xw_ncols+k] * b_buf[row*xw_ncols+k];
       }
-      c_buf[row*xw_ncols+col] = result;
+      c_buf[col*x_nrows+row] = result;
     }
   }
   memcpy(out_y, c_buf, x_nrows*w_nrows*sizeof(float));
@@ -255,3 +257,5 @@ int _p0_mmult_accel_0(float * in_x, float * in_w, float * out_y, int x_nrows, in
 }
 
 
+
+//}

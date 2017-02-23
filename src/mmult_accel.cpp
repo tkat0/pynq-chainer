@@ -185,7 +185,7 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 }
 #endif
 
-extern "C" {
+//extern "C" {
 
 //C:\Xilinx\SDSoC\2015.4\samples\zc706_mem_apps\mmult_sp0_all
 #define A_NROWS 1
@@ -221,4 +221,4 @@ int mmult_accel (float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrow
   return 0;
 }
 
-}
+//}
