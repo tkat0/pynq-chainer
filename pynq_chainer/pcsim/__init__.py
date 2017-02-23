@@ -4,9 +4,10 @@ import cffi
 
 def _load_pcsim():
     ffi = cffi.FFI()
-    ffi.cdef("int mmult_accel1(float*, float*, float*, int, int, int);")
+    #ffi.cdef("int mmult_accel1(float*, float*, float*, int, int, int);")
+    ffi.cdef("int mmult_accel(float*, float*, float*, int, int, int);")
     C = ffi.dlopen(CURRENT_DIR + "/mmult_accel.so")
-    return C.mmult_accel1
+    return C.mmult_accel
 
 try:
     #from .overlay import lib
