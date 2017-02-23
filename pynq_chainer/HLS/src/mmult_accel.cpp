@@ -127,7 +127,7 @@ void y_write_cahce(float* output, int width, int height, float data) {
 	}
 }
 
-#pragma SDS data sys_port(x:ACP, w:ACP, y:ACP)
+//#pragma SDS data sys_port(x:ACP, w:ACP, y:ACP)
 #pragma SDS data access_pattern(x:SEQUENTIAL, w:SEQUENTIAL, y:SEQUENTIAL)
 #pragma SDS data mem_attribute(x:PHYSICAL_CONTIGUOUS, w:PHYSICAL_CONTIGUOUS, y:PHYSICAL_CONTIGUOUS)
 #pragma SDS data zero_copy(x[0:x_nrows*xw_ncols])
@@ -168,8 +168,9 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 
 			float result = 0.0;
 			for (int k = 0; k < xw_ncols; k++) {
-#pragma HLS unroll factor = 4096
-				result += x_row_cache[w_row_cache_+k] * w_row_cache[x_row_cache_+k];
+#pragma HLS unroll
+				float product_term = x_row_cache[w_row_cache_+k] * w_row_cache[x_row_cache_+k];
+				result += product_term;
 			}
 			debug("[%s] result:%f\n", __func__, result);
 			y_write_cahce(y, w_nrows, x_nrows, result);

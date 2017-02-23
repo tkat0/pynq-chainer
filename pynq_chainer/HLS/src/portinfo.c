@@ -22,21 +22,21 @@ axi_lite_info_t _p0_swinst_mmult_accel1_0_cmd_mmult_accel1_info = {
 zero_copy_info_t _p0_swinst_mmult_accel1_0_x_info = {
   .accel_info = &_sds__p0_mmult_accel1_0,
   .reg_name = "0x80",
-  .needs_cache_flush_invalidate = 0,
+  .needs_cache_flush_invalidate = 1,
   .dir_chan = XLNK_BI_DIRECTIONAL
 };
 
 zero_copy_info_t _p0_swinst_mmult_accel1_0_w_info = {
   .accel_info = &_sds__p0_mmult_accel1_0,
   .reg_name = "0x84",
-  .needs_cache_flush_invalidate = 0,
+  .needs_cache_flush_invalidate = 1,
   .dir_chan = XLNK_BI_DIRECTIONAL
 };
 
 zero_copy_info_t _p0_swinst_mmult_accel1_0_y_info = {
   .accel_info = &_sds__p0_mmult_accel1_0,
   .reg_name = "0x88",
-  .needs_cache_flush_invalidate = 0,
+  .needs_cache_flush_invalidate = 1,
   .dir_chan = XLNK_BI_DIRECTIONAL
 };
 
