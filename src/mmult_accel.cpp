@@ -124,13 +124,11 @@ void y_write_cahce(float* output, int width, int height, float data) {
 }
 
 #pragma SDS data sys_port(x:ACP, w:ACP, y:ACP)
-#pragma SDS data access_pattern(x:SEQUENTIAL)
-#pragma SDS data access_pattern(w:SEQUENTIAL)
-#pragma SDS data access_pattern(y:SEQUENTIAL)
+#pragma SDS data access_pattern(x:SEQUENTIAL, w:SEQUENTIAL, y:SEQUENTIAL)
 #pragma SDS data mem_attribute(x:PHYSICAL_CONTIGUOUS, w:PHYSICAL_CONTIGUOUS, y:PHYSICAL_CONTIGUOUS)
-#pragma SDS data zero_copy(x[0:CACHE_SIZE])
-#pragma SDS data zero_copy(w[0:CACHE_SIZE])
-#pragma SDS data zero_copy(y[0:CACHE_SIZE])
+#pragma SDS data zero_copy(x[0:x_nrows*xw_ncols])
+#pragma SDS data zero_copy(w[0:w_nrows*xw_ncols])
+#pragma SDS data zero_copy(y[0:x_nrows*w_nrows])
 int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_ncols) {
 	float *x_row_cache_;
 	float *w_row_cache_;

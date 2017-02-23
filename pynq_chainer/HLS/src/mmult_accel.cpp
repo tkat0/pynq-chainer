@@ -124,13 +124,11 @@ void y_write_cahce(float* output, int width, int height, float data) {
 }
 
 #pragma SDS data sys_port(x:ACP, w:ACP, y:ACP)
-#pragma SDS data access_pattern(x:SEQUENTIAL)
-#pragma SDS data access_pattern(w:SEQUENTIAL)
-#pragma SDS data access_pattern(y:SEQUENTIAL)
+#pragma SDS data access_pattern(x:SEQUENTIAL, w:SEQUENTIAL, y:SEQUENTIAL)
 #pragma SDS data mem_attribute(x:PHYSICAL_CONTIGUOUS, w:PHYSICAL_CONTIGUOUS, y:PHYSICAL_CONTIGUOUS)
-#pragma SDS data zero_copy(x[0:CACHE_SIZE])
-#pragma SDS data zero_copy(w[0:CACHE_SIZE])
-#pragma SDS data zero_copy(y[0:CACHE_SIZE])
+#pragma SDS data zero_copy(x[0:x_nrows*xw_ncols])
+#pragma SDS data zero_copy(w[0:w_nrows*xw_ncols])
+#pragma SDS data zero_copy(y[0:x_nrows*w_nrows])
 int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_ncols) {
 	float *x_row_cache_;
 	float *w_row_cache_;
@@ -187,9 +185,9 @@ int _p0_mmult_accel1_0(float * x, float * w, float * y, int x_nrows, int w_nrows
   cf_send_i(&(_p0_swinst_mmult_accel1_0.cmd_mmult_accel1), start_seq, 3*sizeof(int), &_p0_swinst_mmult_accel1_0_cmd);
   cf_wait(_p0_swinst_mmult_accel1_0_cmd);
 
-  cf_send_ref_i(&(_p0_swinst_mmult_accel1_0.x), &x, ((1024*16)) * 4, &_p0_request_0);
-  cf_send_ref_i(&(_p0_swinst_mmult_accel1_0.w), &w, ((1024*16)) * 4, &_p0_request_1);
-  cf_send_ref_i(&(_p0_swinst_mmult_accel1_0.y), &y, ((1024*16)) * 4, &_p0_request_2);
+  cf_send_ref_i(&(_p0_swinst_mmult_accel1_0.x), &x, (x_nrows*xw_ncols) * 4, &_p0_request_0);
+  cf_send_ref_i(&(_p0_swinst_mmult_accel1_0.w), &w, (w_nrows*xw_ncols) * 4, &_p0_request_1);
+  cf_send_ref_i(&(_p0_swinst_mmult_accel1_0.y), &y, (x_nrows*w_nrows) * 4, &_p0_request_2);
   cf_send_i(&(_p0_swinst_mmult_accel1_0.x_nrows), &x_nrows, 4, &_p0_request_3);
   cf_send_i(&(_p0_swinst_mmult_accel1_0.w_nrows), &w_nrows, 4, &_p0_request_4);
   cf_send_i(&(_p0_swinst_mmult_accel1_0.xw_ncols), &xw_ncols, 4, &_p0_request_5);
