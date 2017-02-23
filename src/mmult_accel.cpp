@@ -157,14 +157,14 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 		// read 1 row from DRAM
 		debug("[%s] i:%d\n", __func__, w_row);
 		//w_row_cache_ = w_get_next_line_offset(w, xw_ncols, w_nrows);
-		w_row_cache_ = w_get_next_line_offset(w, xw_ncols, w_nrows);
+		//w_row_cache_ = w_get_next_line_offset(w, xw_ncols, w_nrows);
 
 		for (int x_row = 0; x_row < x_nrows; x_row++) {
 #pragma HLS PIPELINE II=1
 			// read 1 col from DRAM
 			debug("[%s] i:%d, j:%d\n", __func__, w_row, x_row);
 			//x_row_cache_ = x_get_next_line_offset(x, xw_ncols, x_nrows);
-			x_row_cache_ = x_get_next_line_offset(x, xw_ncols, x_nrows);
+			//x_row_cache_ = x_get_next_line_offset(x, xw_ncols, x_nrows);
 
 			float result = 0.0;
 			for (int k = 0; k < xw_ncols; k++) {
