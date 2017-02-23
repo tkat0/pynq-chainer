@@ -160,7 +160,7 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 
 			float result = 0.0;
 			for (int k = 0; k < xw_ncols; k++) {
-#pragma HLS unroll
+#pragma HLS unroll factor = 1024
 				result += x_row_cache_[k] * w_row_cache_[k];
 			}
 			debug("[%s] result:%f\n", __func__, result);
