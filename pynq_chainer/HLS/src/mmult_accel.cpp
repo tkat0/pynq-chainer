@@ -6,12 +6,12 @@
 //#define debug(...) {}
 
 #define X_CACHE_SIZE (1024*2)
-#define W_CACHE_SIZE (1024*32)
+#define W_CACHE_SIZE (1024*64)
 #define Y_CACHE_SIZE (1024*2)
 
-float x_row_cache[X_CACHE_SIZE];
-float w_row_cache[W_CACHE_SIZE];
-float y_col_cache[Y_CACHE_SIZE];
+static float x_row_cache[X_CACHE_SIZE];
+static float w_row_cache[W_CACHE_SIZE];
+static float y_col_cache[Y_CACHE_SIZE];
 
 static int r_xcnt = 0;
 static int n_xread = 0;
