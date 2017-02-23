@@ -5,7 +5,7 @@
 #define debug(...) {printf(__VA_ARGS__);}
 //#define debug(...) {}
 
-#define X_CACHE_SIZE (1024*2)
+#define X_CACHE_SIZE (1024*4)
 #define W_CACHE_SIZE (1024*64)
 #define Y_CACHE_SIZE (1024*2)
 
@@ -17,7 +17,7 @@ static int r_xcnt = 0;
 static int n_xread = 0;
 static int n_xread_pix = 0;
 static int r_xflg = 0;
-float* x_get_next_line_offset(float* input, int width, int height) {
+int x_get_next_line_offset(float* input, int width, int height) {
 	int n_cache_line = X_CACHE_SIZE / width;
 
 	if (n_cache_line > height) {
@@ -52,14 +52,15 @@ float* x_get_next_line_offset(float* input, int width, int height) {
 		r_xcnt++;
 	}
 	debug("[%s] offset:%d\n", __func__, idx*width);
-	return &x_row_cache[idx * width];
+	//return &x_row_cache[idx * width];
+	return idx * width;
 }
 
 static int r_wcnt = 0;
 static int n_wread = 0;
 static int n_wread_pix = 0;
 static int r_wflg = 0;
-float* w_get_next_line_offset(float* input, int width, int height) {
+int w_get_next_line_offset(float* input, int width, int height) {
 	int n_cache_line = W_CACHE_SIZE / width;
 
 	if (n_cache_line > height) {
@@ -92,7 +93,8 @@ float* w_get_next_line_offset(float* input, int width, int height) {
 		r_wcnt++;
 	}
 	debug("[%s] offset:%d\n", __func__, idx*width);
-	return &w_row_cache[idx * width];
+	//return &w_row_cache[idx * width];
+	return idx * width;
 }
 
 static int w_cnt = 0;
@@ -132,8 +134,10 @@ void y_write_cahce(float* output, int width, int height, float data) {
 #pragma SDS data zero_copy(w[0:w_nrows*xw_ncols])
 #pragma SDS data zero_copy(y[0:x_nrows*w_nrows])
 int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_ncols) {
-	float *x_row_cache_;
-	float *w_row_cache_;
+	//float *x_row_cache_;
+	//float *w_row_cache_;
+	int x_row_cache_;
+	int w_row_cache_;
 	
 	debug("[%s] x: (%d, %d), w: (%d, %d) => y: (%d, %d)\n",__func__ , x_nrows, xw_ncols, w_nrows, xw_ncols, x_nrows, w_nrows);
 	r_xcnt = 0;
@@ -152,18 +156,20 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 
 		// read 1 row from DRAM
 		debug("[%s] i:%d\n", __func__, w_row);
+		//w_row_cache_ = w_get_next_line_offset(w, xw_ncols, w_nrows);
 		w_row_cache_ = w_get_next_line_offset(w, xw_ncols, w_nrows);
 
 		for (int x_row = 0; x_row < x_nrows; x_row++) {
 #pragma HLS PIPELINE II=1
 			// read 1 col from DRAM
 			debug("[%s] i:%d, j:%d\n", __func__, w_row, x_row);
+			//x_row_cache_ = x_get_next_line_offset(x, xw_ncols, x_nrows);
 			x_row_cache_ = x_get_next_line_offset(x, xw_ncols, x_nrows);
 
 			float result = 0.0;
 			for (int k = 0; k < xw_ncols; k++) {
 #pragma HLS unroll factor = 4096
-				result += x_row_cache_[k] * w_row_cache_[k];
+				result += x_row_cache[w_row_cache_+k] * w_row_cache[x_row_cache_+k];
 			}
 			debug("[%s] result:%f\n", __func__, result);
 			y_write_cahce(y, w_nrows, x_nrows, result);
