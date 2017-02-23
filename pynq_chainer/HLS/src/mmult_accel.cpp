@@ -140,17 +140,20 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 	int w_row_cache_;
 	
 	debug("[%s] x: (%d, %d), w: (%d, %d) => y: (%d, %d)\n",__func__ , x_nrows, xw_ncols, w_nrows, xw_ncols, x_nrows, w_nrows);
-	r_xcnt = 0;
-	n_xread = 0;
-	n_xread_pix = 0;
-	r_wcnt = 0;
-	n_wread = 0;
-	n_wread_pix = 0;
-	w_cnt = 0;
-	n_write = 0;
-	n_write_pix = 0;
-	r_xflg = 0;
-	r_wflg = 0;
+//	r_xcnt = 0;
+//	n_xread = 0;
+//	n_xread_pix = 0;
+//	r_wcnt = 0;
+//	n_wread = 0;
+//	n_wread_pix = 0;
+//	w_cnt = 0;
+//	n_write = 0;
+//	n_write_pix = 0;
+//	r_xflg = 0;
+//	r_wflg = 0;
+
+	memcpy(x_row_cache, x, x_nrows * xw_ncols * sizeof(float));
+	memcpy(w_row_cache, w, w_nrows * xw_ncols * sizeof(float));
 
 	for (int w_row = 0; w_row < w_nrows; w_row++) {
 
