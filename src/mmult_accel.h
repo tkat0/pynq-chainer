@@ -12,6 +12,7 @@
 //#pragma SDS data zero_copy(in_B[0:A_NROWS*A_NCOLS])
 //#pragma SDS data zero_copy(out_C[0:A_NROWS*A_NCOLS])
 int mmult_accel1(float *in_A, float *in_B, float *out_C, int a_nrows, int a_ncols, int b_ncols);
+int mmult_accel(float *in_A, float *in_B, float *out_C, int a_nrows, int a_ncols, int b_ncols);
 //int mmult_accel (float *in_A, float *in_B, float *out_C);
 
 #endif /* MMULT_ACC_H_ */

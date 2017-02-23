@@ -5,6 +5,7 @@
 #define debug(...) {printf(__VA_ARGS__);}
 //#define debug(...) {}
 
+#if 0
 #define X_CACHE_SIZE (1024*4)
 #define W_CACHE_SIZE (1024*64)
 #define Y_CACHE_SIZE (1024*2)
@@ -171,41 +172,77 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 
 			float result = 0.0;
 			for (int k = 0; k < xw_ncols; k++) {
-#pragma HLS unroll
-				float product_term = x_row_cache[w_row_cache_+k] * w_row_cache[x_row_cache_+k];
+//#pragma HLS unroll
+				float product_term = x_row_cache[x_row*xw_ncols+k] * w_row_cache[w_row*xw_ncols+k];
 				result += product_term;
 			}
 			debug("[%s] result:%f\n", __func__, result);
 			//y_write_cahce(y, w_nrows, x_nrows, result);
+			y_col_cache[w_row * x_nrows + x_row] = result;
 		}
 	}
 	return 0;
+}
+#endif
+
+//C:\Xilinx\SDSoC\2015.4\samples\zc706_mem_apps\mmult_sp0_all
+#define A_NROWS 1
+#define A_NCOLS 2048
+#define B_NCOLS 2048
+#define B_NROWS A_NCOLS
+
+#pragma SDS data access_pattern(in_x:SEQUENTIAL, in_w:SEQUENTIAL, out_y:SEQUENTIAL)
+#pragma SDS data mem_attribute(in_x:PHYSICAL_CONTIGUOUS, in_w:PHYSICAL_CONTIGUOUS, out_y:PHYSICAL_CONTIGUOUS)
+#pragma SDS data zero_copy(in_x[0:x_nrows*xw_ncols])
+#pragma SDS data zero_copy(in_w[0:w_nrows*xw_ncols])
+#pragma SDS data zero_copy(out_y[0:x_nrows*w_nrows])
+int mmult_accel (float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrows, int xw_ncols)
+{
+  float a_buf[1024*4]; // 1x4096
+  float b_buf[1024*64]; // 4096x4096
+  float c_buf[1024*2]; // 1x4096
+
+  memcpy(a_buf, in_x, x_nrows*xw_ncols*sizeof(float));
+  memcpy(b_buf, in_w, w_nrows*xw_ncols*sizeof(float));
+
+  for (int row = 0; row < w_nrows; row++) {
+    for (int col = 0; col < x_nrows; col++) {
+#pragma HLS PIPELINE II=1
+      float result = 0.0;
+      for (int k = 0; k < xw_ncols; k++) {
+        result += a_buf[row*xw_ncols+k] * b_buf[k*xw_ncols+col];
+      }
+      c_buf[row*xw_ncols+col] = result;
+    }
+  }
+  memcpy(out_y, c_buf, x_nrows*w_nrows*sizeof(float));
+  return 0;
 }
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "cf_stub.h"
-int _p0_mmult_accel1_0(float * x, float * w, float * y, int x_nrows, int w_nrows, int xw_ncols);
-int _p0_mmult_accel1_0(float * x, float * w, float * y, int x_nrows, int w_nrows, int xw_ncols)
+int _p0_mmult_accel_0(float * in_x, float * in_w, float * out_y, int x_nrows, int w_nrows, int xw_ncols);
+int _p0_mmult_accel_0(float * in_x, float * in_w, float * out_y, int x_nrows, int w_nrows, int xw_ncols)
 {
   switch_to_next_partition(0);
   int start_seq[3];
   start_seq[0] = 0x00003f00;
   start_seq[1] = 0x00010100;
   start_seq[2] = 0x00020000;
-  cf_request_handle_t _p0_swinst_mmult_accel1_0_cmd;
-  cf_send_i(&(_p0_swinst_mmult_accel1_0.cmd_mmult_accel1), start_seq, 3*sizeof(int), &_p0_swinst_mmult_accel1_0_cmd);
-  cf_wait(_p0_swinst_mmult_accel1_0_cmd);
+  cf_request_handle_t _p0_swinst_mmult_accel_0_cmd;
+  cf_send_i(&(_p0_swinst_mmult_accel_0.cmd_mmult_accel), start_seq, 3*sizeof(int), &_p0_swinst_mmult_accel_0_cmd);
+  cf_wait(_p0_swinst_mmult_accel_0_cmd);
 
-  cf_send_ref_i(&(_p0_swinst_mmult_accel1_0.x), &x, (x_nrows*xw_ncols) * 4, &_p0_request_0);
-  cf_send_ref_i(&(_p0_swinst_mmult_accel1_0.w), &w, (w_nrows*xw_ncols) * 4, &_p0_request_1);
-  cf_send_ref_i(&(_p0_swinst_mmult_accel1_0.y), &y, (x_nrows*w_nrows) * 4, &_p0_request_2);
-  cf_send_i(&(_p0_swinst_mmult_accel1_0.x_nrows), &x_nrows, 4, &_p0_request_3);
-  cf_send_i(&(_p0_swinst_mmult_accel1_0.w_nrows), &w_nrows, 4, &_p0_request_4);
-  cf_send_i(&(_p0_swinst_mmult_accel1_0.xw_ncols), &xw_ncols, 4, &_p0_request_5);
+  cf_send_ref_i(&(_p0_swinst_mmult_accel_0.in_x), &in_x, (x_nrows*xw_ncols) * 4, &_p0_request_0);
+  cf_send_ref_i(&(_p0_swinst_mmult_accel_0.in_w), &in_w, (w_nrows*xw_ncols) * 4, &_p0_request_1);
+  cf_send_ref_i(&(_p0_swinst_mmult_accel_0.out_y), &out_y, (x_nrows*w_nrows) * 4, &_p0_request_2);
+  cf_send_i(&(_p0_swinst_mmult_accel_0.x_nrows), &x_nrows, 4, &_p0_request_3);
+  cf_send_i(&(_p0_swinst_mmult_accel_0.w_nrows), &w_nrows, 4, &_p0_request_4);
+  cf_send_i(&(_p0_swinst_mmult_accel_0.xw_ncols), &xw_ncols, 4, &_p0_request_5);
 
-  int _p0_mmult_accel1_0_v_return;
-  cf_receive_i(&(_p0_swinst_mmult_accel1_0.ap_return), &_p0_mmult_accel1_0_v_return, 4, &_p0_mmult_accel1_0_num_ap_return, &_p0_request_6);
+  int _p0_mmult_accel_0_v_return;
+  cf_receive_i(&(_p0_swinst_mmult_accel_0.ap_return), &_p0_mmult_accel_0_v_return, 4, &_p0_mmult_accel_0_num_ap_return, &_p0_request_6);
 
   cf_wait(_p0_request_0);
   cf_wait(_p0_request_1);
@@ -214,7 +251,7 @@ int _p0_mmult_accel1_0(float * x, float * w, float * y, int x_nrows, int w_nrows
   cf_wait(_p0_request_4);
   cf_wait(_p0_request_5);
   cf_wait(_p0_request_6);
-  return _p0_mmult_accel1_0_v_return;
+  return _p0_mmult_accel_0_v_return;
 }
 
 

@@ -5,18 +5,18 @@
 extern "C" {
 #endif
 
-struct _p0_swblk_mmult_accel1 {
-  cf_port_send_t cmd_mmult_accel1;
-  cf_port_send_t x;
-  cf_port_send_t w;
-  cf_port_send_t y;
+struct _p0_swblk_mmult_accel {
+  cf_port_send_t cmd_mmult_accel;
+  cf_port_send_t in_x;
+  cf_port_send_t in_w;
+  cf_port_send_t out_y;
   cf_port_send_t x_nrows;
   cf_port_send_t w_nrows;
   cf_port_send_t xw_ncols;
   cf_port_receive_t ap_return;
 };
 
-extern struct _p0_swblk_mmult_accel1 _p0_swinst_mmult_accel1_0;
+extern struct _p0_swblk_mmult_accel _p0_swinst_mmult_accel_0;
 void _p0_cf_framework_open(int);
 void _p0_cf_framework_close(int);
 

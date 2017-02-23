@@ -26,15 +26,15 @@ set_property -dict [ list \
   ] $xlconcat
 
 #---------------------------
-# Instantiating mmult_accel1_0
+# Instantiating mmult_accel_0
 #---------------------------
-set mmult_accel1_0 [create_bd_cell -type ip -vlnv xilinx.com:hls:mmult_accel1:1.0 mmult_accel1_0]
+set mmult_accel_0 [create_bd_cell -type ip -vlnv xilinx.com:hls:mmult_accel:1.0 mmult_accel_0]
   
 
 #---------------------------
-# Instantiating mmult_accel1_0_if
+# Instantiating mmult_accel_0_if
 #---------------------------
-set mmult_accel1_0_if [create_bd_cell -type ip -vlnv xilinx.com:ip:axis_accelerator_adapter:2.1 mmult_accel1_0_if]
+set mmult_accel_0_if [create_bd_cell -type ip -vlnv xilinx.com:ip:axis_accelerator_adapter:2.1 mmult_accel_0_if]
   
 set_property -dict [ list \
   CONFIG.C_OUTPUT_SCALAR_0_WIDTH {32} \
@@ -48,7 +48,7 @@ set_property -dict [ list \
   CONFIG.C_N_INPUT_ARGS {0} \
   CONFIG.C_N_INPUT_SCALARS {6} \
   CONFIG.C_N_OUTPUT_SCALARS {1} \
-  ] $mmult_accel1_0_if
+  ] $mmult_accel_0_if
 
 #---------------------------
 # Instantiating axi_ic_ps7_M_AXI_GP0
@@ -92,44 +92,44 @@ set_property -dict [ list \
 # Connectivity
 #---------------------------
 connect_bd_net  \
-  [get_bd_pins /mmult_accel1_0_if/aresetn] \
-  [get_bd_pins /mmult_accel1_0/ap_rst_n] \
+  [get_bd_pins /mmult_accel_0_if/aresetn] \
+  [get_bd_pins /mmult_accel_0/ap_rst_n] \
 
 connect_bd_net  \
-  [get_bd_pins /mmult_accel1_0/ap_return] \
-  [get_bd_pins /mmult_accel1_0_if/ap_oscalar_0_din] \
+  [get_bd_pins /mmult_accel_0/ap_return] \
+  [get_bd_pins /mmult_accel_0_if/ap_oscalar_0_din] \
 
 connect_bd_net  \
-  [get_bd_pins /mmult_accel1_0_if/ap_iscalar_0_dout] \
-  [get_bd_pins /mmult_accel1_0/x] \
+  [get_bd_pins /mmult_accel_0_if/ap_iscalar_0_dout] \
+  [get_bd_pins /mmult_accel_0/in_x] \
 
 connect_bd_net  \
-  [get_bd_pins /mmult_accel1_0_if/ap_iscalar_1_dout] \
-  [get_bd_pins /mmult_accel1_0/w] \
+  [get_bd_pins /mmult_accel_0_if/ap_iscalar_1_dout] \
+  [get_bd_pins /mmult_accel_0/in_w] \
 
 connect_bd_net  \
-  [get_bd_pins /mmult_accel1_0_if/ap_iscalar_2_dout] \
-  [get_bd_pins /mmult_accel1_0/y] \
+  [get_bd_pins /mmult_accel_0_if/ap_iscalar_2_dout] \
+  [get_bd_pins /mmult_accel_0/out_y] \
 
 connect_bd_net  \
-  [get_bd_pins /mmult_accel1_0_if/ap_iscalar_3_dout] \
-  [get_bd_pins /mmult_accel1_0/x_nrows] \
+  [get_bd_pins /mmult_accel_0_if/ap_iscalar_3_dout] \
+  [get_bd_pins /mmult_accel_0/x_nrows] \
 
 connect_bd_net  \
-  [get_bd_pins /mmult_accel1_0_if/ap_iscalar_4_dout] \
-  [get_bd_pins /mmult_accel1_0/w_nrows] \
+  [get_bd_pins /mmult_accel_0_if/ap_iscalar_4_dout] \
+  [get_bd_pins /mmult_accel_0/w_nrows] \
 
 connect_bd_net  \
-  [get_bd_pins /mmult_accel1_0_if/ap_iscalar_5_dout] \
-  [get_bd_pins /mmult_accel1_0/xw_ncols] \
+  [get_bd_pins /mmult_accel_0_if/ap_iscalar_5_dout] \
+  [get_bd_pins /mmult_accel_0/xw_ncols] \
 
 connect_bd_net  \
   [get_bd_pins /ps7/FCLK_CLK2] \
   [get_bd_pins /ps7/M_AXI_GP0_ACLK] \
   [get_bd_pins /ps7/S_AXI_HP0_ACLK] \
-  [get_bd_pins /mmult_accel1_0/ap_clk] \
-  [get_bd_pins /mmult_accel1_0_if/s_axi_aclk] \
-  [get_bd_pins /mmult_accel1_0_if/aclk] \
+  [get_bd_pins /mmult_accel_0/ap_clk] \
+  [get_bd_pins /mmult_accel_0_if/s_axi_aclk] \
+  [get_bd_pins /mmult_accel_0_if/aclk] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/ACLK] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/S00_ACLK] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/M00_ACLK] \
@@ -148,15 +148,15 @@ connect_bd_net  \
 
 connect_bd_net  \
   [get_bd_pins /proc_sys_reset_2_200M/peripheral_aresetn] \
-  [get_bd_pins /mmult_accel1_0_if/s_axi_aresetn] \
+  [get_bd_pins /mmult_accel_0_if/s_axi_aresetn] \
 
 connect_bd_net  \
   [get_bd_pins /ps7_irq_const/dout] \
   [get_bd_pins /xlconcat/In0] \
 
 connect_bd_intf_net \
-  [get_bd_intf_pins /mmult_accel1_0_if/ap_ctrl] \
-  [get_bd_intf_pins /mmult_accel1_0/ap_ctrl] \
+  [get_bd_intf_pins /mmult_accel_0_if/ap_ctrl] \
+  [get_bd_intf_pins /mmult_accel_0/ap_ctrl] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /ps7/M_AXI_GP0] \
@@ -167,12 +167,12 @@ connect_bd_intf_net \
   [get_bd_intf_pins /ps7/S_AXI_HP0] \
 
 connect_bd_intf_net \
-  [get_bd_intf_pins /mmult_accel1_0/m_axi_gmem] \
+  [get_bd_intf_pins /mmult_accel_0/m_axi_gmem] \
   [get_bd_intf_pins /axi_ic_ps7_S_AXI_HP0/S00_AXI] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /axi_ic_ps7_M_AXI_GP0/M00_AXI] \
-  [get_bd_intf_pins /mmult_accel1_0_if/S_AXI] \
+  [get_bd_intf_pins /mmult_accel_0_if/S_AXI] \
 
 #---------------------------
 # Automation Commands

@@ -9,7 +9,7 @@
 #include "axi_lite_dm.h"
 #include "zero_copy_dm.h"
 
-accel_info_t _sds__p0_mmult_accel1_0 = {
+accel_info_t _sds__p0_mmult_accel_0 = {
   .device_id = 0,
   .phys_base_addr = 0x43c00000,
   .addr_range = 0x10000,
@@ -20,7 +20,7 @@ void _p0_cf_register(int first)
 {
   int xlnk_init_done = cf_xlnk_open(first);
   if (xlnk_init_done == 0) {
-    accel_register(&_sds__p0_mmult_accel1_0);
+    accel_register(&_sds__p0_mmult_accel_0);
     cf_xlnk_init(first);
   }
   else if (xlnk_init_done <0) {
@@ -32,7 +32,7 @@ void _p0_cf_register(int first)
 
 void _p0_cf_unregister(int last)
 {
-  accel_unregister(&_sds__p0_mmult_accel1_0);
+  accel_unregister(&_sds__p0_mmult_accel_0);
   xlnkClose(last,NULL);
 }
 

@@ -5,6 +5,7 @@
 #define debug(...) {printf(__VA_ARGS__);}
 //#define debug(...) {}
 
+#if 0
 #define X_CACHE_SIZE (1024*4)
 #define W_CACHE_SIZE (1024*64)
 #define Y_CACHE_SIZE (1024*2)
@@ -171,13 +172,49 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 
 			float result = 0.0;
 			for (int k = 0; k < xw_ncols; k++) {
-#pragma HLS unroll
-				float product_term = x_row_cache[w_row_cache_+k] * w_row_cache[x_row_cache_+k];
+//#pragma HLS unroll
+				float product_term = x_row_cache[x_row*xw_ncols+k] * w_row_cache[w_row*xw_ncols+k];
 				result += product_term;
 			}
 			debug("[%s] result:%f\n", __func__, result);
 			//y_write_cahce(y, w_nrows, x_nrows, result);
+			y_col_cache[w_row * x_nrows + x_row] = result;
 		}
 	}
 	return 0;
+}
+#endif
+
+//C:\Xilinx\SDSoC\2015.4\samples\zc706_mem_apps\mmult_sp0_all
+#define A_NROWS 1
+#define A_NCOLS 2048
+#define B_NCOLS 2048
+#define B_NROWS A_NCOLS
+
+#pragma SDS data access_pattern(in_x:SEQUENTIAL, in_w:SEQUENTIAL, out_y:SEQUENTIAL)
+#pragma SDS data mem_attribute(in_x:PHYSICAL_CONTIGUOUS, in_w:PHYSICAL_CONTIGUOUS, out_y:PHYSICAL_CONTIGUOUS)
+#pragma SDS data zero_copy(in_x[0:x_nrows*xw_ncols])
+#pragma SDS data zero_copy(in_w[0:w_nrows*xw_ncols])
+#pragma SDS data zero_copy(out_y[0:x_nrows*w_nrows])
+int mmult_accel (float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrows, int xw_ncols)
+{
+  float a_buf[1024*4]; // 1x4096
+  float b_buf[1024*64]; // 4096x4096
+  float c_buf[1024*2]; // 1x4096
+
+  memcpy(a_buf, in_x, x_nrows*xw_ncols*sizeof(float));
+  memcpy(b_buf, in_w, w_nrows*xw_ncols*sizeof(float));
+
+  for (int row = 0; row < w_nrows; row++) {
+    for (int col = 0; col < x_nrows; col++) {
+#pragma HLS PIPELINE II=1
+      float result = 0.0;
+      for (int k = 0; k < xw_ncols; k++) {
+        result += a_buf[row*xw_ncols+k] * b_buf[k*xw_ncols+col];
+      }
+      c_buf[row*xw_ncols+col] = result;
+    }
+  }
+  memcpy(out_y, c_buf, x_nrows*w_nrows*sizeof(float));
+  return 0;
 }
