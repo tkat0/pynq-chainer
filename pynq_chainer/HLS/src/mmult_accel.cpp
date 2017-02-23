@@ -173,7 +173,7 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 				result += product_term;
 			}
 			debug("[%s] result:%f\n", __func__, result);
-			y_write_cahce(y, w_nrows, x_nrows, result);
+			//y_write_cahce(y, w_nrows, x_nrows, result);
 		}
 	}
 	return 0;
