@@ -87,7 +87,7 @@ int mmult_drv(float* a, float* b, float* c, int n1, int n2, int n3) {
 	a = (float *)sds_alloc(n1 * n3 * sizeof(float));
 	b = (float *)sds_alloc(n2 * n3 * sizeof(float));
 	c = (float *)sds_alloc(n1 * n2 * sizeof(float));
-	return mmult_accel(a, b, c, n1, n2, n3);
+	return mmult_accel(a, b, c);//, n1, n2, n3);
 }
 
 int main(int argc, char* argv[]){

@@ -188,17 +188,14 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 //extern "C" {
 
 //C:\Xilinx\SDSoC\2015.4\samples\zc706_mem_apps\mmult_sp0_all
-#define A_NROWS 1
-#define A_NCOLS 2048
-#define B_NCOLS 2048
-#define B_NROWS A_NCOLS
+
 
 #pragma SDS data access_pattern(in_x:SEQUENTIAL, in_w:SEQUENTIAL, out_y:SEQUENTIAL)
 #pragma SDS data mem_attribute(in_x:PHYSICAL_CONTIGUOUS, in_w:PHYSICAL_CONTIGUOUS, out_y:PHYSICAL_CONTIGUOUS)
 #pragma SDS data zero_copy(in_x[0:x_nrows*xw_ncols])
 #pragma SDS data zero_copy(in_w[0:w_nrows*xw_ncols])
 #pragma SDS data zero_copy(out_y[0:x_nrows*w_nrows])
-int mmult_accel (float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrows, int xw_ncols)
+int _mmult_accel (float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrows, int xw_ncols)
 {
   float a_buf[1024*4]; // 1x4096
   float b_buf[1024*64]; // 4096x4096
@@ -220,5 +217,37 @@ int mmult_accel (float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrow
   memcpy(out_y, c_buf, x_nrows*w_nrows*sizeof(float));
   return 0;
 }
+
+#define A_NROWS 32
+#define A_NCOLS 32
+#define B_NCOLS 32
+#define B_NROWS A_NCOLS
+
+#pragma SDS data zero_copy(in_A[0:A_NROWS*A_NCOLS])
+#pragma SDS data zero_copy(in_B[0:A_NROWS*A_NCOLS])
+#pragma SDS data zero_copy(out_C[0:A_NROWS*A_NCOLS])
+int mmult_accel (float *in_A, float *in_B, float *out_C)
+{
+  float a_buf[A_NROWS*A_NCOLS];
+  float b_buf[A_NCOLS*B_NCOLS];
+  float c_buf[A_NCOLS*B_NCOLS];
+
+  memcpy(a_buf, in_A, A_NROWS*A_NCOLS*sizeof(float));
+  memcpy(b_buf, in_B, A_NROWS*A_NCOLS*sizeof(float));
+
+  for (int row = 0; row < A_NROWS; row++) {
+    for (int col = 0; col < B_NCOLS; col++) {
+#pragma HLS PIPELINE II=1
+      float result = 0.0;
+      for (int k = 0; k < A_NCOLS; k++) {
+        result += a_buf[row*A_NCOLS+k] * b_buf[k*B_NCOLS+col];
+      }
+      c_buf[row*A_NCOLS+col] = result;
+    }
+  }
+  memcpy(out_C, c_buf, A_NROWS*A_NCOLS*sizeof(float));
+  return 0;
+}
+
 
 //}

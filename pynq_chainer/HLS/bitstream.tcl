@@ -41,12 +41,9 @@ set_property -dict [ list \
   CONFIG.C_INPUT_SCALAR_0_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_1_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_2_WIDTH {32} \
-  CONFIG.C_INPUT_SCALAR_3_WIDTH {32} \
-  CONFIG.C_INPUT_SCALAR_4_WIDTH {32} \
-  CONFIG.C_INPUT_SCALAR_5_WIDTH {32} \
   CONFIG.C_N_OUTPUT_ARGS {0} \
   CONFIG.C_N_INPUT_ARGS {0} \
-  CONFIG.C_N_INPUT_SCALARS {6} \
+  CONFIG.C_N_INPUT_SCALARS {3} \
   CONFIG.C_N_OUTPUT_SCALARS {1} \
   ] $mmult_accel_0_if
 
@@ -101,27 +98,15 @@ connect_bd_net  \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_0_dout] \
-  [get_bd_pins /mmult_accel_0/in_x] \
+  [get_bd_pins /mmult_accel_0/in_A] \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_1_dout] \
-  [get_bd_pins /mmult_accel_0/in_w] \
+  [get_bd_pins /mmult_accel_0/in_B] \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_2_dout] \
-  [get_bd_pins /mmult_accel_0/out_y] \
-
-connect_bd_net  \
-  [get_bd_pins /mmult_accel_0_if/ap_iscalar_3_dout] \
-  [get_bd_pins /mmult_accel_0/x_nrows] \
-
-connect_bd_net  \
-  [get_bd_pins /mmult_accel_0_if/ap_iscalar_4_dout] \
-  [get_bd_pins /mmult_accel_0/w_nrows] \
-
-connect_bd_net  \
-  [get_bd_pins /mmult_accel_0_if/ap_iscalar_5_dout] \
-  [get_bd_pins /mmult_accel_0/xw_ncols] \
+  [get_bd_pins /mmult_accel_0/out_C] \
 
 connect_bd_net  \
   [get_bd_pins /ps7/FCLK_CLK2] \
