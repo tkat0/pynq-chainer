@@ -185,7 +185,7 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 }
 #endif
 
-//extern "C" {
+extern "C" {
 
 //C:\Xilinx\SDSoC\2015.4\samples\zc706_mem_apps\mmult_sp0_all
 
@@ -197,19 +197,23 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 #pragma SDS data zero_copy(out_y[0:x_nrows*w_nrows])
 int _mmult_accel (float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrows, int xw_ncols)
 {
-  float a_buf[1024*4]; // 1x4096
-  float b_buf[1024*64]; // 4096x4096
-  float c_buf[1024*2]; // 1x4096
+  float a_buf[1*768]; // 1x4096
+  float b_buf[32*768]; // 4096x4096
+  float c_buf[1*32]; // 1x4096
 
   memcpy(a_buf, in_x, x_nrows*xw_ncols*sizeof(float));
   memcpy(b_buf, in_w, w_nrows*xw_ncols*sizeof(float));
+
 
   for (int row = 0; row < w_nrows; row++) {
     for (int col = 0; col < x_nrows; col++) {
 #pragma HLS PIPELINE II=1
       float result = 0.0;
       for (int k = 0; k < xw_ncols; k++) {
-        result += a_buf[col*xw_ncols+k] * b_buf[row*xw_ncols+k];
+        //result += a_buf[col*xw_ncols+k] * b_buf[row*xw_ncols+k];
+        //result += 1 * b_buf[row*xw_ncols+k];
+        //result += a_buf[col*xw_ncols+k] * 1;
+        result += a_buf[0] * b_buf[0];
       }
       c_buf[col*x_nrows+row] = result;
     }
@@ -234,21 +238,29 @@ int mmult_accel(float *in_A, float *in_B, float *out_C, int a_nrows, int b_ncols
   float b_buf[A_NCOLS*B_NCOLS];
   float c_buf[A_NROWS*B_NCOLS];
 
-  memcpy(a_buf, in_A, A_NROWS*A_NCOLS*sizeof(float));
-  memcpy(b_buf, in_B, A_NROWS*A_NCOLS*sizeof(float));
+  // Copy to BRAM
+  memcpy(a_buf, in_A, a_nrows*a_ncols*sizeof(float));
+  memcpy(b_buf, in_B, a_ncols*b_ncols*sizeof(float));
 
-  for (int row = 0; row < A_NROWS; row++) {
-    for (int col = 0; col < B_NCOLS; col++) {
+  debug("[%s] (%d, %d) T(%d, %d) (%d, %d)\n", __func__, a_nrows, a_ncols, a_ncols, b_ncols, a_nrows, b_ncols);
+
+  for (int row = 0; row < a_nrows; row++) {
+    for (int col = 0; col < b_ncols; col++) {
 #pragma HLS PIPELINE II=1
 //#pragma HLS loop_tripcount min=32 max=1024
       float result = 0.0;
-      for (int k = 0; k < A_NCOLS; k++) {
+      for (int k = 0; k < a_ncols; k++) {
+  		debug("[%s] row: %d, col: %d, k: %d, a_buf: %f, b_buf: %f\n", __func__, row, col, k, a_buf[row*A_NCOLS+k], b_buf[k*B_NCOLS+col]);
         result += a_buf[row*A_NCOLS+k] * b_buf[k*B_NCOLS+col];
+        //result += a_buf[row*A_NCOLS+k] * 1;
+        //result += 1 * b_buf[k*B_NCOLS+col];
       }
+  	  debug("[%s] write cache: %d\n", __func__, row*B_NCOLS+col);
       c_buf[row*B_NCOLS+col] = result;
     }
   }
-  memcpy(out_C, c_buf, A_NROWS*A_NCOLS*sizeof(float));
+  debug("[%s] write dram:\n", __func__);
+  memcpy(out_C, c_buf, a_nrows*a_ncols*sizeof(float));
   return 0;
 }
 
@@ -332,4 +344,4 @@ void mmult_accela(float in_A[A_NROWS*A_NCOLS],
 }
 
 
-//}
+}
