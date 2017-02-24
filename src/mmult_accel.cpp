@@ -189,38 +189,38 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 
 //C:\Xilinx\SDSoC\2015.4\samples\zc706_mem_apps\mmult_sp0_all
 
+extern "C" {
 
 #pragma SDS data access_pattern(in_x:SEQUENTIAL, in_w:SEQUENTIAL, out_y:SEQUENTIAL)
 #pragma SDS data mem_attribute(in_x:PHYSICAL_CONTIGUOUS, in_w:PHYSICAL_CONTIGUOUS, out_y:PHYSICAL_CONTIGUOUS)
 #pragma SDS data zero_copy(in_x[0:x_nrows*xw_ncols])
 #pragma SDS data zero_copy(in_w[0:w_nrows*xw_ncols])
 #pragma SDS data zero_copy(out_y[0:x_nrows*w_nrows])
-int _mmult_accel (float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrows, int xw_ncols)
+int mmult_accel(float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrows, int xw_ncols)
 {
-  float a_buf[1*768]; // 1x4096
-  float b_buf[32*768]; // 4096x4096
+  float a_buf[1*784]; // 1x4096
+  float b_buf[32*784]; // 4096x4096
   float c_buf[1*32]; // 1x4096
 
+  debug("[%s] (%d, %d) T(%d, %d) (%d, %d)\n", __func__, x_nrows, xw_ncols, w_nrows, xw_ncols, x_nrows, w_nrows);
   memcpy(a_buf, in_x, x_nrows*xw_ncols*sizeof(float));
   memcpy(b_buf, in_w, w_nrows*xw_ncols*sizeof(float));
-
 
   for (int row = 0; row < w_nrows; row++) {
     for (int col = 0; col < x_nrows; col++) {
 #pragma HLS PIPELINE II=1
       float result = 0.0;
       for (int k = 0; k < xw_ncols; k++) {
-        //result += a_buf[col*xw_ncols+k] * b_buf[row*xw_ncols+k];
-        //result += 1 * b_buf[row*xw_ncols+k];
-        //result += a_buf[col*xw_ncols+k] * 1;
-        result += a_buf[0] * b_buf[0];
+        result += a_buf[col*xw_ncols+k] * b_buf[row*xw_ncols+k];
       }
       c_buf[col*x_nrows+row] = result;
     }
   }
+  debug("[%s] (%d, %d) T(%d, %d) (%d, %d)\n", __func__, x_nrows, xw_ncols, w_nrows, xw_ncols, x_nrows, w_nrows);
   memcpy(out_y, c_buf, x_nrows*w_nrows*sizeof(float));
   return 0;
 }
+
 
 #define A_NROWS 1
 #define A_NCOLS 768
@@ -234,7 +234,7 @@ int _mmult_accel (float *in_x, float *in_w, float *out_y, int x_nrows, int w_nro
 #pragma SDS data zero_copy(in_A[0:A_NROWS*A_NCOLS])
 #pragma SDS data zero_copy(in_B[0:A_NROWS*A_NCOLS])
 #pragma SDS data zero_copy(out_C[0:A_NROWS*A_NCOLS])
-int mmult_accel(float *in_A, float *in_B, float *out_C, int a_nrows, int b_ncols, int a_ncols)
+int mmult_accel_AAAa(float *in_A, float *in_B, float *out_C, int a_nrows, int b_ncols, int a_ncols)
 {
   float a_buf[A_NROWS*A_NCOLS];
   float b_buf[A_NCOLS*B_NCOLS];
@@ -354,4 +354,4 @@ void mmult_accela(float in_A[A_NROWS*A_NCOLS],
 }
 
 
-//}
+}
