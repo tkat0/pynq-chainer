@@ -41,9 +41,12 @@ set_property -dict [ list \
   CONFIG.C_INPUT_SCALAR_0_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_1_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_2_WIDTH {32} \
+  CONFIG.C_INPUT_SCALAR_3_WIDTH {32} \
+  CONFIG.C_INPUT_SCALAR_4_WIDTH {32} \
+  CONFIG.C_INPUT_SCALAR_5_WIDTH {32} \
   CONFIG.C_N_OUTPUT_ARGS {0} \
   CONFIG.C_N_INPUT_ARGS {0} \
-  CONFIG.C_N_INPUT_SCALARS {3} \
+  CONFIG.C_N_INPUT_SCALARS {6} \
   CONFIG.C_N_OUTPUT_SCALARS {1} \
   ] $mmult_accel_0_if
 
@@ -109,7 +112,19 @@ connect_bd_net  \
   [get_bd_pins /mmult_accel_0/out_C] \
 
 connect_bd_net  \
-  [get_bd_pins /ps7/FCLK_CLK2] \
+  [get_bd_pins /mmult_accel_0_if/ap_iscalar_3_dout] \
+  [get_bd_pins /mmult_accel_0/a_nrows] \
+
+connect_bd_net  \
+  [get_bd_pins /mmult_accel_0_if/ap_iscalar_4_dout] \
+  [get_bd_pins /mmult_accel_0/b_ncols] \
+
+connect_bd_net  \
+  [get_bd_pins /mmult_accel_0_if/ap_iscalar_5_dout] \
+  [get_bd_pins /mmult_accel_0/a_ncols] \
+
+connect_bd_net  \
+  [get_bd_pins /ps7/FCLK_CLK3] \
   [get_bd_pins /ps7/M_AXI_GP0_ACLK] \
   [get_bd_pins /ps7/S_AXI_HP0_ACLK] \
   [get_bd_pins /mmult_accel_0/ap_clk] \
@@ -123,7 +138,7 @@ connect_bd_net  \
   [get_bd_pins /axi_ic_ps7_S_AXI_HP0/S00_ACLK] \
 
 connect_bd_net  \
-  [get_bd_pins /proc_sys_reset_2_200M/interconnect_aresetn] \
+  [get_bd_pins /proc_sys_reset_3_166M/interconnect_aresetn] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/ARESETN] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/S00_ARESETN] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/M00_ARESETN] \
@@ -132,7 +147,7 @@ connect_bd_net  \
   [get_bd_pins /axi_ic_ps7_S_AXI_HP0/S00_ARESETN] \
 
 connect_bd_net  \
-  [get_bd_pins /proc_sys_reset_2_200M/peripheral_aresetn] \
+  [get_bd_pins /proc_sys_reset_3_166M/peripheral_aresetn] \
   [get_bd_pins /mmult_accel_0_if/s_axi_aresetn] \
 
 connect_bd_net  \

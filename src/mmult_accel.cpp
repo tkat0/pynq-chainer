@@ -185,7 +185,7 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 }
 #endif
 
-extern "C" {
+//extern "C" {
 
 //C:\Xilinx\SDSoC\2015.4\samples\zc706_mem_apps\mmult_sp0_all
 
@@ -344,4 +344,4 @@ void mmult_accela(float in_A[A_NROWS*A_NCOLS],
 }
 
 
-}
+//}
