@@ -189,7 +189,7 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 
 //C:\Xilinx\SDSoC\2015.4\samples\zc706_mem_apps\mmult_sp0_all
 
-extern "C" {
+//extern "C" {
 
 #pragma SDS data access_pattern(in_x:SEQUENTIAL, in_w:SEQUENTIAL, out_y:SEQUENTIAL)
 #pragma SDS data mem_attribute(in_x:PHYSICAL_CONTIGUOUS, in_w:PHYSICAL_CONTIGUOUS, out_y:PHYSICAL_CONTIGUOUS)
@@ -198,9 +198,9 @@ extern "C" {
 #pragma SDS data zero_copy(out_y[0:x_nrows*w_nrows])
 int mmult_accel(float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrows, int xw_ncols)
 {
-  float a_buf[1*784]; // 1x4096
-  float b_buf[32*784]; // 4096x4096
-  float c_buf[1*32]; // 1x4096
+  float a_buf[1*784];
+  float b_buf[32*784];
+  float c_buf[1*32];
 
   debug("[%s] (%d, %d) T(%d, %d) (%d, %d)\n", __func__, x_nrows, xw_ncols, w_nrows, xw_ncols, x_nrows, w_nrows);
   memcpy(a_buf, in_x, x_nrows*xw_ncols*sizeof(float));
@@ -219,32 +219,6 @@ int mmult_accel(float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrows
   debug("[%s] (%d, %d) T(%d, %d) (%d, %d)\n", __func__, x_nrows, xw_ncols, w_nrows, xw_ncols, x_nrows, w_nrows);
   memcpy(out_y, c_buf, x_nrows*w_nrows*sizeof(float));
   return 0;
-=======
-int _mmult_accel(float *in_x, float *in_w, float *out_y, int x_nrows,
-		int w_nrows, int xw_ncols) {
-	float a_buf[1 * 768]; // 1x4096
-	float b_buf[32 * 768]; // 4096x4096
-	float c_buf[1 * 32]; // 1x4096
-
-	memcpy(a_buf, in_x, x_nrows * xw_ncols * sizeof(float));
-	memcpy(b_buf, in_w, w_nrows * xw_ncols * sizeof(float));
-
-	for (int row = 0; row < w_nrows; row++) {
-		for (int col = 0; col < x_nrows; col++) {
-#pragma HLS PIPELINE II=1
-			float result = 0.0;
-			for (int k = 0; k < xw_ncols; k++) {
-				//result += a_buf[col*xw_ncols+k] * b_buf[row*xw_ncols+k];
-				//result += 1 * b_buf[row*xw_ncols+k];
-				//result += a_buf[col*xw_ncols+k] * 1;
-				result += a_buf[0] * b_buf[0];
-			}
-			c_buf[col * x_nrows + row] = result;
-		}
-	}
-	memcpy(out_y, c_buf, x_nrows * w_nrows * sizeof(float));
-	return 0;
->>>>>>> d5893437e3130a3552ba93c9d2b62afb12792101
 }
 
 
@@ -372,4 +346,4 @@ void mmult_accela(float in_A[A_NROWS * A_NCOLS], float in_B[A_NCOLS * B_NCOLS],
 }
 
 
-}
+//}

@@ -189,36 +189,75 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 
 //C:\Xilinx\SDSoC\2015.4\samples\zc706_mem_apps\mmult_sp0_all
 
+//extern "C" {
+
 #pragma SDS data access_pattern(in_x:SEQUENTIAL, in_w:SEQUENTIAL, out_y:SEQUENTIAL)
 #pragma SDS data mem_attribute(in_x:PHYSICAL_CONTIGUOUS, in_w:PHYSICAL_CONTIGUOUS, out_y:PHYSICAL_CONTIGUOUS)
 #pragma SDS data zero_copy(in_x[0:x_nrows*xw_ncols])
 #pragma SDS data zero_copy(in_w[0:w_nrows*xw_ncols])
 #pragma SDS data zero_copy(out_y[0:x_nrows*w_nrows])
-int _mmult_accel(float *in_x, float *in_w, float *out_y, int x_nrows,
-		int w_nrows, int xw_ncols) {
-	float a_buf[1 * 768]; // 1x4096
-	float b_buf[32 * 768]; // 4096x4096
-	float c_buf[1 * 32]; // 1x4096
+int mmult_accel(float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrows, int xw_ncols)
+{
+  float a_buf[1*784];
+  float b_buf[32*784];
+  float c_buf[1*32];
 
-	memcpy(a_buf, in_x, x_nrows * xw_ncols * sizeof(float));
-	memcpy(b_buf, in_w, w_nrows * xw_ncols * sizeof(float));
+  debug("[%s] (%d, %d) T(%d, %d) (%d, %d)\n", __func__, x_nrows, xw_ncols, w_nrows, xw_ncols, x_nrows, w_nrows);
+  memcpy(a_buf, in_x, x_nrows*xw_ncols*sizeof(float));
+  memcpy(b_buf, in_w, w_nrows*xw_ncols*sizeof(float));
 
-	for (int row = 0; row < w_nrows; row++) {
-		for (int col = 0; col < x_nrows; col++) {
+  for (int row = 0; row < w_nrows; row++) {
+    for (int col = 0; col < x_nrows; col++) {
 #pragma HLS PIPELINE II=1
-			float result = 0.0;
-			for (int k = 0; k < xw_ncols; k++) {
-				//result += a_buf[col*xw_ncols+k] * b_buf[row*xw_ncols+k];
-				//result += 1 * b_buf[row*xw_ncols+k];
-				//result += a_buf[col*xw_ncols+k] * 1;
-				result += a_buf[0] * b_buf[0];
-			}
-			c_buf[col * x_nrows + row] = result;
-		}
-	}
-	memcpy(out_y, c_buf, x_nrows * w_nrows * sizeof(float));
-	return 0;
+      float result = 0.0;
+      for (int k = 0; k < xw_ncols; k++) {
+        result += a_buf[col*xw_ncols+k] * b_buf[row*xw_ncols+k];
+      }
+      c_buf[col*x_nrows+row] = result;
+    }
+  }
+  debug("[%s] (%d, %d) T(%d, %d) (%d, %d)\n", __func__, x_nrows, xw_ncols, w_nrows, xw_ncols, x_nrows, w_nrows);
+  memcpy(out_y, c_buf, x_nrows*w_nrows*sizeof(float));
+  return 0;
 }
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "cf_stub.h"
+int _p0_mmult_accel_0(float * in_x, float * in_w, float * out_y, int x_nrows, int w_nrows, int xw_ncols);
+int _p0_mmult_accel_0(float * in_x, float * in_w, float * out_y, int x_nrows, int w_nrows, int xw_ncols)
+{
+  switch_to_next_partition(0);
+  int start_seq[3];
+  start_seq[0] = 0x00003f00;
+  start_seq[1] = 0x00010100;
+  start_seq[2] = 0x00020000;
+  cf_request_handle_t _p0_swinst_mmult_accel_0_cmd;
+  cf_send_i(&(_p0_swinst_mmult_accel_0.cmd_mmult_accel), start_seq, 3*sizeof(int), &_p0_swinst_mmult_accel_0_cmd);
+  cf_wait(_p0_swinst_mmult_accel_0_cmd);
+
+  cf_send_ref_i(&(_p0_swinst_mmult_accel_0.in_x), &in_x, (x_nrows*xw_ncols) * 4, &_p0_request_0);
+  cf_send_ref_i(&(_p0_swinst_mmult_accel_0.in_w), &in_w, (w_nrows*xw_ncols) * 4, &_p0_request_1);
+  cf_send_ref_i(&(_p0_swinst_mmult_accel_0.out_y), &out_y, (x_nrows*w_nrows) * 4, &_p0_request_2);
+  cf_send_i(&(_p0_swinst_mmult_accel_0.x_nrows), &x_nrows, 4, &_p0_request_3);
+  cf_send_i(&(_p0_swinst_mmult_accel_0.w_nrows), &w_nrows, 4, &_p0_request_4);
+  cf_send_i(&(_p0_swinst_mmult_accel_0.xw_ncols), &xw_ncols, 4, &_p0_request_5);
+
+  int _p0_mmult_accel_0_v_return;
+  cf_receive_i(&(_p0_swinst_mmult_accel_0.ap_return), &_p0_mmult_accel_0_v_return, 4, &_p0_mmult_accel_0_num_ap_return, &_p0_request_6);
+
+  cf_wait(_p0_request_0);
+  cf_wait(_p0_request_1);
+  cf_wait(_p0_request_2);
+  cf_wait(_p0_request_3);
+  cf_wait(_p0_request_4);
+  cf_wait(_p0_request_5);
+  cf_wait(_p0_request_6);
+  return _p0_mmult_accel_0_v_return;
+}
+
+
+
 
 #define A_NROWS 1
 #define A_NCOLS 768
@@ -231,10 +270,11 @@ int _mmult_accel(float *in_x, float *in_w, float *out_y, int x_nrows,
 #pragma SDS data zero_copy(in_A[0:A_NROWS*A_NCOLS])
 #pragma SDS data zero_copy(in_B[0:A_NROWS*A_NCOLS])
 #pragma SDS data zero_copy(out_C[0:A_NROWS*A_NCOLS])
-int mmult_accel(float *in_A, float *in_B, float *out_C, int a_nrows, int b_ncols, int a_ncols) {
-	float a_buf[A_NROWS * A_NCOLS];
-	float b_buf[A_NCOLS * B_NCOLS];
-	float c_buf[A_NROWS * B_NCOLS];
+int mmult_accel_AAAa(float *in_A, float *in_B, float *out_C, int a_nrows, int b_ncols, int a_ncols)
+{
+  float a_buf[A_NROWS*A_NCOLS];
+  float b_buf[A_NCOLS*B_NCOLS];
+  float c_buf[A_NROWS*B_NCOLS];
 
 	// Copy to BRAM
 	memcpy(a_buf, in_A, a_ncols * sizeof(float));
@@ -270,43 +310,6 @@ int mmult_accel(float *in_A, float *in_B, float *out_C, int a_nrows, int b_ncols
 	memcpy(out_C, c_buf, a_ncols * sizeof(float));
 	return 0;
 }
-
-#include <stdio.h>
-#include <stdlib.h>
-#include "cf_stub.h"
-int _p0_mmult_accel_0(float * in_A, float * in_B, float * out_C, int a_nrows, int b_ncols, int a_ncols);
-int _p0_mmult_accel_0(float * in_A, float * in_B, float * out_C, int a_nrows, int b_ncols, int a_ncols)
-{
-  switch_to_next_partition(0);
-  int start_seq[3];
-  start_seq[0] = 0x00003f00;
-  start_seq[1] = 0x00010100;
-  start_seq[2] = 0x00020000;
-  cf_request_handle_t _p0_swinst_mmult_accel_0_cmd;
-  cf_send_i(&(_p0_swinst_mmult_accel_0.cmd_mmult_accel), start_seq, 3*sizeof(int), &_p0_swinst_mmult_accel_0_cmd);
-  cf_wait(_p0_swinst_mmult_accel_0_cmd);
-
-  cf_send_ref_i(&(_p0_swinst_mmult_accel_0.in_A), &in_A, (1*768) * 4, &_p0_request_0);
-  cf_send_ref_i(&(_p0_swinst_mmult_accel_0.in_B), &in_B, (1*768) * 4, &_p0_request_1);
-  cf_send_ref_i(&(_p0_swinst_mmult_accel_0.out_C), &out_C, (1*768) * 4, &_p0_request_2);
-  cf_send_i(&(_p0_swinst_mmult_accel_0.a_nrows), &a_nrows, 4, &_p0_request_3);
-  cf_send_i(&(_p0_swinst_mmult_accel_0.b_ncols), &b_ncols, 4, &_p0_request_4);
-  cf_send_i(&(_p0_swinst_mmult_accel_0.a_ncols), &a_ncols, 4, &_p0_request_5);
-
-  int _p0_mmult_accel_0_v_return;
-  cf_receive_i(&(_p0_swinst_mmult_accel_0.ap_return), &_p0_mmult_accel_0_v_return, 4, &_p0_mmult_accel_0_num_ap_return, &_p0_request_6);
-
-  cf_wait(_p0_request_0);
-  cf_wait(_p0_request_1);
-  cf_wait(_p0_request_2);
-  cf_wait(_p0_request_3);
-  cf_wait(_p0_request_4);
-  cf_wait(_p0_request_5);
-  cf_wait(_p0_request_6);
-  return _p0_mmult_accel_0_v_return;
-}
-
-
 
 //#pragma SDS data access_pattern(in_x:SEQUENTIAL, in_w:SEQUENTIAL, out_y:SEQUENTIAL)
 //#pragma SDS data mem_attribute(in_x:PHYSICAL_CONTIGUOUS, in_w:PHYSICAL_CONTIGUOUS, out_y:PHYSICAL_CONTIGUOUS)
@@ -378,5 +381,6 @@ void mmult_accela(float in_A[A_NROWS * A_NCOLS], float in_B[A_NCOLS * B_NCOLS],
 	// Matrix multiply call
 	mmult_kernel(a_buf, b_buf, out_C, a_nrows, b_ncols, a_ncols);
 }
+
 
 //}

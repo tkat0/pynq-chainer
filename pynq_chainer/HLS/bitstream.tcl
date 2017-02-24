@@ -101,27 +101,27 @@ connect_bd_net  \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_0_dout] \
-  [get_bd_pins /mmult_accel_0/in_A] \
+  [get_bd_pins /mmult_accel_0/in_x] \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_1_dout] \
-  [get_bd_pins /mmult_accel_0/in_B] \
+  [get_bd_pins /mmult_accel_0/in_w] \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_2_dout] \
-  [get_bd_pins /mmult_accel_0/out_C] \
+  [get_bd_pins /mmult_accel_0/out_y] \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_3_dout] \
-  [get_bd_pins /mmult_accel_0/a_nrows] \
+  [get_bd_pins /mmult_accel_0/x_nrows] \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_4_dout] \
-  [get_bd_pins /mmult_accel_0/b_ncols] \
+  [get_bd_pins /mmult_accel_0/w_nrows] \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_5_dout] \
-  [get_bd_pins /mmult_accel_0/a_ncols] \
+  [get_bd_pins /mmult_accel_0/xw_ncols] \
 
 connect_bd_net  \
   [get_bd_pins /ps7/FCLK_CLK3] \
