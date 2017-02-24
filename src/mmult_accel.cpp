@@ -252,9 +252,12 @@ int mmult_accel(float *in_A, float *in_B, float *out_C, int a_nrows, int b_ncols
 #pragma HLS PIPELINE II=1
 #pragma HLS loop_tripcount min=1 max=32
       float result = 0.0;
-      for (int k = 0; k < a_ncols; k++) {
-#pragma HLS loop_tripcount min=32 max=768
-#pragma HLS unroll factor=32
+      for (int k = 0; k < A_NCOLS; k++) {
+#pragma HLS unroll// factor=32
+//#pragma HLS loop_tripcount min=32 max=768
+
+    	if (k==a_ncols)
+    		break;
   		debug("[%s] row: %d, col: %d, k: %d, a_buf: %f, b_buf: %f\n", __func__, row, col, k, a_buf[row*A_NCOLS+k], b_buf[k*B_NCOLS+col]);
         result += a_buf[row*A_NCOLS+k] * b_buf[k*B_NCOLS+col];
         //result += a_buf[row*A_NCOLS+k] * 1;
