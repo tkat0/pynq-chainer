@@ -237,14 +237,14 @@ int mmult_accel(float *in_A, float *in_B, float *out_C, int a_nrows, int b_ncols
 	float c_buf[A_NROWS * B_NCOLS];
 
 	// Copy to BRAM
-	memcpy(a_buf, in_A, a_nrows * a_ncols * sizeof(float));
+	memcpy(a_buf, in_A, a_ncols * sizeof(float));
 	memcpy(b_buf, in_B, a_ncols * b_ncols * sizeof(float));
 
 	debug("[%s] (%d, %d) T(%d, %d) (%d, %d)\n", __func__, a_nrows, a_ncols,
 			a_ncols, b_ncols, a_nrows, b_ncols);
 
 	for (int col = 0; col < B_NCOLS; col++) {
-#pragma HLS PIPELINE II=1
+//#pragma HLS PIPELINE II=1
 
 		if (col == b_ncols)
 			break;
