@@ -218,19 +218,21 @@ int _mmult_accel (float *in_x, float *in_w, float *out_y, int x_nrows, int w_nro
   return 0;
 }
 
-#define A_NROWS 32
-#define A_NCOLS 32
+#define A_NROWS 1
+#define A_NCOLS 768
 #define B_NCOLS 32
 #define B_NROWS A_NCOLS
 
+#pragma SDS data access_pattern(in_x:SEQUENTIAL, in_w:SEQUENTIAL, out_y:SEQUENTIAL)
+#pragma SDS data mem_attribute(in_x:PHYSICAL_CONTIGUOUS, in_w:PHYSICAL_CONTIGUOUS, out_y:PHYSICAL_CONTIGUOUS)
 #pragma SDS data zero_copy(in_A[0:A_NROWS*A_NCOLS])
 #pragma SDS data zero_copy(in_B[0:A_NROWS*A_NCOLS])
 #pragma SDS data zero_copy(out_C[0:A_NROWS*A_NCOLS])
-int mmult_accel (float *in_A, float *in_B, float *out_C)
+int mmult_accel(float *in_A, float *in_B, float *out_C, int a_nrows, int b_ncols, int a_ncols)
 {
   float a_buf[A_NROWS*A_NCOLS];
   float b_buf[A_NCOLS*B_NCOLS];
-  float c_buf[A_NCOLS*B_NCOLS];
+  float c_buf[A_NROWS*B_NCOLS];
 
   memcpy(a_buf, in_A, A_NROWS*A_NCOLS*sizeof(float));
   memcpy(b_buf, in_B, A_NROWS*A_NCOLS*sizeof(float));
@@ -238,15 +240,95 @@ int mmult_accel (float *in_A, float *in_B, float *out_C)
   for (int row = 0; row < A_NROWS; row++) {
     for (int col = 0; col < B_NCOLS; col++) {
 #pragma HLS PIPELINE II=1
+//#pragma HLS loop_tripcount min=32 max=1024
       float result = 0.0;
       for (int k = 0; k < A_NCOLS; k++) {
         result += a_buf[row*A_NCOLS+k] * b_buf[k*B_NCOLS+col];
       }
-      c_buf[row*A_NCOLS+col] = result;
+      c_buf[row*B_NCOLS+col] = result;
     }
   }
   memcpy(out_C, c_buf, A_NROWS*A_NCOLS*sizeof(float));
   return 0;
+}
+
+//#pragma SDS data access_pattern(in_x:SEQUENTIAL, in_w:SEQUENTIAL, out_y:SEQUENTIAL)
+//#pragma SDS data mem_attribute(in_x:PHYSICAL_CONTIGUOUS, in_w:PHYSICAL_CONTIGUOUS, out_y:PHYSICAL_CONTIGUOUS)
+//#pragma SDS data zero_copy(in_A[0:a_nrows*a_ncols])
+//#pragma SDS data zero_copy(in_B[0:a_ncols*b_ncols])
+//#pragma SDS data zero_copy(out_C[0:a_nrows*b_ncols])
+
+
+
+
+#pragma SDS data mem_attribute(in_A:PHYSICAL_CONTIGUOUS, in_B:PHYSICAL_CONTIGUOUS, out_C:PHYSICAL_CONTIGUOUS)
+#pragma SDS data zero_copy(in_A[0:a_nrows*a_ncols])
+#pragma SDS data zero_copy(in_B[0:a_ncols*b_ncols])
+#pragma SDS data zero_copy(out_C[0:a_nrows*b_ncols])
+#pragma SDS data access_pattern(in_A:SEQUENTIAL, in_B:SEQUENTIAL, out_C:SEQUENTIAL)
+void mmult_kernel(float in_A[A_NROWS][A_NCOLS],
+                  float in_B[A_NCOLS][B_NCOLS],
+                  float out_C[A_NROWS*B_NCOLS],
+                  int a_nrows, int b_ncols, int a_ncols)
+{
+//#pragma HLS INLINE self
+//#pragma HLS array_partition variable=in_A block factor=16 dim=2
+//#pragma HLS array_partition variable=in_B block factor=16 dim=1
+
+	  float a_buf[A_NROWS][A_NCOLS];
+	  float b_buf[A_NCOLS][B_NCOLS];//
+	  float c_buf[A_NROWS][A_NCOLS];
+
+  int index_a, index_b, index_d;
+
+  for (index_a = 0; index_a < a_nrows; index_a++) {
+    for (index_b = 0; index_b < b_ncols; index_b++) {
+      float result = 0;
+      for (index_d = 0; index_d < a_ncols; index_d++) {
+#pragma HLS PIPELINE II=1
+//#pragma HLS loop_tripcount min=32 max=1024
+        // multiply accumulate broken into individual operators
+        // so that AutoESL can infer two FP operators
+        float product_term = in_A[index_a][index_d] * in_B[index_d][index_b];
+        result += product_term;
+      }
+      out_C[index_a * a_ncols + index_b] = result;
+    }
+  }
+}
+
+#pragma SDS data mem_attribute(in_A:PHYSICAL_CONTIGUOUS, in_B:PHYSICAL_CONTIGUOUS, out_C:PHYSICAL_CONTIGUOUS)
+#pragma SDS data zero_copy(in_A[0:a_nrows*a_ncols])
+#pragma SDS data zero_copy(in_B[0:a_ncols*b_ncols])
+#pragma SDS data zero_copy(out_C[0:a_nrows*b_ncols])
+#pragma SDS data access_pattern(in_A:SEQUENTIAL, in_B:SEQUENTIAL, out_C:SEQUENTIAL)
+void mmult_accela(float in_A[A_NROWS*A_NCOLS],
+                  float in_B[A_NCOLS*B_NCOLS],
+                  float out_C[A_NROWS*B_NCOLS],
+                  int a_nrows, int b_ncols, int a_ncols)
+{
+  int i, j;
+  float a_buf[A_NROWS][A_NCOLS];
+  float b_buf[A_NCOLS][B_NCOLS];//
+
+  // Transfer matrix A from multi-buffer into local RAM
+  for(i=0; i<a_ncols; i++) {
+    for(j=0; j<a_nrows; j++) {
+#pragma HLS PIPELINE II=1
+      a_buf[i][j] = in_A[i * a_nrows + j];
+    }
+  }
+
+  // Transfer matrix B from multi-buffer into local RAM
+  for(i=0; i<b_ncols; i++) {
+    for(j=0; j<a_ncols; j++) {
+#pragma HLS PIPELINE II=1
+      b_buf[i][j] = in_B[i * a_ncols + j];
+    }
+  }
+
+  // Matrix multiply call
+  mmult_kernel(a_buf, b_buf, out_C, a_nrows, b_ncols, a_ncols);
 }
 
 
