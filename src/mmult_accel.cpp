@@ -229,6 +229,8 @@ int _mmult_accel (float *in_x, float *in_w, float *out_y, int x_nrows, int w_nro
 
 #pragma SDS data access_pattern(in_x:SEQUENTIAL, in_w:SEQUENTIAL, out_y:SEQUENTIAL)
 #pragma SDS data mem_attribute(in_x:PHYSICAL_CONTIGUOUS, in_w:PHYSICAL_CONTIGUOUS, out_y:PHYSICAL_CONTIGUOUS)
+
+
 #pragma SDS data zero_copy(in_A[0:A_NROWS*A_NCOLS])
 #pragma SDS data zero_copy(in_B[0:A_NROWS*A_NCOLS])
 #pragma SDS data zero_copy(out_C[0:A_NROWS*A_NCOLS])
@@ -245,11 +247,14 @@ int mmult_accel(float *in_A, float *in_B, float *out_C, int a_nrows, int b_ncols
   debug("[%s] (%d, %d) T(%d, %d) (%d, %d)\n", __func__, a_nrows, a_ncols, a_ncols, b_ncols, a_nrows, b_ncols);
 
   for (int row = 0; row < a_nrows; row++) {
+#pragma HLS loop_tripcount min=1 max=32
     for (int col = 0; col < b_ncols; col++) {
 #pragma HLS PIPELINE II=1
-//#pragma HLS loop_tripcount min=32 max=1024
+#pragma HLS loop_tripcount min=1 max=32
       float result = 0.0;
       for (int k = 0; k < a_ncols; k++) {
+#pragma HLS loop_tripcount min=32 max=768
+#pragma HLS unroll factor=32
   		debug("[%s] row: %d, col: %d, k: %d, a_buf: %f, b_buf: %f\n", __func__, row, col, k, a_buf[row*A_NCOLS+k], b_buf[k*B_NCOLS+col]);
         result += a_buf[row*A_NCOLS+k] * b_buf[k*B_NCOLS+col];
         //result += a_buf[row*A_NCOLS+k] * 1;
