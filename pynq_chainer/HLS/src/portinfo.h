@@ -1,18 +1,18 @@
 #ifndef _SDS_PORTINFO_H
 #define _SDS_PORTINFO_H
-/* File: C:/workspace2015.4/pynq-nn1/SDDebug/_sds/p0/.cf_work/portinfo.h */
+/* File: C:/workspace_2015.4/pynq-chainer/SDDebug/_sds/p0/.cf_work/portinfo.h */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 struct _p0_swblk_mmult_accel {
   cf_port_send_t cmd_mmult_accel;
-  cf_port_send_t in_A;
-  cf_port_send_t in_B;
-  cf_port_send_t out_C;
-  cf_port_send_t a_nrows;
-  cf_port_send_t b_ncols;
-  cf_port_send_t a_ncols;
+  cf_port_send_t in_x;
+  cf_port_send_t in_w;
+  cf_port_send_t out_y;
+  cf_port_send_t x_nrows;
+  cf_port_send_t w_nrows;
+  cf_port_send_t xw_ncols;
   cf_port_receive_t ap_return;
 };
 

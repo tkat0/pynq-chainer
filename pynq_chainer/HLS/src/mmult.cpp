@@ -83,7 +83,7 @@ int mmult_test(float *tin1Buf,  float *tin2Buf, float *toutBufSw, float *toutBuf
   return mmult_result_check(toutBufSw, toutBufHw);
 }
 
-int _p0_mmult_accel_0(float * in_A, float * in_B, float * out_C, int a_nrows, int b_ncols, int a_ncols);
+int _p0_mmult_accel_0(float * in_x, float * in_w, float * out_y, int x_nrows, int w_nrows, int xw_ncols);
 int mmult_drv(float* a, float* b, float* c, int n1, int n2, int n3) {
 	a = (float *)sds_alloc(n1 * n3 * sizeof(float));
 	b = (float *)sds_alloc(n2 * n3 * sizeof(float));

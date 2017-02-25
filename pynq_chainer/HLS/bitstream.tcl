@@ -101,30 +101,30 @@ connect_bd_net  \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_0_dout] \
-  [get_bd_pins /mmult_accel_0/in_A] \
+  [get_bd_pins /mmult_accel_0/in_x] \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_1_dout] \
-  [get_bd_pins /mmult_accel_0/in_B] \
+  [get_bd_pins /mmult_accel_0/in_w] \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_2_dout] \
-  [get_bd_pins /mmult_accel_0/out_C] \
+  [get_bd_pins /mmult_accel_0/out_y] \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_3_dout] \
-  [get_bd_pins /mmult_accel_0/a_nrows] \
+  [get_bd_pins /mmult_accel_0/x_nrows] \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_4_dout] \
-  [get_bd_pins /mmult_accel_0/b_ncols] \
+  [get_bd_pins /mmult_accel_0/w_nrows] \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_5_dout] \
-  [get_bd_pins /mmult_accel_0/a_ncols] \
+  [get_bd_pins /mmult_accel_0/xw_ncols] \
 
 connect_bd_net  \
-  [get_bd_pins /ps7/FCLK_CLK3] \
+  [get_bd_pins /ps7/FCLK_CLK0] \
   [get_bd_pins /ps7/M_AXI_GP0_ACLK] \
   [get_bd_pins /ps7/S_AXI_HP0_ACLK] \
   [get_bd_pins /mmult_accel_0/ap_clk] \
@@ -138,7 +138,7 @@ connect_bd_net  \
   [get_bd_pins /axi_ic_ps7_S_AXI_HP0/S00_ACLK] \
 
 connect_bd_net  \
-  [get_bd_pins /proc_sys_reset_3_166M/interconnect_aresetn] \
+  [get_bd_pins /proc_sys_reset_0_100M/interconnect_aresetn] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/ARESETN] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/S00_ARESETN] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/M00_ARESETN] \
@@ -147,7 +147,7 @@ connect_bd_net  \
   [get_bd_pins /axi_ic_ps7_S_AXI_HP0/S00_ARESETN] \
 
 connect_bd_net  \
-  [get_bd_pins /proc_sys_reset_3_166M/peripheral_aresetn] \
+  [get_bd_pins /proc_sys_reset_0_100M/peripheral_aresetn] \
   [get_bd_pins /mmult_accel_0_if/s_axi_aresetn] \
 
 connect_bd_net  \
