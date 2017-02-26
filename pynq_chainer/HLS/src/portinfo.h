@@ -1,6 +1,6 @@
 #ifndef _SDS_PORTINFO_H
 #define _SDS_PORTINFO_H
-/* File: C:/workspace_2015.4/pynq-chainer/SDDebug/_sds/p0/.cf_work/portinfo.h */
+/* File: C:/workspace2015.4/pynq-nn1/SDDebug/_sds/p0/.cf_work/portinfo.h */
 #ifdef __cplusplus
 extern "C" {
 #endif

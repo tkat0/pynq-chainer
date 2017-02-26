@@ -1,4 +1,4 @@
-/* File: C:/workspace_2015.4/pynq-chainer/SDDebug/_sds/p0/.cf_work/devreg.c */
+/* File: C:/workspace2015.4/pynq-nn1/SDDebug/_sds/p0/.cf_work/devreg.c */
 #include "cf_lib.h"
 #include "cf_request.h"
 #include "devreg.h"

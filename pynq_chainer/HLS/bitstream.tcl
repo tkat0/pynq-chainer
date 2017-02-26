@@ -124,7 +124,7 @@ connect_bd_net  \
   [get_bd_pins /mmult_accel_0/xw_ncols] \
 
 connect_bd_net  \
-  [get_bd_pins /ps7/FCLK_CLK2] \
+  [get_bd_pins /ps7/FCLK_CLK0] \
   [get_bd_pins /ps7/M_AXI_GP0_ACLK] \
   [get_bd_pins /ps7/S_AXI_HP0_ACLK] \
   [get_bd_pins /mmult_accel_0/ap_clk] \
@@ -138,7 +138,7 @@ connect_bd_net  \
   [get_bd_pins /axi_ic_ps7_S_AXI_HP0/S00_ACLK] \
 
 connect_bd_net  \
-  [get_bd_pins /proc_sys_reset_2_200M/interconnect_aresetn] \
+  [get_bd_pins /proc_sys_reset_0_100M/interconnect_aresetn] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/ARESETN] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/S00_ARESETN] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/M00_ARESETN] \
@@ -147,7 +147,7 @@ connect_bd_net  \
   [get_bd_pins /axi_ic_ps7_S_AXI_HP0/S00_ARESETN] \
 
 connect_bd_net  \
-  [get_bd_pins /proc_sys_reset_2_200M/peripheral_aresetn] \
+  [get_bd_pins /proc_sys_reset_0_100M/peripheral_aresetn] \
   [get_bd_pins /mmult_accel_0_if/s_axi_aresetn] \
 
 connect_bd_net  \
