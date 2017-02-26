@@ -195,30 +195,32 @@ int mmult_accel1(float *x, float *w, float *y, int x_nrows, int w_nrows, int xw_
 #define W_NROWS (32)
 #define XW_NCOLS (784)
 
+//#pragma SDS data zero_copy(out_y[0:x_nrows*w_nrows])
+
 #pragma SDS data access_pattern(in_x:SEQUENTIAL, in_w:SEQUENTIAL, out_y:SEQUENTIAL)
 #pragma SDS data mem_attribute(in_x:PHYSICAL_CONTIGUOUS, in_w:PHYSICAL_CONTIGUOUS, out_y:PHYSICAL_CONTIGUOUS)
 #pragma SDS data zero_copy(in_x[0:x_nrows*xw_ncols])
 #pragma SDS data zero_copy(in_w[0:w_nrows*xw_ncols])
-#pragma SDS data zero_copy(out_y[0:x_nrows*w_nrows])
-int mmult_accel(float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrows, int xw_ncols)
+int mmult_accel(float *in_x, float *in_w, float out_y[1*W_NROWS], int x_nrows, int w_nrows, int xw_ncols)
 {
   float a_buf[1*XW_NCOLS];
   float b_buf[W_NROWS*XW_NCOLS];
-  float c_buf[1*W_NROWS];
+  //float c_buf[1*W_NROWS];
 
 #pragma HLS array_partition variable=a_buf block factor=32
 #pragma HLS array_partition variable=b_buf block factor=32
-#pragma HLS array_partition variable=c_buf block factor=32
+//#pragma HLS array_partition variable=c_buf block factor=32
 
   debug("[%s] (%d, %d) T(%d, %d) (%d, %d)\n", __func__, x_nrows, xw_ncols, w_nrows, xw_ncols, x_nrows, w_nrows);
   memcpy(a_buf, in_x, x_nrows*xw_ncols*sizeof(float));
   memcpy(b_buf, in_w, w_nrows*xw_ncols*sizeof(float));
 
   for (int row = 0; row < W_NROWS; row++) {
+#pragma HLS PIPELINE II=1
+
   	if (row==w_nrows)
   	  break;
 
-#pragma HLS PIPELINE II=1
       float result = 0.0;
       for (int k = 0; k < XW_NCOLS; k++) {
 //#pragma HLS unroll factor=2
@@ -227,11 +229,11 @@ int mmult_accel(float *in_x, float *in_w, float *out_y, int x_nrows, int w_nrows
 		float product_term = a_buf[k] * b_buf[row*xw_ncols+k];
 		result += product_term;
       }
-      c_buf[row] = result;
+      out_y[row] = result;
 
   }
   debug("[%s] (%d, %d) T(%d, %d) (%d, %d)\n", __func__, x_nrows, xw_ncols, w_nrows, xw_ncols, x_nrows, w_nrows);
-  memcpy(out_y, c_buf, x_nrows*w_nrows*sizeof(float));
+  //memcpy(out_y, c_buf, x_nrows*w_nrows*sizeof(float));
   return 0;
 }
 

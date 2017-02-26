@@ -9,9 +9,11 @@
 
 #include "xlnk_core_cf.h"
 #include "accel_info.h"
+#include "axi_dma_simple_dm.h"
 #include "axi_lite_dm.h"
 #include "zero_copy_dm.h"
 
+extern axi_dma_simple_info_t _p0_dm_0;
 extern accel_info_t _sds__p0_mmult_accel_0;
 
 axi_lite_info_t _p0_swinst_mmult_accel_0_cmd_mmult_accel_info = {
@@ -33,26 +35,25 @@ zero_copy_info_t _p0_swinst_mmult_accel_0_in_w_info = {
   .dir_chan = XLNK_BI_DIRECTIONAL
 };
 
-zero_copy_info_t _p0_swinst_mmult_accel_0_out_y_info = {
-  .accel_info = &_sds__p0_mmult_accel_0,
-  .reg_name = "0x88",
-  .needs_cache_flush_invalidate = 1,
-  .dir_chan = XLNK_BI_DIRECTIONAL
+axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_out_y_info = {
+  .dma_info = &_p0_dm_0,
+  .in_use = 0,
+  .needs_cache_flush_invalidate = 0
 };
 
 axi_lite_info_t _p0_swinst_mmult_accel_0_x_nrows_info = {
   .accel_info = &_sds__p0_mmult_accel_0,
-  .reg_name = "0x8C"
+  .reg_name = "0x88"
 };
 
 axi_lite_info_t _p0_swinst_mmult_accel_0_w_nrows_info = {
   .accel_info = &_sds__p0_mmult_accel_0,
-  .reg_name = "0x90"
+  .reg_name = "0x8C"
 };
 
 axi_lite_info_t _p0_swinst_mmult_accel_0_xw_ncols_info = {
   .accel_info = &_sds__p0_mmult_accel_0,
-  .reg_name = "0x94"
+  .reg_name = "0x90"
 };
 
 axi_lite_info_t _p0_swinst_mmult_accel_0_ap_return_info = {
@@ -78,9 +79,10 @@ struct _p0_swblk_mmult_accel _p0_swinst_mmult_accel_0 = {
 		.send_ref_i = &zero_copy_send_ref_i },
   .out_y = { .base = { 
 		.channel_info = &_p0_swinst_mmult_accel_0_out_y_info, 
-		.open_i = &zero_copy_open, 
-		.close_i = &zero_copy_close },
-		.send_ref_i = &zero_copy_send_ref_i },
+		.open_i = &axi_dma_simple_open, 
+		.close_i = &axi_dma_simple_close },
+		.receive_ref_i = 0,
+		.receive_i = &axi_dma_simple_recv_i },
   .x_nrows = { .base = { 
 		.channel_info = &_p0_swinst_mmult_accel_0_x_nrows_info, 
 		.open_i = &axi_lite_open, 

@@ -9,7 +9,7 @@ struct _p0_swblk_mmult_accel {
   cf_port_send_t cmd_mmult_accel;
   cf_port_send_t in_x;
   cf_port_send_t in_w;
-  cf_port_send_t out_y;
+  cf_port_receive_t out_y;
   cf_port_send_t x_nrows;
   cf_port_send_t w_nrows;
   cf_port_send_t xw_ncols;
