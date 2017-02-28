@@ -20,7 +20,7 @@ void xlnkFlushCache(void *buf, int size);
 void xlnkInvalidateCache(void *buf, int size);
 """)
 
-def malloc_cma_ndarray(shape, cacheable=1, dtype="float", npdtype='float32'):
+def malloc_cma_ndarray(shape, dtype="float", npdtype='float32', cacheable=1):
     if IS_PYNQ:
         length = shape[0]*shape[1]
         buf = memmanager.cma_alloc(length, cacheable=cacheable, data_type=dtype)
@@ -28,13 +28,13 @@ def malloc_cma_ndarray(shape, cacheable=1, dtype="float", npdtype='float32'):
         v = np.frombuffer(v_cdata, dtype=np.float32).reshape(shape)
         print("cma alloc")
     else:
-        v = np.zeros(shape).astype(np.float32)
+        v = np.zeros(shape).astype(npdtype)
         buf = ffi.from_buffer(v.data)
         print("cma alloc dumy")
     return v, buf
 
 def copy_cma_ndarray(array, dtype="float"):
-    x, cdata = malloc_cma_ndarray(array.shape)
+    x, cdata = malloc_cma_ndarray(array.shape, dtype, array.dtype)
     array = ffi.cast(dtype + "*", array.ctypes.data)
     if IS_PYNQ:
         memmanager.cma_memcopy(cdata, array, ffi.sizeof(dtype)*x.size)
