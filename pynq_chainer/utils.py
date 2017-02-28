@@ -25,7 +25,7 @@ def malloc_cma_ndarray(shape, dtype="float", npdtype='float32', cacheable=1):
         length = shape[0]*shape[1]
         buf = memmanager.cma_alloc(length, cacheable=cacheable, data_type=dtype)
         v_cdata = ffi.buffer(buf,  length * ffi.sizeof(dtype))
-        v = np.frombuffer(v_cdata, dtype=np.float32).reshape(shape)
+        v = np.frombuffer(v_cdata, dtype=npdtype).reshape(shape)
         print("cma alloc")
     else:
         v = np.zeros(shape).astype(npdtype)
