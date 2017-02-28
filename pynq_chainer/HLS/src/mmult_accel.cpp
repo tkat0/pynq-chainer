@@ -13,20 +13,20 @@ void mmult_kernel(inter_t in_A[A_NROWS][A_NCOLS],
 	int index_a, index_b, index_d;
 
 	for (index_a = 0; index_a < A_NROWS; index_a++) {
-//		if (index_a > a_nrows-1)
-//			break;
+		if (index_a > a_nrows-1)
+			break;
 		for (index_b = 0; index_b < B_NCOLS; index_b++) {
 #pragma HLS PIPELINE II=1
 //#pragma HLS unroll factor = 32
-//			if (index_b > b_ncols-1)
-//				break;
+			if (index_b > b_ncols-1)
+				break;
 
 			ap_uint<16> result = 0;
 #pragma HLS RESOURCE variable=result core=FAddSub_fulldsp
 			for (index_d = 0; index_d < A_NCOLS; index_d++) {
 
-//				if (index_d > a_ncols-1)
-//					break;
+				if (index_d > a_ncols-1)
+					break;
 
 // multiply accumulate broken into individual operators
 // so that AutoESL can infer two FP operators
@@ -88,13 +88,13 @@ void _p0_mmult_accel_0(outer_t * in_A, outer_t * in_B, outer_t * out_C, int a_nr
   cf_send_i(&(_p0_swinst_mmult_accel_0.cmd_mmult_accel), start_seq, 3*sizeof(int), &_p0_swinst_mmult_accel_0_cmd);
   cf_wait(_p0_swinst_mmult_accel_0_cmd);
 
-  cf_send_i(&(_p0_swinst_mmult_accel_0.in_A_V), in_A, (a_nrows*a_ncols) * 1, &_p0_request_0);
-  cf_send_i(&(_p0_swinst_mmult_accel_0.in_B_V), in_B, (a_ncols*b_ncols) * 1, &_p0_request_1);
+  cf_send_i(&(_p0_swinst_mmult_accel_0.in_A), in_A, (a_nrows*a_ncols) * 4, &_p0_request_0);
+  cf_send_i(&(_p0_swinst_mmult_accel_0.in_B), in_B, (a_ncols*b_ncols) * 4, &_p0_request_1);
   cf_send_i(&(_p0_swinst_mmult_accel_0.a_nrows), &a_nrows, 4, &_p0_request_3);
   cf_send_i(&(_p0_swinst_mmult_accel_0.b_ncols), &b_ncols, 4, &_p0_request_4);
   cf_send_i(&(_p0_swinst_mmult_accel_0.a_ncols), &a_ncols, 4, &_p0_request_5);
 
-  cf_receive_i(&(_p0_swinst_mmult_accel_0.out_C_V), out_C, (a_nrows*b_ncols) * 1, &_p0_mmult_accel_0_num_out_C_V, &_p0_request_2);
+  cf_receive_i(&(_p0_swinst_mmult_accel_0.out_C), out_C, (a_nrows*b_ncols) * 4, &_p0_mmult_accel_0_num_out_C, &_p0_request_2);
 
   cf_wait(_p0_request_0);
   cf_wait(_p0_request_1);

@@ -22,19 +22,19 @@ axi_lite_info_t _p0_swinst_mmult_accel_0_cmd_mmult_accel_info = {
   .reg_name = "0x28"
 };
 
-axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_in_A_V_info = {
+axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_in_A_info = {
   .dma_info = &_p0_dm_1,
   .in_use = 0,
   .needs_cache_flush_invalidate = 0
 };
 
-axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_in_B_V_info = {
+axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_in_B_info = {
   .dma_info = &_p0_dm_0,
   .in_use = 0,
   .needs_cache_flush_invalidate = 1
 };
 
-axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_out_C_V_info = {
+axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_out_C_info = {
   .dma_info = &_p0_dm_2,
   .in_use = 0,
   .needs_cache_flush_invalidate = 0
@@ -61,18 +61,18 @@ struct _p0_swblk_mmult_accel _p0_swinst_mmult_accel_0 = {
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
 		.send_i = &axi_lite_send },
-  .in_A_V = { .base = { 
-		.channel_info = &_p0_swinst_mmult_accel_0_in_A_V_info, 
+  .in_A = { .base = { 
+		.channel_info = &_p0_swinst_mmult_accel_0_in_A_info, 
 		.open_i = &axi_dma_simple_open, 
 		.close_i = &axi_dma_simple_close },
 		.send_i = &axi_dma_simple_send_i },
-  .in_B_V = { .base = { 
-		.channel_info = &_p0_swinst_mmult_accel_0_in_B_V_info, 
+  .in_B = { .base = { 
+		.channel_info = &_p0_swinst_mmult_accel_0_in_B_info, 
 		.open_i = &axi_dma_simple_open, 
 		.close_i = &axi_dma_simple_close },
 		.send_i = &axi_dma_simple_send_i },
-  .out_C_V = { .base = { 
-		.channel_info = &_p0_swinst_mmult_accel_0_out_C_V_info, 
+  .out_C = { .base = { 
+		.channel_info = &_p0_swinst_mmult_accel_0_out_C_info, 
 		.open_i = &axi_dma_simple_open, 
 		.close_i = &axi_dma_simple_close },
 		.receive_ref_i = 0,
@@ -107,9 +107,9 @@ void _p0_cf_framework_open(int first)
   cf_get_current_context();
   accel_open(&_sds__p0_mmult_accel_0);
   _p0_cf_open_port( &_p0_swinst_mmult_accel_0.cmd_mmult_accel.base );
-  _p0_cf_open_port( &_p0_swinst_mmult_accel_0.in_A_V.base );
-  _p0_cf_open_port( &_p0_swinst_mmult_accel_0.in_B_V.base );
-  _p0_cf_open_port( &_p0_swinst_mmult_accel_0.out_C_V.base );
+  _p0_cf_open_port( &_p0_swinst_mmult_accel_0.in_A.base );
+  _p0_cf_open_port( &_p0_swinst_mmult_accel_0.in_B.base );
+  _p0_cf_open_port( &_p0_swinst_mmult_accel_0.out_C.base );
   _p0_cf_open_port( &_p0_swinst_mmult_accel_0.a_nrows.base );
   _p0_cf_open_port( &_p0_swinst_mmult_accel_0.b_ncols.base );
   _p0_cf_open_port( &_p0_swinst_mmult_accel_0.a_ncols.base );
@@ -118,9 +118,9 @@ void _p0_cf_framework_open(int first)
 void _p0_cf_framework_close(int last)
 {
   cf_close_i( &_p0_swinst_mmult_accel_0.cmd_mmult_accel, NULL);
-  cf_close_i( &_p0_swinst_mmult_accel_0.in_A_V, NULL);
-  cf_close_i( &_p0_swinst_mmult_accel_0.in_B_V, NULL);
-  cf_close_i( &_p0_swinst_mmult_accel_0.out_C_V, NULL);
+  cf_close_i( &_p0_swinst_mmult_accel_0.in_A, NULL);
+  cf_close_i( &_p0_swinst_mmult_accel_0.in_B, NULL);
+  cf_close_i( &_p0_swinst_mmult_accel_0.out_C, NULL);
   cf_close_i( &_p0_swinst_mmult_accel_0.a_nrows, NULL);
   cf_close_i( &_p0_swinst_mmult_accel_0.b_ncols, NULL);
   cf_close_i( &_p0_swinst_mmult_accel_0.a_ncols, NULL);

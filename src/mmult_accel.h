@@ -5,7 +5,8 @@
 #include <ap_int.h>
 
 
-typedef ap_uint<8> outer_t;
+//typedef ap_uint<8> outer_t;
+typedef unsigned int outer_t;
 typedef ap_uint<1> inter_t;
 
 //typedef ap_uint<8> index_t;
@@ -22,8 +23,8 @@ void mmult_accel (float in_A[A_NROWS*A_NCOLS],
                   float out_C[A_NROWS*B_NCOLS]);
 #else
 #define A_NROWS 1
-#define A_NCOLS 784
-#define B_NCOLS 1000
+#define A_NCOLS 1024
+#define B_NCOLS 1024
 #define B_NROWS A_NCOLS
 
 void mmult_accel (outer_t* in_A,

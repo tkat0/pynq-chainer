@@ -13,20 +13,20 @@ void mmult_kernel(inter_t in_A[A_NROWS][A_NCOLS],
 	int index_a, index_b, index_d;
 
 	for (index_a = 0; index_a < A_NROWS; index_a++) {
-//		if (index_a > a_nrows-1)
-//			break;
+		if (index_a > a_nrows-1)
+			break;
 		for (index_b = 0; index_b < B_NCOLS; index_b++) {
 #pragma HLS PIPELINE II=1
 //#pragma HLS unroll factor = 32
-//			if (index_b > b_ncols-1)
-//				break;
+			if (index_b > b_ncols-1)
+				break;
 
 			ap_uint<16> result = 0;
 #pragma HLS RESOURCE variable=result core=FAddSub_fulldsp
 			for (index_d = 0; index_d < A_NCOLS; index_d++) {
 
-//				if (index_d > a_ncols-1)
-//					break;
+				if (index_d > a_ncols-1)
+					break;
 
 // multiply accumulate broken into individual operators
 // so that AutoESL can infer two FP operators

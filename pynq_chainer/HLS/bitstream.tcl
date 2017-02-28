@@ -93,17 +93,17 @@ set mmult_accel_0 [create_bd_cell -type ip -vlnv xilinx.com:hls:mmult_accel:1.0 
 set mmult_accel_0_if [create_bd_cell -type ip -vlnv xilinx.com:ip:axis_accelerator_adapter:2.1 mmult_accel_0_if]
   
 set_property -dict [ list \
-  CONFIG.C_AP_IARG_0_WIDTH {8} \
+  CONFIG.C_AP_IARG_0_WIDTH {32} \
   CONFIG.C_AP_IARG_0_TYPE {1} \
-  CONFIG.C_AP_IARG_0_DWIDTH {8} \
+  CONFIG.C_AP_IARG_0_DWIDTH {32} \
   CONFIG.C_AP_IARG_0_DIM_1 {1024} \
-  CONFIG.C_AP_IARG_1_WIDTH {8} \
+  CONFIG.C_AP_IARG_1_WIDTH {32} \
   CONFIG.C_AP_IARG_1_TYPE {1} \
-  CONFIG.C_AP_IARG_1_DWIDTH {8} \
+  CONFIG.C_AP_IARG_1_DWIDTH {32} \
   CONFIG.C_AP_IARG_1_DIM_1 {1024} \
-  CONFIG.C_AP_OARG_0_WIDTH {8} \
+  CONFIG.C_AP_OARG_0_WIDTH {32} \
   CONFIG.C_AP_OARG_0_TYPE {1} \
-  CONFIG.C_AP_OARG_0_DWIDTH {8} \
+  CONFIG.C_AP_OARG_0_DWIDTH {32} \
   CONFIG.C_AP_OARG_0_DIM_1 {1024} \
   CONFIG.C_INPUT_SCALAR_0_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_1_WIDTH {32} \
@@ -271,15 +271,15 @@ connect_bd_intf_net \
   [get_bd_intf_pins /mmult_accel_0/ap_ctrl] \
 
 connect_bd_intf_net \
-  [get_bd_intf_pins /mmult_accel_0/in_A_V] \
+  [get_bd_intf_pins /mmult_accel_0/in_A] \
   [get_bd_intf_pins /mmult_accel_0_if/AP_FIFO_IARG_0] \
 
 connect_bd_intf_net \
-  [get_bd_intf_pins /mmult_accel_0/in_B_V] \
+  [get_bd_intf_pins /mmult_accel_0/in_B] \
   [get_bd_intf_pins /mmult_accel_0_if/AP_FIFO_IARG_1] \
 
 connect_bd_intf_net \
-  [get_bd_intf_pins /mmult_accel_0/out_C_V] \
+  [get_bd_intf_pins /mmult_accel_0/out_C] \
   [get_bd_intf_pins /mmult_accel_0_if/AP_FIFO_OARG_0] \
 
 connect_bd_intf_net \
