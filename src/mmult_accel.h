@@ -23,8 +23,8 @@ void mmult_accel (float in_A[A_NROWS*A_NCOLS],
                   float out_C[A_NROWS*B_NCOLS]);
 #else
 #define A_NROWS 1
-#define A_NCOLS 1024
-#define B_NCOLS 1024*2
+#define A_NCOLS 32//1024
+#define B_NCOLS 32//1024*2
 #define B_NROWS A_NCOLS
 
 void mmult_accel (outer_t* in_A,

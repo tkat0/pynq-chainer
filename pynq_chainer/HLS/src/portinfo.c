@@ -9,18 +9,13 @@
 
 #include "xlnk_core_cf.h"
 #include "accel_info.h"
-#include "axi_dma_sg_dm.h"
 #include "axi_dma_simple_dm.h"
 #include "axi_lite_dm.h"
 
+extern axi_dma_simple_info_t _p0_dm_0;
 extern axi_dma_simple_info_t _p0_dm_1;
 extern axi_dma_simple_info_t _p0_dm_2;
 extern accel_info_t _sds__p0_mmult_accel_0;
-
-axi_dma_sg_channel_info_t _p0_dm_0_channel_send = {
-  .name = "xilinx-axidma.0chan0",
-  .state = 0
-};
 
 axi_lite_info_t _p0_swinst_mmult_accel_0_cmd_mmult_accel_info = {
   .accel_info = &_sds__p0_mmult_accel_0,
@@ -33,10 +28,10 @@ axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_in_A_info = {
   .needs_cache_flush_invalidate = 0
 };
 
-axi_dma_sg_transaction_info_t _p0_swinst_mmult_accel_0_in_B_info = {
-  .dma_channel_info = &_p0_dm_0_channel_send,
-  .port_id = 0,
-  .flag = (0 | CF_FLAG_CACHE_FLUSH_INVALIDATE)
+axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_in_B_info = {
+  .dma_info = &_p0_dm_0,
+  .in_use = 0,
+  .needs_cache_flush_invalidate = 0
 };
 
 axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_out_C_info = {
@@ -73,9 +68,9 @@ struct _p0_swblk_mmult_accel _p0_swinst_mmult_accel_0 = {
 		.send_i = &axi_dma_simple_send_i },
   .in_B = { .base = { 
 		.channel_info = &_p0_swinst_mmult_accel_0_in_B_info, 
-		.open_i = &axi_dma_sg_open, 
-		.close_i = &axi_dma_sg_close },
-		.send_i = &axi_dma_sg_send_i },
+		.open_i = &axi_dma_simple_open, 
+		.close_i = &axi_dma_simple_close },
+		.send_i = &axi_dma_simple_send_i },
   .out_C = { .base = { 
 		.channel_info = &_p0_swinst_mmult_accel_0_out_C_info, 
 		.open_i = &axi_dma_simple_open, 
