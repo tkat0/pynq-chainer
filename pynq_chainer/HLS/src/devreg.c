@@ -32,7 +32,7 @@ axi_dma_simple_info_t _p0_dm_2 = {
   .device_id = 1,
   .phys_base_addr = 0x40420000,
   .addr_range = 0x10000,
-  .dir = XLNK_DMA_FROM_DEV,
+  .dir = XLNK_DMA_TO_DEV,
 };
 
 accel_info_t _sds__p0_mmult_accel_0 = {

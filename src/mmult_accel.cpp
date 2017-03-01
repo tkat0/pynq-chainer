@@ -80,5 +80,5 @@ void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C, int a_nrows,
 	}
 
 	// Matrix multiply call
-	mmult_kernel(a_buf, b_buf, out_C, a_nrows, b_ncols, a_ncols);
+	//mmult_kernel(a_buf, b_buf, out_C, a_nrows, b_ncols, a_ncols);
 }

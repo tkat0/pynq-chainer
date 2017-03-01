@@ -80,7 +80,7 @@ void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C, int a_nrows,
 	}
 
 	// Matrix multiply call
-	mmult_kernel(a_buf, b_buf, out_C, a_nrows, b_ncols, a_ncols);
+	//mmult_kernel(a_buf, b_buf, out_C, a_nrows, b_ncols, a_ncols);
 }
 
 #include <stdio.h>
@@ -100,11 +100,11 @@ void _p0_mmult_accel_0(outer_t * in_A, outer_t * in_B, outer_t * out_C, int a_nr
 
   cf_send_i(&(_p0_swinst_mmult_accel_0.in_A), in_A, (a_nrows*a_ncols) * 4, &_p0_request_0);
   cf_send_i(&(_p0_swinst_mmult_accel_0.in_B), in_B, (a_ncols*b_ncols) * 4, &_p0_request_1);
+  cf_send_i(&(_p0_swinst_mmult_accel_0.out_C), out_C, (a_nrows*b_ncols) * 4, &_p0_request_2);
   cf_send_i(&(_p0_swinst_mmult_accel_0.a_nrows), &a_nrows, 4, &_p0_request_3);
   cf_send_i(&(_p0_swinst_mmult_accel_0.b_ncols), &b_ncols, 4, &_p0_request_4);
   cf_send_i(&(_p0_swinst_mmult_accel_0.a_ncols), &a_ncols, 4, &_p0_request_5);
 
-  cf_receive_i(&(_p0_swinst_mmult_accel_0.out_C), out_C, (a_nrows*b_ncols) * 4, &_p0_mmult_accel_0_num_out_C, &_p0_request_2);
 
   cf_wait(_p0_request_0);
   cf_wait(_p0_request_1);

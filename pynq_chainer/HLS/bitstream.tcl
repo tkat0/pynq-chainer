@@ -74,13 +74,13 @@ set_property -dict [ list \
   CONFIG.C_DLYTMR_RESOLUTION {1250} \
   CONFIG.C_SG_LENGTH_WIDTH {23} \
   CONFIG.C_INCLUDE_SG {0} \
-  CONFIG.C_INCLUDE_MM2S {0} \
-  CONFIG.C_INCLUDE_S2MM {1} \
-  CONFIG.C_INCLUDE_S2MM_SF {1} \
-  CONFIG.C_INCLUDE_S2MM_DRE {1} \
-  CONFIG.C_S2MM_BURST_SIZE {64} \
-  CONFIG.C_M_AXI_S2MM_DATA_WIDTH {64} \
-  CONFIG.C_S_AXIS_S2MM_TDATA_WIDTH {64} \
+  CONFIG.C_INCLUDE_MM2S {1} \
+  CONFIG.C_INCLUDE_S2MM {0} \
+  CONFIG.C_INCLUDE_MM2S_SF {1} \
+  CONFIG.C_INCLUDE_MM2S_DRE {1} \
+  CONFIG.C_MM2S_BURST_SIZE {64} \
+  CONFIG.C_M_AXI_MM2S_DATA_WIDTH {64} \
+  CONFIG.C_M_AXIS_MM2S_TDATA_WIDTH {64} \
   ] $dm_2
 
 #---------------------------
@@ -103,19 +103,16 @@ set_property -dict [ list \
   CONFIG.C_AP_IARG_1_TYPE {1} \
   CONFIG.C_AP_IARG_1_DWIDTH {32} \
   CONFIG.C_AP_IARG_1_DIM_1 {1024} \
-  CONFIG.C_AP_OARG_0_WIDTH {32} \
-  CONFIG.C_AP_OARG_0_TYPE {1} \
-  CONFIG.C_AP_OARG_0_DWIDTH {32} \
-  CONFIG.C_AP_OARG_0_DIM_1 {1024} \
+  CONFIG.C_AP_IARG_2_WIDTH {32} \
+  CONFIG.C_AP_IARG_2_TYPE {1} \
+  CONFIG.C_AP_IARG_2_DWIDTH {32} \
+  CONFIG.C_AP_IARG_2_DIM_1 {1024} \
   CONFIG.C_INPUT_SCALAR_0_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_1_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_2_WIDTH {32} \
-  CONFIG.C_N_OUTPUT_ARGS {1} \
-  CONFIG.C_N_INPUT_ARGS {2} \
+  CONFIG.C_N_OUTPUT_ARGS {0} \
+  CONFIG.C_N_INPUT_ARGS {3} \
   CONFIG.C_N_INPUT_SCALARS {3} \
-  CONFIG.C_M_AXIS_HAS_TKEEP {1} \
-  CONFIG.C_M_AXIS_HAS_TSTRB {1} \
-  CONFIG.C_M_AXIS_TDATA_WIDTH {64} \
   CONFIG.C_S_AXIS_TDATA_WIDTH {64} \
   ] $mmult_accel_0_if
 
@@ -220,14 +217,13 @@ connect_bd_net  \
   [get_bd_pins /dm_1/s_axi_lite_aclk] \
   [get_bd_pins /dm_1/m_axi_mm2s_aclk] \
   [get_bd_pins /dm_2/s_axi_lite_aclk] \
-  [get_bd_pins /dm_2/m_axi_s2mm_aclk] \
+  [get_bd_pins /dm_2/m_axi_mm2s_aclk] \
   [get_bd_pins /ps7/M_AXI_GP0_ACLK] \
   [get_bd_pins /ps7/S_AXI_ACP_ACLK] \
   [get_bd_pins /ps7/S_AXI_HP0_ACLK] \
   [get_bd_pins /mmult_accel_0/ap_clk] \
   [get_bd_pins /mmult_accel_0_if/s_axi_aclk] \
   [get_bd_pins /mmult_accel_0_if/aclk] \
-  [get_bd_pins /mmult_accel_0_if/m_axis_aclk] \
   [get_bd_pins /mmult_accel_0_if/s_axis_aclk] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/ACLK] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/S00_ACLK] \
@@ -272,7 +268,6 @@ connect_bd_net  \
   [get_bd_pins /dm_1/axi_resetn] \
   [get_bd_pins /dm_2/axi_resetn] \
   [get_bd_pins /mmult_accel_0_if/s_axi_aresetn] \
-  [get_bd_pins /mmult_accel_0_if/m_axis_aresetn] \
   [get_bd_pins /mmult_accel_0_if/s_axis_aresetn] \
   [get_bd_pins /axis_rtr_dm_0/m_axis_rxs_aresetn] \
   [get_bd_pins /axis_rtr_dm_0/m_axis_rxd_aresetn] \
@@ -288,13 +283,13 @@ connect_bd_net  \
   [get_bd_pins /xlconcat/In1] \
 
 connect_bd_net  \
-  [get_bd_pins /dm_2/s2mm_introut] \
+  [get_bd_pins /dm_2/mm2s_introut] \
   [get_bd_pins /xlconcat/In2] \
 
 connect_bd_net  \
   [get_bd_pins /acp_axcache_0xF/dout] \
   [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S00_AXI_arcache] \
-  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S01_AXI_awcache] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S01_AXI_arcache] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /mmult_accel_0_if/ap_ctrl] \
@@ -310,7 +305,7 @@ connect_bd_intf_net \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /mmult_accel_0/out_C] \
-  [get_bd_intf_pins /mmult_accel_0_if/AP_FIFO_OARG_0] \
+  [get_bd_intf_pins /mmult_accel_0_if/AP_FIFO_IARG_2] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /ps7/M_AXI_GP0] \
@@ -362,19 +357,19 @@ connect_bd_intf_net \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /dm_1/M_AXIS_MM2S] \
-  [get_bd_intf_pins /mmult_accel_0_if/S_AXIS_0] \
+  [get_bd_intf_pins /mmult_accel_0_if/S_AXIS_2] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /axi_ic_ps7_M_AXI_GP0/M03_AXI] \
   [get_bd_intf_pins /dm_2/S_AXI_LITE] \
 
 connect_bd_intf_net \
-  [get_bd_intf_pins /dm_2/M_AXI_S2MM] \
+  [get_bd_intf_pins /dm_2/M_AXI_MM2S] \
   [get_bd_intf_pins /axi_ic_ps7_S_AXI_ACP/S01_AXI] \
 
 connect_bd_intf_net \
-  [get_bd_intf_pins /mmult_accel_0_if/M_AXIS_0] \
-  [get_bd_intf_pins /dm_2/S_AXIS_S2MM] \
+  [get_bd_intf_pins /dm_2/M_AXIS_MM2S] \
+  [get_bd_intf_pins /mmult_accel_0_if/S_AXIS_0] \
 
 #---------------------------
 # Automation Commands

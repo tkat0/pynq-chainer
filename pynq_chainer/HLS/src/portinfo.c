@@ -28,7 +28,7 @@ axi_lite_info_t _p0_swinst_mmult_accel_0_cmd_mmult_accel_info = {
 };
 
 axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_in_A_info = {
-  .dma_info = &_p0_dm_1,
+  .dma_info = &_p0_dm_2,
   .in_use = 0,
   .needs_cache_flush_invalidate = 0
 };
@@ -40,7 +40,7 @@ axi_dma_sg_transaction_info_t _p0_swinst_mmult_accel_0_in_B_info = {
 };
 
 axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_out_C_info = {
-  .dma_info = &_p0_dm_2,
+  .dma_info = &_p0_dm_1,
   .in_use = 0,
   .needs_cache_flush_invalidate = 0
 };
@@ -80,8 +80,7 @@ struct _p0_swblk_mmult_accel _p0_swinst_mmult_accel_0 = {
 		.channel_info = &_p0_swinst_mmult_accel_0_out_C_info, 
 		.open_i = &axi_dma_simple_open, 
 		.close_i = &axi_dma_simple_close },
-		.receive_ref_i = 0,
-		.receive_i = &axi_dma_simple_recv_i },
+		.send_i = &axi_dma_simple_send_i },
   .a_nrows = { .base = { 
 		.channel_info = &_p0_swinst_mmult_accel_0_a_nrows_info, 
 		.open_i = &axi_lite_open, 
