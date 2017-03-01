@@ -3,7 +3,7 @@ CPP = arm-linux-gnueabihf-g++
 
 OBJSH = devreg.o cf_stub.o mmult_accel.o portinfo.o 
 LIBS = -l sds_lib
-INC = -I include/
+INC = -I include/ -I include_hls/
 
 all:	
 	$(CC) -fPIC $(INC) -c -g3 -gstabs devreg.c

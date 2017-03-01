@@ -19,7 +19,6 @@ set_property -dict [ list \
   CONFIG.PCW_USE_M_AXI_GP0 1 \
   CONFIG.PCW_USE_S_AXI_ACP 1 \
   CONFIG.PCW_USE_DEFAULT_ACP_USER_VAL 1 \
-  CONFIG.PCW_USE_S_AXI_HP0 1 \
   ] $ps7
 set xlconcat [get_bd_cell /xlconcat]
     
@@ -140,7 +139,7 @@ set axi_ic_ps7_S_AXI_ACP [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interc
   
 set_property -dict [ list \
   CONFIG.NUM_MI {1} \
-  CONFIG.NUM_SI {2} \
+  CONFIG.NUM_SI {3} \
   CONFIG.STRATEGY {2} \
   CONFIG.M00_HAS_REGSLICE {1} \
   CONFIG.M00_HAS_DATA_FIFO {2} \
@@ -148,22 +147,9 @@ set_property -dict [ list \
   CONFIG.S00_HAS_DATA_FIFO {2} \
   CONFIG.S01_HAS_REGSLICE {1} \
   CONFIG.S01_HAS_DATA_FIFO {2} \
+  CONFIG.S02_HAS_REGSLICE {1} \
+  CONFIG.S02_HAS_DATA_FIFO {2} \
   ] $axi_ic_ps7_S_AXI_ACP
-
-#---------------------------
-# Instantiating axi_ic_ps7_S_AXI_HP0
-#---------------------------
-set axi_ic_ps7_S_AXI_HP0 [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_ic_ps7_S_AXI_HP0]
-  
-set_property -dict [ list \
-  CONFIG.NUM_MI {1} \
-  CONFIG.NUM_SI {1} \
-  CONFIG.STRATEGY {2} \
-  CONFIG.M00_HAS_REGSLICE {1} \
-  CONFIG.M00_HAS_DATA_FIFO {2} \
-  CONFIG.S00_HAS_REGSLICE {1} \
-  CONFIG.S00_HAS_DATA_FIFO {2} \
-  ] $axi_ic_ps7_S_AXI_HP0
 
 #---------------------------
 # Instantiating acp_axcache_0xF
@@ -204,7 +190,6 @@ connect_bd_net  \
   [get_bd_pins /dm_2/m_axi_s2mm_aclk] \
   [get_bd_pins /ps7/M_AXI_GP0_ACLK] \
   [get_bd_pins /ps7/S_AXI_ACP_ACLK] \
-  [get_bd_pins /ps7/S_AXI_HP0_ACLK] \
   [get_bd_pins /mmult_accel_0/ap_clk] \
   [get_bd_pins /mmult_accel_0_if/s_axi_aclk] \
   [get_bd_pins /mmult_accel_0_if/aclk] \
@@ -220,9 +205,7 @@ connect_bd_net  \
   [get_bd_pins /axi_ic_ps7_S_AXI_ACP/M00_ACLK] \
   [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S00_ACLK] \
   [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S01_ACLK] \
-  [get_bd_pins /axi_ic_ps7_S_AXI_HP0/ACLK] \
-  [get_bd_pins /axi_ic_ps7_S_AXI_HP0/M00_ACLK] \
-  [get_bd_pins /axi_ic_ps7_S_AXI_HP0/S00_ACLK] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S02_ACLK] \
 
 connect_bd_net  \
   [get_bd_pins /proc_sys_reset_0_100M/interconnect_aresetn] \
@@ -236,9 +219,7 @@ connect_bd_net  \
   [get_bd_pins /axi_ic_ps7_S_AXI_ACP/M00_ARESETN] \
   [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S00_ARESETN] \
   [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S01_ARESETN] \
-  [get_bd_pins /axi_ic_ps7_S_AXI_HP0/ARESETN] \
-  [get_bd_pins /axi_ic_ps7_S_AXI_HP0/M00_ARESETN] \
-  [get_bd_pins /axi_ic_ps7_S_AXI_HP0/S00_ARESETN] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S02_ARESETN] \
 
 connect_bd_net  \
   [get_bd_pins /proc_sys_reset_0_100M/peripheral_aresetn] \
@@ -264,7 +245,8 @@ connect_bd_net  \
 connect_bd_net  \
   [get_bd_pins /acp_axcache_0xF/dout] \
   [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S00_AXI_arcache] \
-  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S01_AXI_awcache] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S01_AXI_arcache] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S02_AXI_awcache] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /mmult_accel_0_if/ap_ctrl] \
@@ -291,10 +273,6 @@ connect_bd_intf_net \
   [get_bd_intf_pins /ps7/S_AXI_ACP] \
 
 connect_bd_intf_net \
-  [get_bd_intf_pins /axi_ic_ps7_S_AXI_HP0/M00_AXI] \
-  [get_bd_intf_pins /ps7/S_AXI_HP0] \
-
-connect_bd_intf_net \
   [get_bd_intf_pins /axi_ic_ps7_M_AXI_GP0/M00_AXI] \
   [get_bd_intf_pins /mmult_accel_0_if/S_AXI] \
 
@@ -304,7 +282,7 @@ connect_bd_intf_net \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /dm_0/M_AXI_MM2S] \
-  [get_bd_intf_pins /axi_ic_ps7_S_AXI_HP0/S00_AXI] \
+  [get_bd_intf_pins /axi_ic_ps7_S_AXI_ACP/S00_AXI] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /dm_0/M_AXIS_MM2S] \
@@ -316,7 +294,7 @@ connect_bd_intf_net \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /dm_1/M_AXI_MM2S] \
-  [get_bd_intf_pins /axi_ic_ps7_S_AXI_ACP/S00_AXI] \
+  [get_bd_intf_pins /axi_ic_ps7_S_AXI_ACP/S01_AXI] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /dm_1/M_AXIS_MM2S] \
@@ -328,7 +306,7 @@ connect_bd_intf_net \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /dm_2/M_AXI_S2MM] \
-  [get_bd_intf_pins /axi_ic_ps7_S_AXI_ACP/S01_AXI] \
+  [get_bd_intf_pins /axi_ic_ps7_S_AXI_ACP/S02_AXI] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /mmult_accel_0_if/M_AXIS_0] \

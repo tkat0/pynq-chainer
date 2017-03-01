@@ -31,7 +31,7 @@ axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_in_A_info = {
 axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_in_B_info = {
   .dma_info = &_p0_dm_0,
   .in_use = 0,
-  .needs_cache_flush_invalidate = 1
+  .needs_cache_flush_invalidate = 0
 };
 
 axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_out_C_info = {
