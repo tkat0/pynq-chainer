@@ -12,23 +12,26 @@ void mmult_kernel(inter_t in_A[A_NROWS][A_NCOLS],
 
 	int index_a, index_b, index_d;
 
-	for (index_a = 0; index_a < A_NROWS; index_a++) {
+	for (index_a = 0; index_a < a_nrows; index_a++) {
+#pragma HLS LOOP_TRIPCOUNT min = 1 max = 128 avg = 32
 //		if (index_a > a_nrows-1)
 //			break;
-		for (index_b = 0; index_b < B_NCOLS; index_b++) {
-#pragma HLS PIPELINE II=1
+		for (index_b = 0; index_b < b_ncols; index_b++) {
+#pragma HLS LOOP_TRIPCOUNT min = 16 max = 2048 avg = 258
+//#pragma HLS PIPELINE II=1
 //#pragma HLS unroll factor = 32
 //			if (index_b > b_ncols - 1) {
 				ap_uint<16> result = 0;
 				//#pragma HLS RESOURCE variable=result core=FAddSub_fulldsp
-				for (index_d = 0; index_d < A_NCOLS; index_d++) {
-
+				for (index_d = 0; index_d < a_ncols; index_d++) {
+#pragma HLS LOOP_TRIPCOUNT min = 16 max = 2048 avg = 258
+#pragma HLS PIPELINE II=1
 //					if (index_d > a_ncols - 1) {
 						// multiply accumulate broken into individual operators
 						// so that AutoESL can infer two FP operators
 
 						//inter_t product_term = in_A[index_a][index_d] * in_B[index_d][index_b];
-						inter_t product_term = in_A[index_a][index_d] ^ in_B[index_d][index_b]; // XOR
+						inter_t product_term = ~(in_A[index_a][index_d] ^ in_B[index_d][index_b]); // XNOR
 						//#pragma HLS RESOURCE variable=product_term core=FMul_fulldsp
 						result += product_term;
 //					}
@@ -50,12 +53,12 @@ void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C, int a_nrows,
 	int i, j;
 	inter_t a_buf[A_NROWS][A_NCOLS];
 	inter_t b_buf[A_NCOLS][B_NCOLS];
-	for (i = 0; i < A_NROWS; i++) {
-		for (j = 0; j < A_NCOLS; j++) {
-#pragma HLS PIPELINE II=1
-			a_buf[i][j] = 1;
-		}
-	}
+//	for (i = 0; i < A_NROWS; i++) {
+//		for (j = 0; j < A_NCOLS; j++) {
+//#pragma HLS PIPELINE II=1
+//			a_buf[i][j] = 1;
+//		}
+//	}
 
 //#pragma HLS RESOURCE variable=a_buf core=RAM_2P_BRAM
 //#pragma HLS RESOURCE variable=a_buf core=RAM_2P_BRAM
