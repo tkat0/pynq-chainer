@@ -25,6 +25,7 @@ void mmult_kernel(inter_t in_A[A_NROWS][A_NCOLS],
 				for (index_d = 0; index_d < A_NCOLS; index_d++) {
 //#pragma HLS PIPELINE II=1
 //#pragma HLS unroll
+#if 0
 					inter_t product_term = ~(in_A[index_a][index_d] ^ in_B[index_d][index_b]); // XNOR
 					if (index_d < a_ncols && index_b < b_ncols) {
 						// multiply accumulate broken into individual operators
@@ -37,6 +38,7 @@ void mmult_kernel(inter_t in_A[A_NROWS][A_NCOLS],
 					} else {
 						result += 0;
 					}
+#endif
 
 				}
 				out_C[index_a * B_NCOLS + index_b] = (outer_t) result;
