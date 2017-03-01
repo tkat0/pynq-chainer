@@ -224,7 +224,9 @@ connect_bd_net  \
   [get_bd_pins /ps7/M_AXI_GP0_ACLK] \
   [get_bd_pins /ps7/S_AXI_ACP_ACLK] \
   [get_bd_pins /ps7/S_AXI_HP0_ACLK] \
+  [get_bd_pins /mmult_accel_0/ap_clk] \
   [get_bd_pins /mmult_accel_0_if/s_axi_aclk] \
+  [get_bd_pins /mmult_accel_0_if/aclk] \
   [get_bd_pins /mmult_accel_0_if/m_axis_aclk] \
   [get_bd_pins /mmult_accel_0_if/s_axis_aclk] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/ACLK] \
@@ -276,11 +278,6 @@ connect_bd_net  \
   [get_bd_pins /axis_rtr_dm_0/m_axis_rxd_aresetn] \
   [get_bd_pins /axis_rtr_dm_0/s_axis_txc_aresetn] \
   [get_bd_pins /axis_rtr_dm_0/s_axis_txd_aresetn] \
-
-connect_bd_net  \
-  [get_bd_pins /ps7/FCLK_CLK2] \
-  [get_bd_pins /mmult_accel_0/ap_clk] \
-  [get_bd_pins /mmult_accel_0_if/aclk] \
 
 connect_bd_net  \
   [get_bd_pins /dm_0/mm2s_introut] \
