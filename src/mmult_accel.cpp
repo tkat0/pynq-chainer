@@ -11,22 +11,21 @@ void mmult_kernel(inter_t in_A[A_NROWS][A_NCOLS],
 #pragma HLS array_partition variable=in_B block factor=16 dim=1
 
 	int index_a, index_b, index_d;
+	index_a = 0;
 
-	for (index_a = 0; index_a < a_nrows; index_a++) {
-#pragma HLS LOOP_TRIPCOUNT min = 1 max = 128 avg = 32
+//	for (index_a = 0; index_a < A_NROWS; index_a++) {
 //		if (index_a > a_nrows-1)
 //			break;
-		for (index_b = 0; index_b < b_ncols; index_b++) {
-#pragma HLS LOOP_TRIPCOUNT min = 16 max = 2048 avg = 258
+		for (index_b = 0; index_b < B_NCOLS; index_b++) {
 //#pragma HLS PIPELINE II=1
 //#pragma HLS unroll factor = 32
-//			if (index_b > b_ncols - 1) {
+			if (index_b < b_ncols) {
 				ap_uint<16> result = 0;
 				//#pragma HLS RESOURCE variable=result core=FAddSub_fulldsp
-				for (index_d = 0; index_d < a_ncols; index_d++) {
-#pragma HLS LOOP_TRIPCOUNT min = 16 max = 2048 avg = 258
-#pragma HLS PIPELINE II=1
-//					if (index_d > a_ncols - 1) {
+				for (index_d = 0; index_d < A_NCOLS; index_d++) {
+//#pragma HLS PIPELINE II=1
+#pragma HLS unroll
+					if (index_d < a_ncols) {
 						// multiply accumulate broken into individual operators
 						// so that AutoESL can infer two FP operators
 
@@ -34,14 +33,14 @@ void mmult_kernel(inter_t in_A[A_NROWS][A_NCOLS],
 						inter_t product_term = ~(in_A[index_a][index_d] ^ in_B[index_d][index_b]); // XNOR
 						//#pragma HLS RESOURCE variable=product_term core=FMul_fulldsp
 						result += product_term;
-//					}
+					}
 
 				}
 				out_C[index_a * B_NCOLS + index_b] = (outer_t) result;
-//			}
+			}
 
 		}
-	}
+//	}
 }
 
 #pragma SDS data access_pattern(in_A:SEQUENTIAL, in_B:SEQUENTIAL, out_C:SEQUENTIAL)
@@ -80,5 +79,5 @@ void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C, int a_nrows,
 	}
 
 	// Matrix multiply call
-	//mmult_kernel(a_buf, b_buf, out_C, a_nrows, b_ncols, a_ncols);
+	mmult_kernel(a_buf, b_buf, out_C, a_nrows, b_ncols, a_ncols);
 }
