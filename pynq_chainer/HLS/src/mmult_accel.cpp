@@ -7,8 +7,8 @@ void mmult_kernel(inter_t in_A[A_NROWS][A_NCOLS],
 		inter_t in_B[A_NCOLS][B_NCOLS], outer_t* out_C, int a_nrows,
 		int b_ncols, int a_ncols) {
 #pragma HLS INLINE self
-#pragma HLS array_partition variable=in_A block factor=16 dim=2
-#pragma HLS array_partition variable=in_B block factor=16 dim=1
+//#pragma HLS array_partition variable=in_A block factor=16 dim=2
+//#pragma HLS array_partition variable=in_B block factor=16 dim=1
 
 	int index_a, index_b, index_d;
 	index_a = 0;
@@ -19,13 +19,13 @@ void mmult_kernel(inter_t in_A[A_NROWS][A_NCOLS],
 		for (index_b = 0; index_b < B_NCOLS; index_b++) {
 //#pragma HLS PIPELINE II=1
 //#pragma HLS unroll factor = 32
-			if (index_b < b_ncols) {
+//			if (index_b < b_ncols) {
 				ap_uint<16> result = 0;
 				//#pragma HLS RESOURCE variable=result core=FAddSub_fulldsp
 				for (index_d = 0; index_d < A_NCOLS; index_d++) {
 //#pragma HLS PIPELINE II=1
-#pragma HLS unroll
-					if (index_d < a_ncols) {
+//#pragma HLS unroll
+					if (index_d < a_ncols || index_b < b_ncols) {
 						// multiply accumulate broken into individual operators
 						// so that AutoESL can infer two FP operators
 
@@ -37,7 +37,7 @@ void mmult_kernel(inter_t in_A[A_NROWS][A_NCOLS],
 
 				}
 				out_C[index_a * B_NCOLS + index_b] = (outer_t) result;
-			}
+//			}
 
 		}
 //	}
