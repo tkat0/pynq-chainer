@@ -26,9 +26,10 @@ class BinLinearFunction():
         assert x_ncols == w_ncols
 
         x = x.astype(np.uint32, copy=True)
-        w = w.astype(np.uint32, copy=True)
+        #w = w.astype(np.uint32, copy=True)
+        wb = numpy.where(w>=0, 1, -1).astype(numpy.uint32, copy=True)
         x, x_cdata = utils.copy_cma_ndarray(x, "unsigned int")
-        w, w_cdata = utils.copy_cma_ndarray(w, "unsigned int")
+        w, w_cdata = utils.copy_cma_ndarray(wb, "unsigned int")
 
         y, y_cdata = utils.malloc_cma_ndarray((x_nrows, w_nrows), "unsigned int", np.uint32)
         
