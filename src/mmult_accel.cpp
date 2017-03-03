@@ -7,8 +7,8 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 		inter_t in_B[A_NCOLS*B_NCOLS], outer_t* out_C, int a_nrows,
 		int b_ncols, int a_ncols) {
 #pragma HLS INLINE self
-//#pragma HLS array_partition variable=in_A block factor=16 dim=2
-//#pragma HLS array_partition variable=in_B block factor=16 dim=1
+#pragma HLS array_partition variable=in_A block factor=2
+#pragma HLS array_partition variable=in_B block factor=2
 
 	int index_a, index_b, index_d;
 	index_a = 0;

@@ -3,12 +3,12 @@
 
 #include "mmult_accel.h"
 
-void mmult_kernel(inter_t in_A[A_NROWS][A_NCOLS],
-		inter_t in_B[A_NCOLS][B_NCOLS], outer_t* out_C, int a_nrows,
+void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
+		inter_t in_B[A_NCOLS*B_NCOLS], outer_t* out_C, int a_nrows,
 		int b_ncols, int a_ncols) {
 #pragma HLS INLINE self
-//#pragma HLS array_partition variable=in_A block factor=16 dim=2
-//#pragma HLS array_partition variable=in_B block factor=16 dim=1
+#pragma HLS array_partition variable=in_A block factor=2
+#pragma HLS array_partition variable=in_B block factor=2
 
 	int index_a, index_b, index_d;
 	index_a = 0;
@@ -43,7 +43,9 @@ void mmult_kernel(inter_t in_A[A_NROWS][A_NCOLS],
 #endif
 
 				}
-				out_C[index_a * B_NCOLS + index_b] = (outer_t) result;
+				if (index_b < b_ncols) {
+					out_C[index_a * B_NCOLS + index_b] = (outer_t) result;
+				}
 //			}
 
 		}
@@ -57,8 +59,8 @@ void mmult_kernel(inter_t in_A[A_NROWS][A_NCOLS],
 void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C, int a_nrows,
 		int b_ncols, int a_ncols) {
 	int i, j;
-	inter_t a_buf[A_NROWS][A_NCOLS];
-	inter_t b_buf[A_NCOLS][B_NCOLS];
+	inter_t a_buf[A_NROWS*A_NCOLS];
+	inter_t b_buf[A_NCOLS*B_NCOLS];
 //	for (i = 0; i < A_NROWS; i++) {
 //		for (j = 0; j < A_NCOLS; j++) {
 //#pragma HLS PIPELINE II=1
@@ -73,7 +75,7 @@ void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C, int a_nrows,
 	for (i = 0; i < a_nrows; i++) {
 		for (j = 0; j < a_ncols; j++) {
 #pragma HLS PIPELINE II=1
-			a_buf[i][j] = (inter_t) in_A[i * a_ncols + j];
+			a_buf[i*a_nrows + j] = (inter_t) in_A[i * a_ncols + j];
 		}
 	}
 
@@ -81,7 +83,7 @@ void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C, int a_nrows,
 	for (i = 0; i < a_ncols; i++) {
 		for (j = 0; j < b_ncols; j++) {
 #pragma HLS PIPELINE II=1
-			b_buf[i][j] = (inter_t) in_B[i * b_ncols + j];
+			b_buf[i*a_ncols + j] = (inter_t) in_B[i * b_ncols + j];
 		}
 	}
 
