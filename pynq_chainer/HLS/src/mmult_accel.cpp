@@ -26,23 +26,21 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 				for (index_d = 0; index_d < A_NCOLS; index_d++) {
 //#pragma HLS PIPELINE II=1
 //#pragma HLS unroll
-#if 1
 					//inter_t product_term = ~(in_A[index_a][index_d] ^ in_B[index_d][index_b]); // XNOR
-					int product_term = 1;
+					//int product_term = 0;
 					if (index_d < a_ncols && index_b < b_ncols) {
 						// multiply accumulate broken into individual operators
 						// so that AutoESL can infer two FP operators
 
-						//inter_t product_term = in_A[index_a][index_d] * in_B[index_d][index_b];
+					    //inter_t product_term = in_A[index_a][index_d] * in_B[index_d][index_b];
+					    inter_t product_term = ~(in_A[index_a][index_d] ^ in_B[index_d][index_b]); // XNOR
 
 						//#pragma HLS RESOURCE variable=product_term core=FMul_fulldsp
-						result += product_term;
+						result += (int)product_term;
 					}
-#else
-					result += 1;
-#endif
 
 				}
+
 				if (index_b < b_ncols) {
 					out_C[index_a * B_NCOLS + index_b] = (outer_t) result;
 				}
