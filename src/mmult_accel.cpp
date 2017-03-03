@@ -43,7 +43,9 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 #endif
 
 				}
-				out_C[index_a * B_NCOLS + index_b] = (outer_t) result;
+				if (index_b < b_ncols) {
+					out_C[index_a * B_NCOLS + index_b] = (outer_t) result;
+				}
 //			}
 
 		}
