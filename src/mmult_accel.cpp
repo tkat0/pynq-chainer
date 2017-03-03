@@ -17,7 +17,7 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 //		if (index_a > a_nrows-1)
 //			break;
 		for (index_b = 0; index_b < B_NCOLS; index_b++) {
-//#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1
 //#pragma HLS unroll factor = 32
 //			if (index_b < b_ncols) {
 				//ap_uint<16> result = 0;
