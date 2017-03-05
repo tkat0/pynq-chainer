@@ -22,20 +22,25 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 
 	int index_a, index_b, index_d;
 	index_a = 0;
+    outer_t result = 0;
 
 //	for (index_a = 0; index_a < A_NROWS; index_a++) {
 //		if (index_a > a_nrows-1)
 //			break;
 		for (index_b = 0; index_b < B_NCOLS; index_b++) {
-//#pragma HLS PIPELINE II=1
-//#pragma HLS unroll factor = 32
+#pragma HLS unroll factor = 64  // 128: ERROR: [SDSoC 0-0] Hardware function 'mmult_accel' LUT resource requirement (58290) exceeds platform 'pynq' resource capacity (53200)
+//#pragma HLS PIPELINE II=1 // XXX hlsおわらな�?
+
 //			if (index_b < b_ncols) {
 				//ap_uint<16> result = 0;
-			    outer_t result = 0;
+			    //outer_t result = 0;
 				//#pragma HLS RESOURCE variable=result core=FAddSub_fulldsp
 				for (index_d = 0; index_d < A_NCOLS; index_d++) {
-#pragma HLS PIPELINE II=1
+//#pragma HLS PIPELINE II=1
 //#pragma HLS unroll
+				    if (index_d == 0) {
+			            result = 0;
+					}
 					//inter_t product_term = ~(in_A[index_a][index_d] ^ in_B[index_d][index_b]); // XNOR
 					//int product_term = 0;
 					if (index_d < a_ncols && index_b < b_ncols) {
@@ -56,16 +61,33 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 						//#pragma HLS RESOURCE variable=product_term core=FMul_fulldsp
 						debug("= %x\n", product_term);
 						result += (outer_t)product_term;
+
+#if 1
+				        if (index_d == a_ncols-1) {
+							// last time 
+				        	debug("add = %d\n", result);
+				        	//result = 2 * result - a_ncols; // [0,1]に戻�?
+				        	result = (result << 1) - a_ncols; // [0,1]に戻�?
+				        	debug("= %d (2*result-%d)\n", result, a_ncols);
+				        	out_C[index_a * b_ncols + index_b] = result;
+				        }
+#endif
+
 					}
+
+					// ある�?はここに追�?
 
 				}
 
+#if 0
 				if (index_b < b_ncols) {
 					debug("add = %d\n", result);
-					result = 2 * result - a_ncols; // [0,1]に戻す
+					//result = 2 * result - a_ncols; // [0,1]に戻�?
+					result = (result << 1) - a_ncols; // [0,1]に戻�?
 					debug("= %d (2*result-%d)\n", result, a_ncols);
 					out_C[index_a * b_ncols + index_b] = result;
 				}
+#endif
 //			}
 
 		}
