@@ -27,11 +27,11 @@ class BinLinearFunction():
 
         x = x.astype(np.uint32, copy=True)
         #w = w.astype(np.uint32, copy=True)
-        wb = numpy.where(w>=0, 1, -1).astype(numpy.uint32, copy=True)
-        x, x_cdata = utils.copy_cma_ndarray(x, "unsigned int")
-        w, w_cdata = utils.copy_cma_ndarray(wb, "unsigned int")
+        wb = numpy.where(w>=0, 1, -1).astype(numpy.int32, copy=True)
+        x, x_cdata = utils.copy_cma_ndarray(x, "int")
+        w, w_cdata = utils.copy_cma_ndarray(wb, "int")
 
-        y, y_cdata = utils.malloc_cma_ndarray((x_nrows, w_nrows), "unsigned int", np.uint32)
+        y, y_cdata = utils.malloc_cma_ndarray((x_nrows, w_nrows), "int", np.int32)
         
         self.accel_fn(x.cdata, w.cdata, y.cdata, x_nrows, w_nrows, x_ncols)
 

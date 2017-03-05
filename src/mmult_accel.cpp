@@ -14,7 +14,7 @@ extern "C" { // for CFFI compiler
 #endif
 
 void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
-		inter_t in_B[A_NCOLS*B_NCOLS], outer_t* out_C, int a_nrows,
+		inter_t in_B[A_NCOLS*B_NCOLS], outer_t* out_C,
 		int b_ncols, int a_ncols) {
 #pragma HLS INLINE self
 #pragma HLS array_partition variable=in_A block factor=2
@@ -61,11 +61,10 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 				}
 
 				if (index_b < b_ncols) {
-					debug("\n");
 					debug("add = %d\n", result);
 					result = 2 * result - a_ncols; // [0,1]に戻す
 					debug("= %d (2*result-%d)\n", result, a_ncols);
-					out_C[index_a * B_NCOLS + index_b] = result;
+					out_C[index_a * b_ncols + index_b] = result;
 				}
 //			}
 
@@ -77,7 +76,7 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 #pragma SDS data copy(in_A[0:a_nrows*a_ncols])
 #pragma SDS data copy(in_B[0:a_ncols*b_ncols])
 #pragma SDS data copy(out_C[0:a_nrows*b_ncols])
-void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C, int a_nrows,
+void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C,
 		int b_ncols, int a_ncols) {
 	int i, j;
 	inter_t a_buf[A_NROWS*A_NCOLS];
@@ -93,13 +92,13 @@ void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C, int a_nrows,
 //#pragma HLS RESOURCE variable=a_buf core=RAM_2P_BRAM
 
 // Transfer matrix A from multi-buffer into local RAM
-	for (i = 0; i < a_nrows; i++) {
+//	for (i = 0; i < a_nrows; i++) {
 		for (j = 0; j < a_ncols; j++) {
 #pragma HLS PIPELINE II=1
 			//a_buf[i*a_nrows + j] = (inter_t) in_A[i * a_ncols + j];
 			a_buf[i*a_ncols + j] = (inter_t) in_A[i * a_ncols + j];
 		}
-	}
+//	}
 
 	// Transfer matrix B from multi-buffer into local RAM
 	for (i = 0; i < a_ncols; i++) {
@@ -107,12 +106,12 @@ void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C, int a_nrows,
 #pragma HLS PIPELINE II=1
 			//b_buf[i*a_ncols + j] = (inter_t) in_B[i * b_ncols + j];
 			debug("%d\n", i*b_ncols+j);
-			b_buf[i*b_ncols + j] = (inter_t) 1;
+			b_buf[i*b_ncols + j] = (inter_t) in_B[i * b_ncols + j];
 		}
 	}
 
 	// Matrix multiply call
-	mmult_kernel(a_buf, b_buf, out_C, a_nrows, b_ncols, a_ncols);
+	mmult_kernel(a_buf, b_buf, out_C, b_ncols, a_ncols);
 }
 
 #ifndef __SYNTHESIS__

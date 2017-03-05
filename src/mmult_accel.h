@@ -5,7 +5,7 @@
 extern "C" { // for CFFI compiler
 #endif
 
-typedef unsigned int outer_t;
+typedef int outer_t;
 //typedef ap_uint<8> outer_t;
 #ifdef __SYNTHESIS__
 #include <ap_int.h>
@@ -34,7 +34,7 @@ void mmult_accel (float in_A[A_NROWS*A_NCOLS],
 
 void mmult_accel (outer_t* in_A,
 		outer_t* in_B,
-		outer_t* out_C, int a_nrows, int b_ncols, int a_ncols);
+		outer_t* out_C, int b_ncols, int a_ncols);
 #endif
 
 

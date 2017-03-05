@@ -21,25 +21,37 @@ class TestBinLinear(unittest.TestCase):
 
         x_size = (1, 4)
         w_size = (2, 4)
+        x_size = (1, 784)
+        w_size = (32, 784)
+        x_size = (1, 32)
+        w_size = (10, 32)
+        x_size = (1, 4)
+        w_size = (2, 4)
 
         x = np.ones(x_size).astype(np.uint32)
         w = np.ones(w_size).astype(np.uint32)
+        xb = np.random.randint(2, size=x_size).astype(np.uint32)
+        wb = np.random.randint(2, size=w_size).astype(np.uint32)
+
+        x = np.where(xb>0, 1, -1).astype(np.int32, copy=True)
+        w = np.where(wb>0, 1, -1).astype(np.int32, copy=True)
+        print(xb)
+        print(wb)
         print(x)
         print(w)
 
         x_nrows, x_ncols = x.shape
         w_nrows, w_ncols = w.shape
 
-        y = np.zeros((w_nrows, x_nrows)).astype(np.uint32)
+        y = np.zeros((w_nrows, x_nrows)).astype(np.int32)
 
         #w_ = w.T.copy()
 
-        x_cdata = self.ffi.from_buffer(x.data)
-        w_cdata = self.ffi.from_buffer(w.T.copy().data)
+        x_cdata = self.ffi.from_buffer(xb.data)
+        w_cdata = self.ffi.from_buffer(wb.T.copy().data)
         y_cdata = self.ffi.from_buffer(y.data)
 
-        pcsim.mmult_accel(x_cdata, w_cdata, y_cdata, x_nrows, w_nrows, x_ncols)
-        #pcsim.mmult_accel(x_cdata, w_cdata, y_cdata, x_nrows, x_ncols, w_nrows)
+        pcsim.mmult_accel(x_cdata, w_cdata, y_cdata, w_nrows, x_ncols)
 
         y_ = x.dot(w.T)
 

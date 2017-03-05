@@ -16,7 +16,7 @@ class BinMmult():
         if IS_PYNQ:
             bitfile = "../pynq_chainer/HLS/bitstream.bit"
             libfile = "../pynq_chainer/HLS/src/libaccel.so"
-            self.ffi.cdef("void _Z17_p0_mmult_accel_0PjS_S_iii(unsigned int*, unsigned int*, unsigned int*, int, int, int);")
+            self.ffi.cdef("void _Z17_p0_mmult_accel_0PjS_S_iii(int*, int*, int*, int, int);")
             self.lib = self.ffi.dlopen(libfile)
             self.accel_fn = self.lib._Z17_p0_mmult_accel_0PjS_S_iii
             
