@@ -20,8 +20,7 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 #pragma HLS array_partition variable=in_A block factor=32
 #pragma HLS array_partition variable=in_B block factor=32
 
-	int index_a, index_b, index_d;
-	index_a = 0;
+	int index_b, index_d;;
     outer_t result = 0;
 
 //	for (index_a = 0; index_a < A_NROWS; index_a++) {
@@ -36,11 +35,11 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 			    //outer_t result = 0;
 				//#pragma HLS RESOURCE variable=result core=FAddSub_fulldsp
 				for (index_d = 0; index_d < A_NCOLS; index_d++) {
-#pragma HLS PIPELINE II=1
-//#pragma HLS unroll
-				    if (index_d == 0) {
-			            result = 0;
-					}
+#pragma HLS PIPELINE II=1 rewind
+#pragma HLS unroll factor=32
+//				    if (index_d == 0) {
+//			            result = 0;
+//					}
 					//inter_t product_term = ~(in_A[index_a][index_d] ^ in_B[index_d][index_b]); // XNOR
 					//int product_term = 0;
 					if (index_d < a_ncols && index_b < b_ncols) {
@@ -69,7 +68,8 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 				        	//result = 2 * result - a_ncols; // [0,1]に戻�?
 				        	result = (result << 1) - a_ncols; // [0,1]に戻�?
 				        	debug("= %d (2*result-%d)\n", result, a_ncols);
-				        	out_C[index_a * b_ncols + index_b] = result;
+				        	out_C[index_b] = result;
+				        	result = 0;
 				        }
 #endif
 
