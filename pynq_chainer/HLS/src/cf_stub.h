@@ -11,7 +11,6 @@ extern cf_request_handle_t _p0_request_1;
 extern cf_request_handle_t _p0_request_2;
 extern cf_request_handle_t _p0_request_3;
 extern cf_request_handle_t _p0_request_4;
-extern cf_request_handle_t _p0_request_5;
 
 extern size_t _p0_mmult_accel_0_num_out_C;
 

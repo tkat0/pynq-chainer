@@ -107,10 +107,9 @@ set_property -dict [ list \
   CONFIG.C_AP_OARG_0_DIM_1 {1024} \
   CONFIG.C_INPUT_SCALAR_0_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_1_WIDTH {32} \
-  CONFIG.C_INPUT_SCALAR_2_WIDTH {32} \
   CONFIG.C_N_OUTPUT_ARGS {1} \
   CONFIG.C_N_INPUT_ARGS {2} \
-  CONFIG.C_N_INPUT_SCALARS {3} \
+  CONFIG.C_N_INPUT_SCALARS {2} \
   CONFIG.C_M_AXIS_HAS_TKEEP {1} \
   CONFIG.C_M_AXIS_HAS_TSTRB {1} \
   CONFIG.C_M_AXIS_TDATA_WIDTH {64} \
@@ -184,14 +183,10 @@ connect_bd_net  \
 
 connect_bd_net  \
   [get_bd_pins /mmult_accel_0_if/ap_iscalar_0_dout] \
-  [get_bd_pins /mmult_accel_0/a_nrows] \
-
-connect_bd_net  \
-  [get_bd_pins /mmult_accel_0_if/ap_iscalar_1_dout] \
   [get_bd_pins /mmult_accel_0/b_ncols] \
 
 connect_bd_net  \
-  [get_bd_pins /mmult_accel_0_if/ap_iscalar_2_dout] \
+  [get_bd_pins /mmult_accel_0_if/ap_iscalar_1_dout] \
   [get_bd_pins /mmult_accel_0/a_ncols] \
 
 connect_bd_net  \
