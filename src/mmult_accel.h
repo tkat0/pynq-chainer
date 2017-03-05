@@ -1,6 +1,8 @@
 #ifndef MMULT_ACC_H_
 #define MMULT_ACC_H_
 
+#define __SYNTHESIS__
+
 #ifndef __SYNTHESIS__
 extern "C" { // for CFFI compiler
 #endif

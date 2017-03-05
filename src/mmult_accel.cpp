@@ -73,9 +73,9 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 }
 
 #pragma SDS data access_pattern(in_A:SEQUENTIAL, in_B:SEQUENTIAL, out_C:SEQUENTIAL)
-#pragma SDS data copy(in_A[0:a_nrows*a_ncols])
+#pragma SDS data copy(in_A[0:a_ncols])
 #pragma SDS data copy(in_B[0:a_ncols*b_ncols])
-#pragma SDS data copy(out_C[0:a_nrows*b_ncols])
+#pragma SDS data copy(out_C[0:b_ncols])
 void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C,
 		int b_ncols, int a_ncols) {
 	int i, j;
@@ -96,7 +96,7 @@ void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C,
 		for (j = 0; j < a_ncols; j++) {
 #pragma HLS PIPELINE II=1
 			//a_buf[i*a_nrows + j] = (inter_t) in_A[i * a_ncols + j];
-			a_buf[i*a_ncols + j] = (inter_t) in_A[i * a_ncols + j];
+			a_buf[j] = (inter_t) in_A[j];
 		}
 //	}
 

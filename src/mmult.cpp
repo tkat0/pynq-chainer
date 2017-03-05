@@ -14,7 +14,7 @@ int main(void) {
 	  tin2Buf = (outer_t *)sds_alloc(A_NCOLS * B_NCOLS * sizeof(float));
 	  toutBufHw = (outer_t *)sds_alloc(A_NROWS * B_NCOLS * sizeof(float));
 
-	mmult_accel(tin1Buf, tin2Buf, toutBufHw, A_NROWS, B_NCOLS, A_NCOLS);
+	mmult_accel(tin1Buf, tin2Buf, toutBufHw, B_NCOLS, A_NCOLS);
 
 	return 0;
 }
