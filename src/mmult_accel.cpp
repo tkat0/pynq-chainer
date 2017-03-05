@@ -3,6 +3,16 @@
 
 #include "mmult_accel.h"
 
+#ifndef __SYNTHESIS__
+#define debug(...) {printf(__VA_ARGS__);}
+#else
+#define debug(...) {}
+#endif
+
+#ifndef __SYNTHESIS__
+extern "C" { // for CFFI compiler
+#endif
+
 void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 		inter_t in_B[A_NCOLS*B_NCOLS], outer_t* out_C, int a_nrows,
 		int b_ncols, int a_ncols) {
@@ -21,7 +31,7 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 //#pragma HLS unroll factor = 32
 //			if (index_b < b_ncols) {
 				//ap_uint<16> result = 0;
-			int result = 0;
+			    outer_t result = 0;
 				//#pragma HLS RESOURCE variable=result core=FAddSub_fulldsp
 				for (index_d = 0; index_d < A_NCOLS; index_d++) {
 //#pragma HLS PIPELINE II=1
@@ -33,16 +43,29 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 						// so that AutoESL can infer two FP operators
 
 					    //inter_t product_term = in_A[index_a][index_d] * in_B[index_d][index_b];
-					    inter_t product_term = ~(in_A[index_a][index_d] ^ in_B[index_d][index_b]); // XNOR
+						debug("mult %x(%d), %x(%d)\n", in_A[index_d], index_d, in_B[index_d*b_ncols+index_b], index_d*b_ncols+index_b);
+						//debug("xor %x\n", in_A[index_d]^in_B[index_d*B_NCOLS+index_b]);
+						//debug("xor %x\n", in_A[index_d]^in_B[index_d*B_NCOLS+index_b]);
+						//debug("xnor %x\n", ~(in_A[index_d]^in_B[index_d*B_NCOLS+index_b]));
+#ifndef __SYNTHESIS__
+					    inter_t product_term = ~(in_A[index_d] ^ in_B[index_d*b_ncols + index_b]) & 0x1; // XNOR
+#else
+					    inter_t product_term = ~(in_A[index_d] ^ in_B[index_d*b_ncols + index_b]); // XNOR
+#endif
 
 						//#pragma HLS RESOURCE variable=product_term core=FMul_fulldsp
-						result += (int)product_term;
+						debug("= %x\n", product_term);
+						result += (outer_t)product_term;
 					}
 
 				}
 
 				if (index_b < b_ncols) {
-					out_C[index_a * B_NCOLS + index_b] = (outer_t) result;
+					debug("\n");
+					debug("add = %d\n", result);
+					result = 2 * result - a_ncols; // [0,1]に戻す
+					debug("= %d (2*result-%d)\n", result, a_ncols);
+					out_C[index_a * B_NCOLS + index_b] = result;
 				}
 //			}
 
@@ -73,7 +96,8 @@ void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C, int a_nrows,
 	for (i = 0; i < a_nrows; i++) {
 		for (j = 0; j < a_ncols; j++) {
 #pragma HLS PIPELINE II=1
-			a_buf[i*a_nrows + j] = (inter_t) in_A[i * a_ncols + j];
+			//a_buf[i*a_nrows + j] = (inter_t) in_A[i * a_ncols + j];
+			a_buf[i*a_ncols + j] = (inter_t) in_A[i * a_ncols + j];
 		}
 	}
 
@@ -81,10 +105,16 @@ void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C, int a_nrows,
 	for (i = 0; i < a_ncols; i++) {
 		for (j = 0; j < b_ncols; j++) {
 #pragma HLS PIPELINE II=1
-			b_buf[i*a_ncols + j] = (inter_t) in_B[i * b_ncols + j];
+			//b_buf[i*a_ncols + j] = (inter_t) in_B[i * b_ncols + j];
+			debug("%d\n", i*b_ncols+j);
+			b_buf[i*b_ncols + j] = (inter_t) 1;
 		}
 	}
 
 	// Matrix multiply call
 	mmult_kernel(a_buf, b_buf, out_C, a_nrows, b_ncols, a_ncols);
 }
+
+#ifndef __SYNTHESIS__
+} // extern "C"
+#endif

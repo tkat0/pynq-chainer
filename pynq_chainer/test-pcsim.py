@@ -5,6 +5,53 @@ import numpy as np
 
 import pcsim
 
+class TestBinLinear(unittest.TestCase):
+    def setUp(self):
+        self.ffi = cffi.FFI()
+
+    def test_mmult(self):
+        x_size = (1, 784)
+        w_size = (32, 784)
+
+        x_size = (1, 32)
+        w_size = (32, 32)
+
+        x_size = (1, 32)
+        w_size = (10, 32)
+
+        x_size = (1, 4)
+        w_size = (2, 4)
+
+        x = np.ones(x_size).astype(np.uint32)
+        w = np.ones(w_size).astype(np.uint32)
+        print(x)
+        print(w)
+
+        x_nrows, x_ncols = x.shape
+        w_nrows, w_ncols = w.shape
+
+        y = np.zeros((w_nrows, x_nrows)).astype(np.uint32)
+
+        #w_ = w.T.copy()
+
+        x_cdata = self.ffi.from_buffer(x.data)
+        w_cdata = self.ffi.from_buffer(w.T.copy().data)
+        y_cdata = self.ffi.from_buffer(y.data)
+
+        pcsim.mmult_accel(x_cdata, w_cdata, y_cdata, x_nrows, w_nrows, x_ncols)
+        #pcsim.mmult_accel(x_cdata, w_cdata, y_cdata, x_nrows, x_ncols, w_nrows)
+
+        y_ = x.dot(w.T)
+
+        print("Actual(C):")
+        y = y.T
+        print(y)
+        print("Expected(NumPy):")
+        print(y_)
+
+        self.assertTrue(np.allclose(y, y_, rtol=1e-04, atol=1e-04))
+
+"""
 class TestLinear(unittest.TestCase):
     def setUp(self):
         self.ffi = cffi.FFI()
@@ -21,8 +68,10 @@ class TestLinear(unittest.TestCase):
 
         x_size = (1, 784)
         w_size = (32, 784)
+
         x = np.random.uniform(-1, 1, x_size).astype(np.float32)
         w = np.random.uniform(-1, 1, w_size).astype(np.float32)
+
         #x = np.ones(x_size).astype(np.float32)
         #w = np.ones(w_size).astype(np.float32)
 
@@ -48,8 +97,7 @@ class TestLinear(unittest.TestCase):
         print(y_)
 
         self.assertTrue(np.allclose(y, y_, rtol=1e-04, atol=1e-04))
-
-"""
+        
 class Test(unittest.TestCase):
     def setUp(self):
         self.ffi = cffi.FFI()

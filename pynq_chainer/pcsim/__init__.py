@@ -4,8 +4,8 @@ import cffi
 
 def _load_pcsim():
     ffi = cffi.FFI()
-    #ffi.cdef("int mmult_accel1(float*, float*, float*, int, int, int);")
-    ffi.cdef("int mmult_accel(float*, float*, float*, int, int, int);")
+    #ffi.cdef("void mmult_accel(float*, float*, float*, int, int, int);")
+    ffi.cdef("void mmult_accel(unsigned int*, unsigned int*, unsigned int*, int, int, int);")
     C = ffi.dlopen(CURRENT_DIR + "/mmult_accel.so")
     return C.mmult_accel
 

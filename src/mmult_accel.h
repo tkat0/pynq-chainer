@@ -1,14 +1,19 @@
 #ifndef MMULT_ACC_H_
 #define MMULT_ACC_H_
 
+#ifndef __SYNTHESIS__
+extern "C" { // for CFFI compiler
+#endif
 
+typedef unsigned int outer_t;
+//typedef ap_uint<8> outer_t;
+#ifdef __SYNTHESIS__
 #include <ap_int.h>
 
-
-//typedef ap_uint<8> outer_t;
-typedef unsigned int outer_t;
 typedef ap_uint<1> inter_t;
-
+#else
+typedef unsigned int inter_t;
+#endif
 //typedef ap_uint<8> index_t;
 //typedef int index_t;
 
@@ -33,5 +38,8 @@ void mmult_accel (outer_t* in_A,
 #endif
 
 
+#ifndef __SYNTHESIS__
+} // extern "C"
+#endif
 
 #endif /* MMULT_ACC_H_ */
