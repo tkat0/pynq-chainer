@@ -28,7 +28,7 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 //		if (index_a > a_nrows-1)
 //			break;
 		for (index_b = 0; index_b < B_NCOLS; index_b++) {
-#pragma HLS unroll factor = 64  // 128: ERROR: [SDSoC 0-0] Hardware function 'mmult_accel' LUT resource requirement (58290) exceeds platform 'pynq' resource capacity (53200)
+//#pragma HLS unroll factor = 64  // 128: ERROR: [SDSoC 0-0] Hardware function 'mmult_accel' LUT resource requirement (58290) exceeds platform 'pynq' resource capacity (53200)
 //#pragma HLS PIPELINE II=1 // XXX hlsおわらな�?
 
 //			if (index_b < b_ncols) {
@@ -36,7 +36,7 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 			    //outer_t result = 0;
 				//#pragma HLS RESOURCE variable=result core=FAddSub_fulldsp
 				for (index_d = 0; index_d < A_NCOLS; index_d++) {
-//#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1
 //#pragma HLS unroll
 				    if (index_d == 0) {
 			            result = 0;
