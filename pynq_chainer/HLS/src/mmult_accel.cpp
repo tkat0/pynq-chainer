@@ -24,7 +24,7 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 			int result = 0;
 				//#pragma HLS RESOURCE variable=result core=FAddSub_fulldsp
 				for (index_d = 0; index_d < A_NCOLS; index_d++) {
-//#pragma HLS PIPELINE II=1
+#pragma HLS PIPELINE II=1
 //#pragma HLS unroll
 					//inter_t product_term = ~(in_A[index_a][index_d] ^ in_B[index_d][index_b]); // XNOR
 					//int product_term = 0;
