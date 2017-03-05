@@ -27,5 +27,5 @@ class BinMmult():
         else:
             self.accel_fn = pcsim.mmult_accel
     
-    def __call__(self, x_cdata, w_cdata, y_cdata, x_nrows, w_nrows, xw_ncols):
-        self.accel_fn(x_cdata, w_cdata, y_cdata, x_nrows, w_nrows, xw_ncols)
+    def __call__(self, x_cdata, w_cdata, y_cdata, w_nrows, xw_ncols):
+        self.accel_fn(x_cdata, w_cdata, y_cdata, w_nrows, xw_ncols)
