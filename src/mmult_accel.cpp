@@ -19,13 +19,14 @@ extern "C" { // for CFFI compiler
 #pragma SDS data copy(h[0:n_h])
 void binary_connect(outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], uint16_t n_x, uint16_t n_h) {
 //#pragma HLS dataflow
-
 	static inter_t bram_x[MAX_X];
 	static inter_t bram_h[MAX_H];
 	static inter_t bram_w[MAX_H*MAX_X];
 #pragma HLS array_partition variable=bram_x complete
 #pragma HLS array_partition variable=bram_h complete
 #pragma HLS array_partition variable=bram_w cyclic factor=32
+
+	debug("[%s] n_x: %d(max:%d), n_h: %d(max:%d)\n", __func__, n_x, MAX_X, n_h, MAX_H);
 
 	uint16_t i,j;
 
@@ -36,10 +37,11 @@ void binary_connect(outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], 
 	}
 
 	// read to cache w
-	READ_W_LOOP:for (j=0; j < n_h; j++) {
-		for (i=0; i < n_x; i++) {
+	READ_W_LOOP:for (i=0; i < n_x; i++) {
+		for (j=0; j < n_h; j++) {
 #pragma HLS PIPELINE II=1
-			bram_w[j*n_x + i] = (inter_t) w[j*n_x + i];
+			bram_w[i*n_h + j] = (inter_t) w[i*n_h + j];
+			debug("[%s] %d: %d\n", __func__, i*n_h+j, bram_w[i*n_h + j]);
 		}
 	}
 
@@ -47,13 +49,14 @@ void binary_connect(outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], 
 	
 	// XNOR mmult
 	XNOR_LOOP:for (i=0; i < MAX_X; i++) {
-		if (i > n_x)
+		if (i >= n_x)
 			break;
 		for (j=0; j < MAX_H; j++) {
 #pragma HLS unroll factor=32
-			if (j > n_h)
+			if (j >= n_h)
 				break;
-			inter_t product_term = ~(x[i] ^ w[j*n_h + i]) & 0x1; // XNOR
+			inter_t product_term = ~(x[i] ^ w[i*n_h + j]) & 0x1; // XNOR
+			debug("[%s] %d, xnor %d: %d\n", __func__, i, i*n_h+j, w[i*n_h + j]);
 			bram_h[j] += product_term;
 		}
 	}
@@ -61,16 +64,19 @@ void binary_connect(outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], 
 	// to [0, 1]
 	POST_LOOP:for (j=0; j < MAX_H; j++) {
 #pragma HLS unroll
-		if (j > n_h)
-			bram_h[j] = (bram_h[j] << 1) - n_h;
+		if (j >= n_h)
+			break;
+		debug("[%s] h[%d]: %d\n", __func__, j, bram_h[j]);
+		bram_h[j] = (bram_h[j] << 1) - n_x;
 	}
 
 	////////////////////////////////////////
 
 	// write to dram
-	WRITE_H_LOOP:for (i=0; j < n_h; i++) {
+	WRITE_H_LOOP:for (i=0; i < n_h; i++) {
 #pragma HLS PIPELINE II=1
 		h[i] = (outer_t) bram_h[i];
+		debug("[%s] %d\n", __func__, bram_h[i]);
 	}
 
 }

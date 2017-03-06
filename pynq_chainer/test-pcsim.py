@@ -25,8 +25,6 @@ class TestBinLinear(unittest.TestCase):
         w_size = (32, 784)
         x_size = (1, 32)
         w_size = (10, 32)
-        x_size = (1, 4)
-        w_size = (2, 4)
 
         x = np.ones(x_size).astype(np.uint32)
         w = np.ones(w_size).astype(np.uint32)
@@ -51,7 +49,8 @@ class TestBinLinear(unittest.TestCase):
         w_cdata = self.ffi.from_buffer(wb.T.copy().data)
         y_cdata = self.ffi.from_buffer(y.data)
 
-        pcsim.mmult_accel(x_cdata, w_cdata, y_cdata, w_nrows, x_ncols)
+        #pcsim.mmult_accel(x_cdata, w_cdata, y_cdata, w_nrows, x_ncols)
+        pcsim.mmult_accel(x_cdata, w_cdata, y_cdata, x_ncols, w_nrows)
 
         y_ = x.dot(w.T)
 
