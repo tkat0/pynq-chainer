@@ -7,6 +7,7 @@ cf_request_handle_t _p0_request_1;
 cf_request_handle_t _p0_request_2;
 cf_request_handle_t _p0_request_3;
 cf_request_handle_t _p0_request_4;
+cf_request_handle_t _p0_request_5;
 
 size_t _p0_binary_connect_0_num_h;
 

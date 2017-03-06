@@ -13,30 +13,31 @@
 extern "C" { // for CFFI compiler
 #endif
 
-void init(inter_t bram_w[MAX_H*MAX_X], outer_t w[MAX_H*MAX_X], uint16_t n_x, uint16_t n_h) {
+void init(inter_t bram_w[MAX_H][MAX_X], outer_t w[MAX_H*MAX_X], uint16_t n_x, uint16_t n_h) {
 #pragma HLS INLINE self
 #pragma HLS dataflow
-#pragma HLS array_partition variable=bram_w cyclic factor=32
+#pragma HLS array_partition variable=bram_w cyclic factor=16 dim=1
 	// init weight for complete loop
 
 	uint16_t i,j;
 
 	// read to cache w
-	for (i=0; i < MAX_X; i++) {
+
 		for (j=0; j < MAX_H; j++) {
+			for (i=0; i < MAX_X; i++) {
 #pragma HLS PIPELINE II=1
 			debug("[%s] bram_w init [%d]\n", __func__, i*n_h + j);
 			if (i < n_x && j < n_h) {
-				bram_w[i*n_h + j] = (inter_t) w[i*n_h + j];
+				bram_w[j][i] = (inter_t) w[j*n_x + i] & 0x1;
 			} else {
-				bram_w[i*n_h + j] = (inter_t) 0;
+				bram_w[j][i] = (inter_t) 0;
 			}
 		}
 	}
 
 }
 
-void xnor_mult(inter_t bram_w[MAX_H*MAX_X], outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], uint16_t n_x, uint16_t n_h) {
+void xnor_mult(inter_t bram_w[MAX_H][MAX_X], outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], uint16_t n_x, uint16_t n_h) {
 #pragma HLS INLINE self
 
 	static inter_t bram_x[MAX_X];
@@ -58,10 +59,12 @@ void xnor_mult(inter_t bram_w[MAX_H*MAX_X], outer_t x[MAX_X], outer_t w[MAX_H*MA
 
 	///
 	// init outbuf
+#if 0
 	for (j=0; j < MAX_H; j++) {
 #pragma HLS unroll
 		bram_h[j] = (inter_t) 0;
 	}
+#endif
 	///
 
 	////////////////////////////////////////
@@ -71,9 +74,9 @@ void xnor_mult(inter_t bram_w[MAX_H*MAX_X], outer_t x[MAX_X], outer_t w[MAX_H*MA
 		if (i >= n_x)
 			break;
 		for (j=0; j < MAX_H; j++) {
-#pragma HLS unroll factor=32
-			inter_t product_term = ~(bram_x[i] ^ bram_w[i*n_h + j]) & 0x1; // XNOR
-			debug("[%s] %d, xnor %d: %d\n", __func__, i, i*n_h+j, bram_w[i*n_h + j]);
+#pragma HLS unroll factor=16
+			inter_t product_term = ~(bram_x[i] ^ bram_w[j][i]) & 0x1; // XNOR
+			debug("[%s] %d,%d, xnor %d\n", __func__, j,i, bram_w[j][i]);
 			bram_h[j] += product_term;
 		}
 	}
@@ -97,12 +100,15 @@ void xnor_mult(inter_t bram_w[MAX_H*MAX_X], outer_t x[MAX_X], outer_t w[MAX_H*MA
 #pragma SDS data copy(x[0:n_x])
 #pragma SDS data copy(w[0:n_h*n_x])
 #pragma SDS data copy(h[0:n_h])
-void binary_connect(outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], uint16_t n_x, uint16_t n_h) {
+void binary_connect(uint16_t op, outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], uint16_t n_x, uint16_t n_h) {
 #pragma HLS INLINE self
-	static inter_t bram_w[MAX_H*MAX_X];
+	static inter_t bram_w[MAX_H][MAX_X];
 
-	init(bram_w, w, n_x, n_h);
-	xnor_mult(bram_w, x, w, h, n_x, n_h);
+	if (op == 0)
+		init(bram_w, w, n_x, n_h);
+
+	if (op == 1)
+		xnor_mult(bram_w, x, w, h, n_x, n_h);
 }
 
 
@@ -122,7 +128,7 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 //			break;
 		for (index_b = 0; index_b < B_NCOLS; index_b++) {
 //#pragma HLS unroll factor = 64  // 128: ERROR: [SDSoC 0-0] Hardware function 'mmult_accel' LUT resource requirement (58290) exceeds platform 'pynq' resource capacity (53200)
-//#pragma HLS PIPELINE II=1 // XXX hlsç¸ºç¿«???¿½?¿½??¿½?¿½ç¹§å³¨â†‘ï¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?
+//#pragma HLS PIPELINE II=1 // XXX hlsç¸ºç¿«????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½ç¹§å³¨â†‘ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?
 
 //			if (index_b < b_ncols) {
 				//ap_uint<16> result = 0;
@@ -159,8 +165,8 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 				        if (index_d == a_ncols-1) {
 							// last time 
 				        	debug("add = %d\n", result);
-				        	//result = 2 * result - a_ncols; // [0,1]ç¸º???¿½?¿½??¿½?¿½è¬Œï½»???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?
-				        	result = (result << 1) - a_ncols; // [0,1]ç¸º???¿½?¿½??¿½?¿½è¬Œï½»???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?
+				        	//result = 2 * result - a_ncols; // [0,1]ç¸º????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½è¬Œï½»????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?
+				        	result = (result << 1) - a_ncols; // [0,1]ç¸º????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½è¬Œï½»????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?
 				        	debug("= %d (2*result-%d)\n", result, a_ncols);
 				        	out_C[index_b] = result;
 				        	result = 0;
@@ -169,15 +175,15 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 
 					}
 
-					// ç¸º??¿½?¿½????¿½?¿½??¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?ç¸º???¿½?¿½??¿½?¿½ç¸ºè–™ï¿½?ç¸º???¿½?¿½??¿½?¿½éœ‘ï½½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?
+					// ç¸º???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?ç¸º????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½ç¸ºè–™ï¿½?ç¸º????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½éœ‘ï½½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?
 
 				}
 
 #if 0
 				if (index_b < b_ncols) {
 					debug("add = %d\n", result);
-					//result = 2 * result - a_ncols; // [0,1]ç¸º???¿½?¿½??¿½?¿½è¬Œï½»???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?
-					result = (result << 1) - a_ncols; // [0,1]ç¸º???¿½?¿½??¿½?¿½è¬Œï½»???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?
+					//result = 2 * result - a_ncols; // [0,1]ç¸º????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½è¬Œï½»????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?
+					result = (result << 1) - a_ncols; // [0,1]ç¸º????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½è¬Œï½»????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?
 					debug("= %d (2*result-%d)\n", result, a_ncols);
 					out_C[index_a * b_ncols + index_b] = result;
 				}

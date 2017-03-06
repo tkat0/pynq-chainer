@@ -13,19 +13,40 @@
 extern "C" { // for CFFI compiler
 #endif
 
-#pragma SDS data access_pattern(x:SEQUENTIAL, w:SEQUENTIAL, h:SEQUENTIAL)
-#pragma SDS data copy(x[0:n_x])
-#pragma SDS data copy(w[0:n_h*n_x])
-#pragma SDS data copy(h[0:n_h])
-void binary_connect(outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], uint16_t n_x, uint16_t n_h) {
-//#pragma HLS dataflow
+void init(inter_t bram_w[MAX_H][MAX_X], outer_t w[MAX_H*MAX_X], uint16_t n_x, uint16_t n_h) {
+#pragma HLS INLINE self
+#pragma HLS dataflow
+#pragma HLS array_partition variable=bram_w cyclic factor=16 dim=1
+	// init weight for complete loop
+
+	uint16_t i,j;
+
+	// read to cache w
+
+		for (j=0; j < MAX_H; j++) {
+			for (i=0; i < MAX_X; i++) {
+#pragma HLS PIPELINE II=1
+			debug("[%s] bram_w init [%d]\n", __func__, i*n_h + j);
+			if (i < n_x && j < n_h) {
+				bram_w[j][i] = (inter_t) w[j*n_x + i] & 0x1;
+			} else {
+				bram_w[j][i] = (inter_t) 0;
+			}
+		}
+	}
+
+}
+
+void xnor_mult(inter_t bram_w[MAX_H][MAX_X], outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], uint16_t n_x, uint16_t n_h) {
+#pragma HLS INLINE self
 
 	static inter_t bram_x[MAX_X];
 	static inter_t bram_h[MAX_H];
-	static inter_t bram_w[MAX_H*MAX_X];
 #pragma HLS array_partition variable=bram_x complete
 #pragma HLS array_partition variable=bram_h complete
-#pragma HLS array_partition variable=bram_w cyclic factor=32
+
+
+	debug("[%s] n_x: %d(max:%d), n_h: %d(max:%d)\n", __func__, n_x, MAX_X, n_h, MAX_H);
 
 	uint16_t i,j;
 
@@ -33,57 +54,72 @@ void binary_connect(outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], 
 	READ_X_LOOP:for (i=0; i < n_x; i++) {
 #pragma HLS PIPELINE II=1
 		bram_x[i] = (inter_t) x[i];
+		// TODO relu
 	}
 
-	// read to cache w
-	READ_W_LOOP:for (j=0; j < n_h; j++) {
-		for (i=0; i < n_x; i++) {
-#pragma HLS PIPELINE II=1
-			bram_w[j*n_x + i] = (inter_t) w[j*n_x + i];
-		}
+	///
+	// init outbuf
+#if 0
+	for (j=0; j < MAX_H; j++) {
+#pragma HLS unroll
+		bram_h[j] = (inter_t) 0;
 	}
+#endif
+	///
 
 	////////////////////////////////////////
 	
 	// XNOR mmult
 	XNOR_LOOP:for (i=0; i < MAX_X; i++) {
-		if (i > n_x)
+		if (i >= n_x)
 			break;
 		for (j=0; j < MAX_H; j++) {
-#pragma HLS unroll factor=32
-			if (j > n_h)
-				break;
-			inter_t product_term = ~(x[i] ^ w[j*n_h + i]) & 0x1; // XNOR
+#pragma HLS unroll factor=16
+			inter_t product_term = ~(bram_x[i] ^ bram_w[j][i]) & 0x1; // XNOR
+			debug("[%s] %d,%d, xnor %d\n", __func__, j,i, bram_w[j][i]);
 			bram_h[j] += product_term;
 		}
-	}
-
-	// to [0, 1]
-	POST_LOOP:for (j=0; j < MAX_H; j++) {
-#pragma HLS unroll
-		if (j > n_h)
-			bram_h[j] = (bram_h[j] << 1) - n_h;
 	}
 
 	////////////////////////////////////////
 
 	// write to dram
-	WRITE_H_LOOP:for (i=0; j < n_h; i++) {
+	// to [0, 1]
+	WRITE_H_LOOP:for (i=0; i < n_h; i++) {
 #pragma HLS PIPELINE II=1
-		h[i] = (outer_t) bram_h[i];
+		h[i] = (outer_t) ((bram_h[i] << 1) - n_x);
+		debug("[%s] %d\n", __func__, h[i]);
 	}
 
+}
+
+#pragma SDS data sys_port(x:AFI)
+#pragma SDS data sys_port(w:AFI)
+#pragma SDS data sys_port(h:AFI)
+#pragma SDS data access_pattern(x:SEQUENTIAL, w:SEQUENTIAL, h:SEQUENTIAL)
+#pragma SDS data copy(x[0:n_x])
+#pragma SDS data copy(w[0:n_h*n_x])
+#pragma SDS data copy(h[0:n_h])
+void binary_connect(uint16_t op, outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], uint16_t n_x, uint16_t n_h) {
+#pragma HLS INLINE self
+	static inter_t bram_w[MAX_H][MAX_X];
+
+	if (op == 0)
+		init(bram_w, w, n_x, n_h);
+
+	if (op == 1)
+		xnor_mult(bram_w, x, w, h, n_x, n_h);
 }
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "cf_stub.h"
-void _p0_binary_connect_0(outer_t x[32], outer_t w[1024], outer_t h[32], uint16_t n_x, uint16_t n_h);
-void _p0_binary_connect_0(outer_t x[32], outer_t w[1024], outer_t h[32], uint16_t n_x, uint16_t n_h)
+void _p0_binary_connect_0(uint16_t op, outer_t x[32], outer_t w[1024], outer_t h[32], uint16_t n_x, uint16_t n_h);
+void _p0_binary_connect_0(uint16_t op, outer_t x[32], outer_t w[1024], outer_t h[32], uint16_t n_x, uint16_t n_h)
 {
   switch_to_next_partition(0);
   int start_seq[3];
-  start_seq[0] = 0x00000300;
+  start_seq[0] = 0x00000700;
   start_seq[1] = 0x00010000;
   start_seq[2] = 0x00020000;
   cf_request_handle_t _p0_swinst_binary_connect_0_cmd;
@@ -100,19 +136,23 @@ void _p0_binary_connect_0(outer_t x[32], outer_t w[1024], outer_t h[32], uint16_
     printf("h of function binary_connect transfer size is different from declared size, system may hang!\n");
 #endif
 
-  cf_send_i(&(_p0_swinst_binary_connect_0.x), x, (n_x) * 4, &_p0_request_0);
-  cf_send_i(&(_p0_swinst_binary_connect_0.w), w, (n_h*n_x) * 4, &_p0_request_1);
-  cf_send_i(&(_p0_swinst_binary_connect_0.n_x), &n_x, 2, &_p0_request_3);
-  cf_send_i(&(_p0_swinst_binary_connect_0.n_h), &n_h, 2, &_p0_request_4);
+  cf_send_i(&(_p0_swinst_binary_connect_0.op), &op, 2, &_p0_request_0);
+  cf_send_i(&(_p0_swinst_binary_connect_0.x), x, (n_x) * 4, &_p0_request_1);
+  cf_send_i(&(_p0_swinst_binary_connect_0.w), w, (n_h*n_x) * 4, &_p0_request_2);
+  cf_send_i(&(_p0_swinst_binary_connect_0.n_x), &n_x, 2, &_p0_request_4);
+  cf_send_i(&(_p0_swinst_binary_connect_0.n_h), &n_h, 2, &_p0_request_5);
 
-  cf_receive_i(&(_p0_swinst_binary_connect_0.h), h, (n_h) * 4, &_p0_binary_connect_0_num_h, &_p0_request_2);
+  cf_receive_i(&(_p0_swinst_binary_connect_0.h), h, (n_h) * 4, &_p0_binary_connect_0_num_h, &_p0_request_3);
 
   cf_wait(_p0_request_0);
   cf_wait(_p0_request_1);
   cf_wait(_p0_request_2);
   cf_wait(_p0_request_3);
   cf_wait(_p0_request_4);
+  cf_wait(_p0_request_5);
 }
+
+
 
 
 
@@ -131,7 +171,7 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 //			break;
 		for (index_b = 0; index_b < B_NCOLS; index_b++) {
 //#pragma HLS unroll factor = 64  // 128: ERROR: [SDSoC 0-0] Hardware function 'mmult_accel' LUT resource requirement (58290) exceeds platform 'pynq' resource capacity (53200)
-//#pragma HLS PIPELINE II=1 // XXX hlsç¸ºç¿«?½ç¹§å³¨â†‘ï¿½?½¿?½½?
+//#pragma HLS PIPELINE II=1 // XXX hlsç¸ºç¿«????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½ç¹§å³¨â†‘ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?
 
 //			if (index_b < b_ncols) {
 				//ap_uint<16> result = 0;
@@ -168,8 +208,8 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 				        if (index_d == a_ncols-1) {
 							// last time 
 				        	debug("add = %d\n", result);
-				        	//result = 2 * result - a_ncols; // [0,1]ç¸º?½«è¬Œï½»?¿½?½¿?½½?
-				        	result = (result << 1) - a_ncols; // [0,1]ç¸º?½«è¬Œï½»?¿½?½¿?½½?
+				        	//result = 2 * result - a_ncols; // [0,1]ç¸º????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½è¬Œï½»????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?
+				        	result = (result << 1) - a_ncols; // [0,1]ç¸º????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½è¬Œï½»????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?
 				        	debug("= %d (2*result-%d)\n", result, a_ncols);
 				        	out_C[index_b] = result;
 				        	result = 0;
@@ -178,15 +218,15 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 
 					}
 
-					// ç¸ºã‚??½‹ï¿½?½¿?½½?ç¸º?½¯ç¸ºè–™ï¼?ç¸º?½«éœ‘ï½½?¿½?½¿?½½?
+					// ç¸º???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?ç¸º????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½ç¸ºè–™ï¿½?ç¸º????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½éœ‘ï½½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?
 
 				}
 
 #if 0
 				if (index_b < b_ncols) {
 					debug("add = %d\n", result);
-					//result = 2 * result - a_ncols; // [0,1]ç¸º?½«è¬Œï½»?¿½?½¿?½½?
-					result = (result << 1) - a_ncols; // [0,1]ç¸º?½«è¬Œï½»?¿½?½¿?½½?
+					//result = 2 * result - a_ncols; // [0,1]ç¸º????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½è¬Œï½»????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?
+					result = (result << 1) - a_ncols; // [0,1]ç¸º????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½è¬Œï½»????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½????ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½???ï¿½ï¿½?ï¿½ï¿½??ï¿½ï¿½?ï¿½ï¿½?
 					debug("= %d (2*result-%d)\n", result, a_ncols);
 					out_C[index_a * b_ncols + index_b] = result;
 				}

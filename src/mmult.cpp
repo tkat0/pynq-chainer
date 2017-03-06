@@ -14,7 +14,8 @@ int main_bin(void) {
 	tin2Buf = (outer_t *)sds_alloc(MAX_H * MAX_X * sizeof(outer_t));
 	toutBufHw = (outer_t *)sds_alloc(MAX_H * sizeof(outer_t));
 
-	binary_connect(tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_H);
+	binary_connect(0, tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_H);
+	binary_connect(1, tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_H);
 
 	return 0;
 }

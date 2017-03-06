@@ -7,6 +7,7 @@ extern "C" {
 
 struct _p0_swblk_binary_connect {
   cf_port_send_t cmd_binary_connect;
+  cf_port_send_t op;
   cf_port_send_t x;
   cf_port_send_t w;
   cf_port_receive_t h;

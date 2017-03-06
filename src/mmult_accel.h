@@ -41,9 +41,10 @@ void mmult_accel (outer_t* in_A,
 		outer_t* in_B,
 		outer_t* out_C, int b_ncols, int a_ncols);
 
-#define MAX_X 1024
-#define MAX_H 1024
-void binary_connect (outer_t* x, outer_t* w, outer_t* h, 
+#define MAX_X 32
+#define MAX_H 32
+
+void binary_connect (uint16_t op, outer_t* x, outer_t* w, outer_t* h,
 		uint16_t n_x, uint16_t n_h);
 #endif
 

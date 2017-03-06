@@ -22,37 +22,47 @@ axi_lite_info_t _p0_swinst_binary_connect_0_cmd_binary_connect_info = {
   .reg_name = "0x28"
 };
 
+axi_lite_info_t _p0_swinst_binary_connect_0_op_info = {
+  .accel_info = &_sds__p0_binary_connect_0,
+  .reg_name = "0x80"
+};
+
 axi_dma_simple_channel_info_t _p0_swinst_binary_connect_0_x_info = {
   .dma_info = &_p0_dm_1,
   .in_use = 0,
-  .needs_cache_flush_invalidate = 0
+  .needs_cache_flush_invalidate = 1
 };
 
 axi_dma_simple_channel_info_t _p0_swinst_binary_connect_0_w_info = {
   .dma_info = &_p0_dm_0,
   .in_use = 0,
-  .needs_cache_flush_invalidate = 0
+  .needs_cache_flush_invalidate = 1
 };
 
 axi_dma_simple_channel_info_t _p0_swinst_binary_connect_0_h_info = {
   .dma_info = &_p0_dm_2,
   .in_use = 0,
-  .needs_cache_flush_invalidate = 0
+  .needs_cache_flush_invalidate = 1
 };
 
 axi_lite_info_t _p0_swinst_binary_connect_0_n_x_info = {
   .accel_info = &_sds__p0_binary_connect_0,
-  .reg_name = "0x80"
+  .reg_name = "0x84"
 };
 
 axi_lite_info_t _p0_swinst_binary_connect_0_n_h_info = {
   .accel_info = &_sds__p0_binary_connect_0,
-  .reg_name = "0x84"
+  .reg_name = "0x88"
 };
 
 struct _p0_swblk_binary_connect _p0_swinst_binary_connect_0 = {
   .cmd_binary_connect = { .base = { 
 		.channel_info = &_p0_swinst_binary_connect_0_cmd_binary_connect_info, 
+		.open_i = &axi_lite_open, 
+		.close_i = &axi_lite_close },
+		.send_i = &axi_lite_send },
+  .op = { .base = { 
+		.channel_info = &_p0_swinst_binary_connect_0_op_info, 
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
 		.send_i = &axi_lite_send },
@@ -97,6 +107,7 @@ void _p0_cf_framework_open(int first)
   cf_get_current_context();
   accel_open(&_sds__p0_binary_connect_0);
   _p0_cf_open_port( &_p0_swinst_binary_connect_0.cmd_binary_connect.base );
+  _p0_cf_open_port( &_p0_swinst_binary_connect_0.op.base );
   _p0_cf_open_port( &_p0_swinst_binary_connect_0.x.base );
   _p0_cf_open_port( &_p0_swinst_binary_connect_0.w.base );
   _p0_cf_open_port( &_p0_swinst_binary_connect_0.h.base );
@@ -107,6 +118,7 @@ void _p0_cf_framework_open(int first)
 void _p0_cf_framework_close(int last)
 {
   cf_close_i( &_p0_swinst_binary_connect_0.cmd_binary_connect, NULL);
+  cf_close_i( &_p0_swinst_binary_connect_0.op, NULL);
   cf_close_i( &_p0_swinst_binary_connect_0.x, NULL);
   cf_close_i( &_p0_swinst_binary_connect_0.w, NULL);
   cf_close_i( &_p0_swinst_binary_connect_0.h, NULL);
