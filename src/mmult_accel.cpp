@@ -13,6 +13,66 @@
 extern "C" { // for CFFI compiler
 #endif
 
+#pragma SDS data access_pattern(x:SEQUENTIAL, w:SEQUENTIAL, h:SEQUENTIAL)
+#pragma SDS data copy(x[0:n_i])
+#pragma SDS data copy(w[0:n_w*n_i])
+#pragma SDS data copy(h[0:n_h])
+void binary_connect(outer_t_t x[MAX_X], outer_t w[MAX_W*MAX_X], outer_t h[MAX_H], uint16_t n_x, uint16_t n_w, uint16_t n_h) {
+#pragma dataflow
+
+	static inter_t bram_x[MAX_X];
+	static inter_t bram_h[MAX_H];
+	static inter_t bram_w[MAX_W*MAX_X];
+#pragma HLS array_partition variable=bram_x complete
+#pragma HLS array_partition variable=bram_y complete
+#pragma HLS array_partition variable=bram_w cyclic factor=32
+
+	uint16_t i,j;
+
+	// read to cache x
+	for (i=0; j < n_x; i++) {
+#pragma HLS PIPELINE II=1
+		bram_x[i] = (inter_t) x[i];
+	}
+
+	// read to cache w
+	for (j=0; j < n_w; j++) {
+		for (i=0; j < n_x; i++) {
+#pragma HLS PIPELINE II=1
+			bram_w[j][i] = (inter_t) w[j*n_x + i];
+	}
+
+	////////////////////////////////////////
+	
+	// XNOR mmult
+	for (i=0; i < MAX_X; i++) {
+		if (i > n_x)
+			break;
+		for (j=0; j < MAX_H; j++) {
+#pragma HLS unroll factor=32
+			if (j > n_w)
+				break;
+			inter_t product_term = ~(x[i] ^ w[j*MAX_H + i]) & 0x1; // XNOR
+			bram_h[j] += product_term;
+		}
+	}
+
+	// to [0, 1]
+	for (j=0; j < MAX_H; j++) {
+#pragma HLS unroll
+		bram_h[j] = (bram_h[j] << 1) - n_h;
+	}
+
+	////////////////////////////////////////
+
+	// read to cache
+	for (i=0; j < n_h; i++) {
+#pragma HLS PIPELINE II=1
+		h[i] = (outer_t) bram_h[i];
+	}
+
+}
+
 void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 		inter_t in_B[A_NCOLS*B_NCOLS], outer_t* out_C,
 		int b_ncols, int a_ncols) {

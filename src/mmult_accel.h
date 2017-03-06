@@ -1,7 +1,7 @@
 #ifndef MMULT_ACC_H_
 #define MMULT_ACC_H_
 
-#define __SYNTHESIS__
+//#define __SYNTHESIS__
 
 #ifndef __SYNTHESIS__
 extern "C" { // for CFFI compiler
@@ -37,6 +37,12 @@ void mmult_accel (float in_A[A_NROWS*A_NCOLS],
 void mmult_accel (outer_t* in_A,
 		outer_t* in_B,
 		outer_t* out_C, int b_ncols, int a_ncols);
+
+#define MAX_X 32
+#define MAX_W 32
+#define MAX_H 32
+void binary_connect (outer_t* x, outer_t* w, outer_t* h, 
+		uint16_t n_in, uint16_t n_w, uint16_t n_h);
 #endif
 
 
