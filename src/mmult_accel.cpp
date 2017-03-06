@@ -13,18 +13,37 @@
 extern "C" { // for CFFI compiler
 #endif
 
-#pragma SDS data access_pattern(x:SEQUENTIAL, w:SEQUENTIAL, h:SEQUENTIAL)
-#pragma SDS data copy(x[0:n_x])
-#pragma SDS data copy(w[0:n_h*n_x])
-#pragma SDS data copy(h[0:n_h])
-void binary_connect(outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], uint16_t n_x, uint16_t n_h) {
-//#pragma HLS dataflow
+void init(inter_t bram_w[MAX_H*MAX_X], outer_t w[MAX_H*MAX_X], uint16_t n_x, uint16_t n_h) {
+#pragma HLS INLINE self
+#pragma HLS dataflow
+#pragma HLS array_partition variable=bram_w cyclic factor=32
+	// init weight for complete loop
+
+	uint16_t i,j;
+
+	// read to cache w
+	for (i=0; i < MAX_X; i++) {
+		for (j=0; j < MAX_H; j++) {
+#pragma HLS PIPELINE II=1
+			debug("[%s] bram_w init [%d]\n", __func__, i*n_h + j);
+			if (i < n_x && j < n_h) {
+				bram_w[i*n_h + j] = (inter_t) w[i*n_h + j];
+			} else {
+				bram_w[i*n_h + j] = (inter_t) 0;
+			}
+		}
+	}
+
+}
+
+void xnor_mult(inter_t bram_w[MAX_H*MAX_X], outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], uint16_t n_x, uint16_t n_h) {
+#pragma HLS INLINE self
+
 	static inter_t bram_x[MAX_X];
 	static inter_t bram_h[MAX_H];
-	static inter_t bram_w[MAX_H*MAX_X];
 #pragma HLS array_partition variable=bram_x complete
 #pragma HLS array_partition variable=bram_h complete
-#pragma HLS array_partition variable=bram_w cyclic factor=32
+
 
 	debug("[%s] n_x: %d(max:%d), n_h: %d(max:%d)\n", __func__, n_x, MAX_X, n_h, MAX_H);
 
@@ -34,16 +53,16 @@ void binary_connect(outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], 
 	READ_X_LOOP:for (i=0; i < n_x; i++) {
 #pragma HLS PIPELINE II=1
 		bram_x[i] = (inter_t) x[i];
+		// TODO relu
 	}
 
-	// read to cache w
-	READ_W_LOOP:for (i=0; i < n_x; i++) {
-		for (j=0; j < n_h; j++) {
-#pragma HLS PIPELINE II=1
-			bram_w[i*n_h + j] = (inter_t) w[i*n_h + j];
-			debug("[%s] %d: %d\n", __func__, i*n_h+j, bram_w[i*n_h + j]);
-		}
+	///
+	// init outbuf
+	for (j=0; j < MAX_H; j++) {
+#pragma HLS unroll
+		bram_h[j] = (inter_t) 0;
 	}
+	///
 
 	////////////////////////////////////////
 	
@@ -53,33 +72,40 @@ void binary_connect(outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], 
 			break;
 		for (j=0; j < MAX_H; j++) {
 #pragma HLS unroll factor=32
-			if (j >= n_h)
-				break;
-			inter_t product_term = ~(x[i] ^ w[i*n_h + j]) & 0x1; // XNOR
-			debug("[%s] %d, xnor %d: %d\n", __func__, i, i*n_h+j, w[i*n_h + j]);
+			inter_t product_term = ~(bram_x[i] ^ bram_w[i*n_h + j]) & 0x1; // XNOR
+			debug("[%s] %d, xnor %d: %d\n", __func__, i, i*n_h+j, bram_w[i*n_h + j]);
 			bram_h[j] += product_term;
 		}
-	}
-
-	// to [0, 1]
-	POST_LOOP:for (j=0; j < MAX_H; j++) {
-#pragma HLS unroll
-		if (j >= n_h)
-			break;
-		debug("[%s] h[%d]: %d\n", __func__, j, bram_h[j]);
-		bram_h[j] = (bram_h[j] << 1) - n_x;
 	}
 
 	////////////////////////////////////////
 
 	// write to dram
+	// to [0, 1]
 	WRITE_H_LOOP:for (i=0; i < n_h; i++) {
 #pragma HLS PIPELINE II=1
-		h[i] = (outer_t) bram_h[i];
-		debug("[%s] %d\n", __func__, bram_h[i]);
+		h[i] = (outer_t) ((bram_h[i] << 1) - n_x);
+		debug("[%s] %d\n", __func__, h[i]);
 	}
 
 }
+
+#pragma SDS data sys_port(x:AFI)
+#pragma SDS data sys_port(w:AFI)
+#pragma SDS data sys_port(h:AFI)
+#pragma SDS data access_pattern(x:SEQUENTIAL, w:SEQUENTIAL, h:SEQUENTIAL)
+#pragma SDS data copy(x[0:n_x])
+#pragma SDS data copy(w[0:n_h*n_x])
+#pragma SDS data copy(h[0:n_h])
+void binary_connect(outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], uint16_t n_x, uint16_t n_h) {
+#pragma HLS INLINE self
+	static inter_t bram_w[MAX_H*MAX_X];
+
+	init(bram_w, w, n_x, n_h);
+	xnor_mult(bram_w, x, w, h, n_x, n_h);
+}
+
+
 
 void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 		inter_t in_B[A_NCOLS*B_NCOLS], outer_t* out_C,
@@ -96,7 +122,7 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 //			break;
 		for (index_b = 0; index_b < B_NCOLS; index_b++) {
 //#pragma HLS unroll factor = 64  // 128: ERROR: [SDSoC 0-0] Hardware function 'mmult_accel' LUT resource requirement (58290) exceeds platform 'pynq' resource capacity (53200)
-//#pragma HLS PIPELINE II=1 // XXX hlsç¸ºç¿«?½ç¹§å³¨â†‘ï¿½?½¿?½½?
+//#pragma HLS PIPELINE II=1 // XXX hlsç¸ºç¿«???¿½?¿½??¿½?¿½ç¹§å³¨â†‘ï¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?
 
 //			if (index_b < b_ncols) {
 				//ap_uint<16> result = 0;
@@ -133,8 +159,8 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 				        if (index_d == a_ncols-1) {
 							// last time 
 				        	debug("add = %d\n", result);
-				        	//result = 2 * result - a_ncols; // [0,1]ç¸º?½«è¬Œï½»?¿½?½¿?½½?
-				        	result = (result << 1) - a_ncols; // [0,1]ç¸º?½«è¬Œï½»?¿½?½¿?½½?
+				        	//result = 2 * result - a_ncols; // [0,1]ç¸º???¿½?¿½??¿½?¿½è¬Œï½»???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?
+				        	result = (result << 1) - a_ncols; // [0,1]ç¸º???¿½?¿½??¿½?¿½è¬Œï½»???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?
 				        	debug("= %d (2*result-%d)\n", result, a_ncols);
 				        	out_C[index_b] = result;
 				        	result = 0;
@@ -143,15 +169,15 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 
 					}
 
-					// ç¸ºã‚??½‹ï¿½?½¿?½½?ç¸º?½¯ç¸ºè–™ï¼?ç¸º?½«éœ‘ï½½?¿½?½¿?½½?
+					// ç¸º??¿½?¿½????¿½?¿½??¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?ç¸º???¿½?¿½??¿½?¿½ç¸ºè–™ï¿½?ç¸º???¿½?¿½??¿½?¿½éœ‘ï½½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?
 
 				}
 
 #if 0
 				if (index_b < b_ncols) {
 					debug("add = %d\n", result);
-					//result = 2 * result - a_ncols; // [0,1]ç¸º?½«è¬Œï½»?¿½?½¿?½½?
-					result = (result << 1) - a_ncols; // [0,1]ç¸º?½«è¬Œï½»?¿½?½¿?½½?
+					//result = 2 * result - a_ncols; // [0,1]ç¸º???¿½?¿½??¿½?¿½è¬Œï½»???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?
+					result = (result << 1) - a_ncols; // [0,1]ç¸º???¿½?¿½??¿½?¿½è¬Œï½»???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½???¿½?¿½??¿½?¿½?
 					debug("= %d (2*result-%d)\n", result, a_ncols);
 					out_C[index_a * b_ncols + index_b] = result;
 				}
