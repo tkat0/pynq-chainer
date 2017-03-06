@@ -13,6 +13,109 @@
 extern "C" { // for CFFI compiler
 #endif
 
+#pragma SDS data access_pattern(x:SEQUENTIAL, w:SEQUENTIAL, h:SEQUENTIAL)
+#pragma SDS data copy(x[0:n_x])
+#pragma SDS data copy(w[0:n_h*n_x])
+#pragma SDS data copy(h[0:n_h])
+void binary_connect(outer_t x[MAX_X], outer_t w[MAX_H*MAX_X], outer_t h[MAX_H], uint16_t n_x, uint16_t n_h) {
+//#pragma HLS dataflow
+
+	static inter_t bram_x[MAX_X];
+	static inter_t bram_h[MAX_H];
+	static inter_t bram_w[MAX_H*MAX_X];
+#pragma HLS array_partition variable=bram_x complete
+#pragma HLS array_partition variable=bram_h complete
+#pragma HLS array_partition variable=bram_w cyclic factor=32
+
+	uint16_t i,j;
+
+	// read to cache x
+	READ_X_LOOP:for (i=0; i < n_x; i++) {
+#pragma HLS PIPELINE II=1
+		bram_x[i] = (inter_t) x[i];
+	}
+
+	// read to cache w
+	READ_W_LOOP:for (j=0; j < n_h; j++) {
+		for (i=0; i < n_x; i++) {
+#pragma HLS PIPELINE II=1
+			bram_w[j*n_x + i] = (inter_t) w[j*n_x + i];
+		}
+	}
+
+	////////////////////////////////////////
+	
+	// XNOR mmult
+	XNOR_LOOP:for (i=0; i < MAX_X; i++) {
+		if (i > n_x)
+			break;
+		for (j=0; j < MAX_H; j++) {
+#pragma HLS unroll factor=32
+			if (j > n_h)
+				break;
+			inter_t product_term = ~(x[i] ^ w[j*n_h + i]) & 0x1; // XNOR
+			bram_h[j] += product_term;
+		}
+	}
+
+	// to [0, 1]
+	POST_LOOP:for (j=0; j < MAX_H; j++) {
+#pragma HLS unroll
+		if (j > n_h)
+			bram_h[j] = (bram_h[j] << 1) - n_h;
+	}
+
+	////////////////////////////////////////
+
+	// write to dram
+	WRITE_H_LOOP:for (i=0; j < n_h; i++) {
+#pragma HLS PIPELINE II=1
+		h[i] = (outer_t) bram_h[i];
+	}
+
+}
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "cf_stub.h"
+void _p0_binary_connect_0(outer_t x[32], outer_t w[1024], outer_t h[32], uint16_t n_x, uint16_t n_h);
+void _p0_binary_connect_0(outer_t x[32], outer_t w[1024], outer_t h[32], uint16_t n_x, uint16_t n_h)
+{
+  switch_to_next_partition(0);
+  int start_seq[3];
+  start_seq[0] = 0x00000300;
+  start_seq[1] = 0x00010000;
+  start_seq[2] = 0x00020000;
+  cf_request_handle_t _p0_swinst_binary_connect_0_cmd;
+  cf_send_i(&(_p0_swinst_binary_connect_0.cmd_binary_connect), start_seq, 3*sizeof(int), &_p0_swinst_binary_connect_0_cmd);
+  cf_wait(_p0_swinst_binary_connect_0_cmd);
+
+
+#ifdef SDS_DEBUG
+  if ((n_x) * 4 != 32*4)
+    printf("x of function binary_connect transfer size is different from declared size, system may hang!\n");
+  if ((n_h*n_x) * 4 != 1024*4)
+    printf("w of function binary_connect transfer size is different from declared size, system may hang!\n");
+  if ((n_h) * 4 != 32*4)
+    printf("h of function binary_connect transfer size is different from declared size, system may hang!\n");
+#endif
+
+  cf_send_i(&(_p0_swinst_binary_connect_0.x), x, (n_x) * 4, &_p0_request_0);
+  cf_send_i(&(_p0_swinst_binary_connect_0.w), w, (n_h*n_x) * 4, &_p0_request_1);
+  cf_send_i(&(_p0_swinst_binary_connect_0.n_x), &n_x, 2, &_p0_request_3);
+  cf_send_i(&(_p0_swinst_binary_connect_0.n_h), &n_h, 2, &_p0_request_4);
+
+  cf_receive_i(&(_p0_swinst_binary_connect_0.h), h, (n_h) * 4, &_p0_binary_connect_0_num_h, &_p0_request_2);
+
+  cf_wait(_p0_request_0);
+  cf_wait(_p0_request_1);
+  cf_wait(_p0_request_2);
+  cf_wait(_p0_request_3);
+  cf_wait(_p0_request_4);
+}
+
+
+
 void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 		inter_t in_B[A_NCOLS*B_NCOLS], outer_t* out_C,
 		int b_ncols, int a_ncols) {
@@ -28,7 +131,7 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 //			break;
 		for (index_b = 0; index_b < B_NCOLS; index_b++) {
 //#pragma HLS unroll factor = 64  // 128: ERROR: [SDSoC 0-0] Hardware function 'mmult_accel' LUT resource requirement (58290) exceeds platform 'pynq' resource capacity (53200)
-//#pragma HLS PIPELINE II=1 // XXX hls„Åä„Çè„Çâ„Å™ÔøΩ?
+//#pragma HLS PIPELINE II=1 // XXX hlsÁ∏∫Áø´?ΩèÁπßÂ≥®‚ÜëÔøΩ?Ωø?ΩΩ?
 
 //			if (index_b < b_ncols) {
 				//ap_uint<16> result = 0;
@@ -65,8 +168,8 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 				        if (index_d == a_ncols-1) {
 							// last time 
 				        	debug("add = %d\n", result);
-				        	//result = 2 * result - a_ncols; // [0,1]„Å´ÊàªÔøΩ?
-				        	result = (result << 1) - a_ncols; // [0,1]„Å´ÊàªÔøΩ?
+				        	//result = 2 * result - a_ncols; // [0,1]Á∏∫?Ω´Ë¨åÔΩª?øΩ?Ωø?ΩΩ?
+				        	result = (result << 1) - a_ncols; // [0,1]Á∏∫?Ω´Ë¨åÔΩª?øΩ?Ωø?ΩΩ?
 				        	debug("= %d (2*result-%d)\n", result, a_ncols);
 				        	out_C[index_b] = result;
 				        	result = 0;
@@ -75,15 +178,15 @@ void mmult_kernel(inter_t in_A[A_NROWS*A_NCOLS],
 
 					}
 
-					// „ÅÇ„ÇãÔøΩ?„ÅØ„Åì„Åì„Å´ËøΩÔøΩ?
+					// Á∏∫„Ç??ΩãÔøΩ?Ωø?ΩΩ?Á∏∫?ΩØÁ∏∫ËñôÔº?Á∏∫?Ω´ÈúëÔΩΩ?øΩ?Ωø?ΩΩ?
 
 				}
 
 #if 0
 				if (index_b < b_ncols) {
 					debug("add = %d\n", result);
-					//result = 2 * result - a_ncols; // [0,1]„Å´ÊàªÔøΩ?
-					result = (result << 1) - a_ncols; // [0,1]„Å´ÊàªÔøΩ?
+					//result = 2 * result - a_ncols; // [0,1]Á∏∫?Ω´Ë¨åÔΩª?øΩ?Ωø?ΩΩ?
+					result = (result << 1) - a_ncols; // [0,1]Á∏∫?Ω´Ë¨åÔΩª?øΩ?Ωø?ΩΩ?
 					debug("= %d (2*result-%d)\n", result, a_ncols);
 					out_C[index_a * b_ncols + index_b] = result;
 				}
@@ -135,37 +238,6 @@ void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C,
 	// Matrix multiply call
 	mmult_kernel(a_buf, b_buf, out_C, b_ncols, a_ncols);
 }
-
-#include <stdio.h>
-#include <stdlib.h>
-#include "cf_stub.h"
-void _p0_mmult_accel_0(outer_t * in_A, outer_t * in_B, outer_t * out_C, int b_ncols, int a_ncols);
-void _p0_mmult_accel_0(outer_t * in_A, outer_t * in_B, outer_t * out_C, int b_ncols, int a_ncols)
-{
-  switch_to_next_partition(0);
-  int start_seq[3];
-  start_seq[0] = 0x00000300;
-  start_seq[1] = 0x00010000;
-  start_seq[2] = 0x00020000;
-  cf_request_handle_t _p0_swinst_mmult_accel_0_cmd;
-  cf_send_i(&(_p0_swinst_mmult_accel_0.cmd_mmult_accel), start_seq, 3*sizeof(int), &_p0_swinst_mmult_accel_0_cmd);
-  cf_wait(_p0_swinst_mmult_accel_0_cmd);
-
-  cf_send_i(&(_p0_swinst_mmult_accel_0.in_A), in_A, (a_ncols) * 4, &_p0_request_0);
-  cf_send_i(&(_p0_swinst_mmult_accel_0.in_B), in_B, (a_ncols*b_ncols) * 4, &_p0_request_1);
-  cf_send_i(&(_p0_swinst_mmult_accel_0.b_ncols), &b_ncols, 4, &_p0_request_3);
-  cf_send_i(&(_p0_swinst_mmult_accel_0.a_ncols), &a_ncols, 4, &_p0_request_4);
-
-  cf_receive_i(&(_p0_swinst_mmult_accel_0.out_C), out_C, (b_ncols) * 4, &_p0_mmult_accel_0_num_out_C, &_p0_request_2);
-
-  cf_wait(_p0_request_0);
-  cf_wait(_p0_request_1);
-  cf_wait(_p0_request_2);
-  cf_wait(_p0_request_3);
-  cf_wait(_p0_request_4);
-}
-
-
 
 #ifndef __SYNTHESIS__
 } // extern "C"

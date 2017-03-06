@@ -7,7 +7,19 @@
 
 #include "sds_lib.h"
 
-void _p0_mmult_accel_0(outer_t * in_A, outer_t * in_B, outer_t * out_C, int b_ncols, int a_ncols);
+void _p0_binary_connect_0(outer_t x[32], outer_t w[1024], outer_t h[32], uint16_t n_x, uint16_t n_h);
+int main_bin(void) {
+	outer_t *tin1Buf, *tin2Buf, *toutBufHw;
+
+	tin1Buf = (outer_t *)sds_alloc(MAX_X * sizeof(outer_t));
+	tin2Buf = (outer_t *)sds_alloc(MAX_H * MAX_X * sizeof(outer_t));
+	toutBufHw = (outer_t *)sds_alloc(MAX_H * sizeof(outer_t));
+
+	_p0_binary_connect_0(tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_H);
+
+	return 0;
+}
+
 int main(void) {
 	outer_t *tin1Buf, *tin2Buf, *toutBufHw;
 
@@ -15,7 +27,7 @@ int main(void) {
 	  tin2Buf = (outer_t *)sds_alloc(A_NCOLS * B_NCOLS * sizeof(float));
 	  toutBufHw = (outer_t *)sds_alloc(A_NROWS * B_NCOLS * sizeof(float));
 
-	_p0_mmult_accel_0(tin1Buf, tin2Buf, toutBufHw, B_NCOLS, A_NCOLS);
+	mmult_accel(tin1Buf, tin2Buf, toutBufHw, B_NCOLS, A_NCOLS);
 
 	return 0;
 }

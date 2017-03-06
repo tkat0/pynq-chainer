@@ -3,6 +3,8 @@
 
 #define __SYNTHESIS__
 
+typedef unsigned short uint16_t;
+
 #ifndef __SYNTHESIS__
 extern "C" { // for CFFI compiler
 #endif
@@ -37,6 +39,11 @@ void mmult_accel (float in_A[A_NROWS*A_NCOLS],
 void mmult_accel (outer_t* in_A,
 		outer_t* in_B,
 		outer_t* out_C, int b_ncols, int a_ncols);
+
+#define MAX_X 32
+#define MAX_H 32
+void binary_connect (outer_t* x, outer_t* w, outer_t* h, 
+		uint16_t n_x, uint16_t n_h);
 #endif
 
 

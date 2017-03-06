@@ -11,10 +11,10 @@ int main_bin(void) {
 	outer_t *tin1Buf, *tin2Buf, *toutBufHw;
 
 	tin1Buf = (outer_t *)sds_alloc(MAX_X * sizeof(outer_t));
-	tin2Buf = (outer_t *)sds_alloc(MAX_W * MAX_X * sizeof(outer_t));
+	tin2Buf = (outer_t *)sds_alloc(MAX_H * MAX_X * sizeof(outer_t));
 	toutBufHw = (outer_t *)sds_alloc(MAX_H * sizeof(outer_t));
 
-	mmult_accel(tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_W, MAX_H);
+	binary_connect(tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_H);
 
 	return 0;
 }

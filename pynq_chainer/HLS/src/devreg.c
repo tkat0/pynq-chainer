@@ -1,4 +1,4 @@
-/* File: C:/workspace2015.4/pynq-nn1/SDDebug/_sds/p0/.cf_work/devreg.c */
+/* File: C:/workspace_2015.4/pynq-chainer/SDDebug/_sds/p0/.cf_work/devreg.c */
 #include "cf_lib.h"
 #include "cf_request.h"
 #include "devreg.h"
@@ -30,7 +30,7 @@ axi_dma_simple_info_t _p0_dm_2 = {
   .dir = XLNK_DMA_FROM_DEV,
 };
 
-accel_info_t _sds__p0_mmult_accel_0 = {
+accel_info_t _sds__p0_binary_connect_0 = {
   .device_id = 3,
   .phys_base_addr = 0x43c00000,
   .addr_range = 0x10000,
@@ -44,7 +44,7 @@ void _p0_cf_register(int first)
     axi_dma_simple_register(&_p0_dm_0);
     axi_dma_simple_register(&_p0_dm_1);
     axi_dma_simple_register(&_p0_dm_2);
-    accel_register(&_sds__p0_mmult_accel_0);
+    accel_register(&_sds__p0_binary_connect_0);
     cf_xlnk_init(first);
   }
   else if (xlnk_init_done <0) {
@@ -59,7 +59,7 @@ void _p0_cf_unregister(int last)
   axi_dma_simple_unregister(&_p0_dm_0);
   axi_dma_simple_unregister(&_p0_dm_1);
   axi_dma_simple_unregister(&_p0_dm_2);
-  accel_unregister(&_sds__p0_mmult_accel_0);
+  accel_unregister(&_sds__p0_binary_connect_0);
   xlnkClose(last,NULL);
 }
 

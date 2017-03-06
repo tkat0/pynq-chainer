@@ -1,4 +1,4 @@
-/* File: C:/workspace2015.4/pynq-nn1/SDDebug/_sds/p0/.cf_work/portinfo.c */
+/* File: C:/workspace_2015.4/pynq-chainer/SDDebug/_sds/p0/.cf_work/portinfo.c */
 #include "cf_lib.h"
 #include "cf_request.h"
 #include "devreg.h"
@@ -15,70 +15,70 @@
 extern axi_dma_simple_info_t _p0_dm_0;
 extern axi_dma_simple_info_t _p0_dm_1;
 extern axi_dma_simple_info_t _p0_dm_2;
-extern accel_info_t _sds__p0_mmult_accel_0;
+extern accel_info_t _sds__p0_binary_connect_0;
 
-axi_lite_info_t _p0_swinst_mmult_accel_0_cmd_mmult_accel_info = {
-  .accel_info = &_sds__p0_mmult_accel_0,
+axi_lite_info_t _p0_swinst_binary_connect_0_cmd_binary_connect_info = {
+  .accel_info = &_sds__p0_binary_connect_0,
   .reg_name = "0x28"
 };
 
-axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_in_A_info = {
+axi_dma_simple_channel_info_t _p0_swinst_binary_connect_0_x_info = {
   .dma_info = &_p0_dm_1,
   .in_use = 0,
   .needs_cache_flush_invalidate = 0
 };
 
-axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_in_B_info = {
+axi_dma_simple_channel_info_t _p0_swinst_binary_connect_0_w_info = {
   .dma_info = &_p0_dm_0,
   .in_use = 0,
-  .needs_cache_flush_invalidate = 1
+  .needs_cache_flush_invalidate = 0
 };
 
-axi_dma_simple_channel_info_t _p0_swinst_mmult_accel_0_out_C_info = {
+axi_dma_simple_channel_info_t _p0_swinst_binary_connect_0_h_info = {
   .dma_info = &_p0_dm_2,
   .in_use = 0,
   .needs_cache_flush_invalidate = 0
 };
 
-axi_lite_info_t _p0_swinst_mmult_accel_0_b_ncols_info = {
-  .accel_info = &_sds__p0_mmult_accel_0,
+axi_lite_info_t _p0_swinst_binary_connect_0_n_x_info = {
+  .accel_info = &_sds__p0_binary_connect_0,
   .reg_name = "0x80"
 };
 
-axi_lite_info_t _p0_swinst_mmult_accel_0_a_ncols_info = {
-  .accel_info = &_sds__p0_mmult_accel_0,
+axi_lite_info_t _p0_swinst_binary_connect_0_n_h_info = {
+  .accel_info = &_sds__p0_binary_connect_0,
   .reg_name = "0x84"
 };
 
-struct _p0_swblk_mmult_accel _p0_swinst_mmult_accel_0 = {
-  .cmd_mmult_accel = { .base = { 
-		.channel_info = &_p0_swinst_mmult_accel_0_cmd_mmult_accel_info, 
+struct _p0_swblk_binary_connect _p0_swinst_binary_connect_0 = {
+  .cmd_binary_connect = { .base = { 
+		.channel_info = &_p0_swinst_binary_connect_0_cmd_binary_connect_info, 
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
 		.send_i = &axi_lite_send },
-  .in_A = { .base = { 
-		.channel_info = &_p0_swinst_mmult_accel_0_in_A_info, 
+  .x = { .base = { 
+		.channel_info = &_p0_swinst_binary_connect_0_x_info, 
 		.open_i = &axi_dma_simple_open, 
 		.close_i = &axi_dma_simple_close },
 		.send_i = &axi_dma_simple_send_i },
-  .in_B = { .base = { 
-		.channel_info = &_p0_swinst_mmult_accel_0_in_B_info, 
+  .w = { .base = { 
+		.channel_info = &_p0_swinst_binary_connect_0_w_info, 
 		.open_i = &axi_dma_simple_open, 
 		.close_i = &axi_dma_simple_close },
 		.send_i = &axi_dma_simple_send_i },
-  .out_C = { .base = { 
-		.channel_info = &_p0_swinst_mmult_accel_0_out_C_info, 
+  .h = { .base = { 
+		.channel_info = &_p0_swinst_binary_connect_0_h_info, 
 		.open_i = &axi_dma_simple_open, 
 		.close_i = &axi_dma_simple_close },
 		.receive_ref_i = 0,
 		.receive_i = &axi_dma_simple_recv_i },
-  .b_ncols = { .base = { 
-		.channel_info = &_p0_swinst_mmult_accel_0_b_ncols_info, 
+  .n_x = { .base = { 
+		.channel_info = &_p0_swinst_binary_connect_0_n_x_info, 
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
 		.send_i = &axi_lite_send },
-  .a_ncols = { .base = { 
-		.channel_info = &_p0_swinst_mmult_accel_0_a_ncols_info, 
+  .n_h = { .base = { 
+		.channel_info = &_p0_swinst_binary_connect_0_n_h_info, 
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
 		.send_i = &axi_lite_send },
@@ -95,24 +95,24 @@ void _p0_cf_framework_open(int first)
   xlnkCounterMap();
   _p0_cf_register(first);
   cf_get_current_context();
-  accel_open(&_sds__p0_mmult_accel_0);
-  _p0_cf_open_port( &_p0_swinst_mmult_accel_0.cmd_mmult_accel.base );
-  _p0_cf_open_port( &_p0_swinst_mmult_accel_0.in_A.base );
-  _p0_cf_open_port( &_p0_swinst_mmult_accel_0.in_B.base );
-  _p0_cf_open_port( &_p0_swinst_mmult_accel_0.out_C.base );
-  _p0_cf_open_port( &_p0_swinst_mmult_accel_0.b_ncols.base );
-  _p0_cf_open_port( &_p0_swinst_mmult_accel_0.a_ncols.base );
+  accel_open(&_sds__p0_binary_connect_0);
+  _p0_cf_open_port( &_p0_swinst_binary_connect_0.cmd_binary_connect.base );
+  _p0_cf_open_port( &_p0_swinst_binary_connect_0.x.base );
+  _p0_cf_open_port( &_p0_swinst_binary_connect_0.w.base );
+  _p0_cf_open_port( &_p0_swinst_binary_connect_0.h.base );
+  _p0_cf_open_port( &_p0_swinst_binary_connect_0.n_x.base );
+  _p0_cf_open_port( &_p0_swinst_binary_connect_0.n_h.base );
 }
 
 void _p0_cf_framework_close(int last)
 {
-  cf_close_i( &_p0_swinst_mmult_accel_0.cmd_mmult_accel, NULL);
-  cf_close_i( &_p0_swinst_mmult_accel_0.in_A, NULL);
-  cf_close_i( &_p0_swinst_mmult_accel_0.in_B, NULL);
-  cf_close_i( &_p0_swinst_mmult_accel_0.out_C, NULL);
-  cf_close_i( &_p0_swinst_mmult_accel_0.b_ncols, NULL);
-  cf_close_i( &_p0_swinst_mmult_accel_0.a_ncols, NULL);
-  accel_close(&_sds__p0_mmult_accel_0);
+  cf_close_i( &_p0_swinst_binary_connect_0.cmd_binary_connect, NULL);
+  cf_close_i( &_p0_swinst_binary_connect_0.x, NULL);
+  cf_close_i( &_p0_swinst_binary_connect_0.w, NULL);
+  cf_close_i( &_p0_swinst_binary_connect_0.h, NULL);
+  cf_close_i( &_p0_swinst_binary_connect_0.n_x, NULL);
+  cf_close_i( &_p0_swinst_binary_connect_0.n_h, NULL);
+  accel_close(&_sds__p0_binary_connect_0);
   _p0_cf_unregister(last);
 }
 
