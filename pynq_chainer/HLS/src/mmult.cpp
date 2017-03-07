@@ -2,12 +2,21 @@
 #include <stdlib.h>
 
 #include "mmult_accel.h"
-
+#include "binary_connect.h"
 #define NUM_TESTS 1024
 
 #include "sds_lib.h"
 
-void _p0_binary_connect_0(uint16_t op, outer_t x[256], outer_t w[65536], outer_t h[256], uint16_t n_x, uint16_t n_h);
+void _p0_BlackBoxJam_0(ap_uint<32> * in, ap_uint<32> * out, bool doInit, unsigned int targetLayer, unsigned int targetMem, unsigned int targetInd, ap_uint<32> val);
+int main_BlackBoxJam(void) {
+
+	ap_uint<32> *in = (ap_uint<32> *)sds_alloc(32 * sizeof(ap_uint<32>));
+	ap_uint<32> *out = (ap_uint<32> *)sds_alloc(32 * sizeof(ap_uint<32>));
+
+	_p0_BlackBoxJam_0(in, out, true, 0, 0, 0, 0);
+	return 0;
+}
+
 int main_bin(void) {
 	outer_t *tin1Buf, *tin2Buf, *toutBufHw;
 
@@ -15,8 +24,8 @@ int main_bin(void) {
 	tin2Buf = (outer_t *)sds_alloc(MAX_H * MAX_X * sizeof(outer_t));
 	toutBufHw = (outer_t *)sds_alloc(MAX_H * sizeof(outer_t));
 
-	_p0_binary_connect_0(0, tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_H);
-	_p0_binary_connect_0(1, tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_H);
+	binary_connect(0, tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_H);
+	binary_connect(1, tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_H);
 
 	return 0;
 }

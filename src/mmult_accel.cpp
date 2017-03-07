@@ -13,6 +13,8 @@
 extern "C" { // for CFFI compiler
 #endif
 
+#if 0
+
 void init(inter_t bram_w[MAX_H][MAX_X], outer_t w[MAX_H*MAX_X], uint16_t n_x, uint16_t n_h) {
 #pragma HLS INLINE self
 #pragma HLS dataflow
@@ -235,6 +237,8 @@ void mmult_accel(outer_t* in_A, outer_t* in_B, outer_t* out_C,
 	// Matrix multiply call
 	mmult_kernel(a_buf, b_buf, out_C, b_ncols, a_ncols);
 }
+
+#endif
 
 #ifndef __SYNTHESIS__
 } // extern "C"

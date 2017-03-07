@@ -2,10 +2,19 @@
 #include <stdlib.h>
 
 #include "mmult_accel.h"
-
+#include "binary_connect.h"
 #define NUM_TESTS 1024
 
 #include "sds_lib.h"
+
+int main_BlackBoxJam(void) {
+
+	ap_uint<32> *in = (ap_uint<32> *)sds_alloc(32 * sizeof(ap_uint<32>));
+	ap_uint<32> *out = (ap_uint<32> *)sds_alloc(32 * sizeof(ap_uint<32>));
+
+	BlackBoxJam(in, out, true, 0, 0, 0, 0);
+	return 0;
+}
 
 int main_bin(void) {
 	outer_t *tin1Buf, *tin2Buf, *toutBufHw;

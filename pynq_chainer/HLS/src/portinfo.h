@@ -1,21 +1,22 @@
 #ifndef _SDS_PORTINFO_H
 #define _SDS_PORTINFO_H
-/* File: C:/workspace_2015.4/pynq-chainer/SDDebug/_sds/p0/.cf_work/portinfo.h */
+/* File: C:/workspace2015.4/pynq-nn1/SDDebug/_sds/p0/.cf_work/portinfo.h */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct _p0_swblk_binary_connect {
-  cf_port_send_t cmd_binary_connect;
-  cf_port_send_t op;
-  cf_port_send_t x;
-  cf_port_send_t w;
-  cf_port_receive_t h;
-  cf_port_send_t n_x;
-  cf_port_send_t n_h;
+struct _p0_swblk_BlackBoxJam {
+  cf_port_send_t cmd_BlackBoxJam;
+  cf_port_send_t in_V_PORTA;
+  cf_port_receive_t out_V_PORTA;
+  cf_port_send_t doInit;
+  cf_port_send_t targetLayer;
+  cf_port_send_t targetMem;
+  cf_port_send_t targetInd;
+  cf_port_send_t val_V;
 };
 
-extern struct _p0_swblk_binary_connect _p0_swinst_binary_connect_0;
+extern struct _p0_swblk_BlackBoxJam _p0_swinst_BlackBoxJam_0;
 void _p0_cf_framework_open(int);
 void _p0_cf_framework_close(int);
 
