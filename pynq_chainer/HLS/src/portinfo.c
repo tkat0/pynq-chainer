@@ -9,11 +9,8 @@
 
 #include "xlnk_core_cf.h"
 #include "accel_info.h"
-#include "axi_dma_simple_dm.h"
 #include "axi_lite_dm.h"
 
-extern axi_dma_simple_info_t _p0_dm_0;
-extern axi_dma_simple_info_t _p0_dm_1;
 extern accel_info_t _sds__p0_BlackBoxJam_0;
 
 axi_lite_info_t _p0_swinst_BlackBoxJam_0_cmd_BlackBoxJam_info = {
@@ -21,41 +18,39 @@ axi_lite_info_t _p0_swinst_BlackBoxJam_0_cmd_BlackBoxJam_info = {
   .reg_name = "0x28"
 };
 
-axi_dma_simple_channel_info_t _p0_swinst_BlackBoxJam_0_in_V_info = {
-  .dma_info = &_p0_dm_0,
-  .in_use = 0,
-  .needs_cache_flush_invalidate = 0
-};
-
-axi_dma_simple_channel_info_t _p0_swinst_BlackBoxJam_0_out_V_info = {
-  .dma_info = &_p0_dm_1,
-  .in_use = 0,
-  .needs_cache_flush_invalidate = 0
-};
-
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_doInit_info = {
+axi_lite_info_t _p0_swinst_BlackBoxJam_0_in_V_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
   .reg_name = "0x80"
 };
 
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_targetLayer_info = {
+axi_lite_info_t _p0_swinst_BlackBoxJam_0_out_V_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
   .reg_name = "0x84"
 };
 
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_targetMem_info = {
+axi_lite_info_t _p0_swinst_BlackBoxJam_0_doInit_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
   .reg_name = "0x88"
 };
 
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_targetInd_info = {
+axi_lite_info_t _p0_swinst_BlackBoxJam_0_targetLayer_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
   .reg_name = "0x8C"
 };
 
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_val_V_info = {
+axi_lite_info_t _p0_swinst_BlackBoxJam_0_targetMem_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
   .reg_name = "0x90"
+};
+
+axi_lite_info_t _p0_swinst_BlackBoxJam_0_targetInd_info = {
+  .accel_info = &_sds__p0_BlackBoxJam_0,
+  .reg_name = "0x94"
+};
+
+axi_lite_info_t _p0_swinst_BlackBoxJam_0_val_V_info = {
+  .accel_info = &_sds__p0_BlackBoxJam_0,
+  .reg_name = "0x98"
 };
 
 struct _p0_swblk_BlackBoxJam _p0_swinst_BlackBoxJam_0 = {
@@ -66,15 +61,14 @@ struct _p0_swblk_BlackBoxJam _p0_swinst_BlackBoxJam_0 = {
 		.send_i = &axi_lite_send },
   .in_V = { .base = { 
 		.channel_info = &_p0_swinst_BlackBoxJam_0_in_V_info, 
-		.open_i = &axi_dma_simple_open, 
-		.close_i = &axi_dma_simple_close },
-		.send_i = &axi_dma_simple_send_i },
+		.open_i = &axi_lite_open, 
+		.close_i = &axi_lite_close },
+		.send_i = &axi_lite_send },
   .out_V = { .base = { 
 		.channel_info = &_p0_swinst_BlackBoxJam_0_out_V_info, 
-		.open_i = &axi_dma_simple_open, 
-		.close_i = &axi_dma_simple_close },
-		.receive_ref_i = 0,
-		.receive_i = &axi_dma_simple_recv_i },
+		.open_i = &axi_lite_open, 
+		.close_i = &axi_lite_close },
+		.send_i = &axi_lite_send },
   .doInit = { .base = { 
 		.channel_info = &_p0_swinst_BlackBoxJam_0_doInit_info, 
 		.open_i = &axi_lite_open, 

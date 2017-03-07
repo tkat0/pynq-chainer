@@ -14,7 +14,6 @@ extern cf_request_handle_t _p0_request_4;
 extern cf_request_handle_t _p0_request_5;
 extern cf_request_handle_t _p0_request_6;
 
-extern size_t _p0_BlackBoxJam_0_num_out_V;
 
 
 

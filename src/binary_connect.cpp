@@ -18,44 +18,6 @@ using namespace std;
 extern "C" { // for CFFI compiler
 #endif
 
-
-template<unsigned int DataWidth,		// stream width
-		unsigned int NumAllowed, 	// number of words to pass through
-		unsigned int NumTotal // total number of words (NumTotal-NumAllowed swallowed)
->
-void StreamLimiter(stream<ap_uint<DataWidth> > & in,
-		stream<ap_uint<DataWidth> > & out) {
-	CASSERT_DATAFLOW(NumTotal >= NumAllowed);
-	unsigned int numLeft = NumAllowed;
-	for (unsigned int i = 0; i < NumTotal; i++) {
-#pragma HLS PIPELINE II=1
-		ap_uint<DataWidth> e = in.read();
-		if (numLeft > 0) {
-			out.write(e);
-			numLeft--;
-		}
-	}
-}
-
-template<unsigned int DataWidth,		// stream width
-		unsigned int NumAllowed, 	// number of words to pass through
-		unsigned int NumTotal // total number of words (NumTotal-NumAllowed swallowed)
->
-void StreamLimiter_Batch(stream<ap_uint<DataWidth> > & in,
-		stream<ap_uint<DataWidth> > & out, unsigned int numReps) {
-	for (unsigned int rep = 0; rep < numReps; rep++) {
-		StreamLimiter<DataWidth, NumAllowed, NumTotal>(in, out);
-	}
-}
-
-template<typename InT, typename OutT>
-void StreamingCast(stream<InT> & in, stream<OutT> & out, unsigned int numReps) {
-  for(unsigned int i = 0; i < numReps; i++) {
-#pragma HLS PIPELINE II=1
-    out.write((OutT) in.read());
-  }
-}
-
 template<unsigned int InWidth,		// width of input stream
 		unsigned int OutWidth,		// width of output stream
 		unsigned int NumInWords		// number of input words to process
@@ -376,9 +338,11 @@ void DoCompute(ap_uint<32> * in, ap_uint<32> * out, const unsigned int targetLay
 //#pragma SDS data zero_copy(in[0:768])
 //#pragma SDS data zero_copy(out[0:1024])
 
-#pragma SDS data access_pattern(in:SEQUENTIAL, out:SEQUENTIAL)
-#pragma SDS data copy(in[0:768])
-#pragma SDS data copy(out[0:512])
+//#pragma SDS data sys_port(in:AFI)
+//#pragma SDS data sys_port(out:AFI)
+//#pragma SDS data access_pattern(in:SEQUENTIAL, out:SEQUENTIAL)
+//#pragma SDS data zero_copy(in[0:768]) // max
+//#pragma SDS data zero_copy(out[0:512])
 void BlackBoxJam(ap_uint<32> *in, ap_uint<32> *out, bool doInit,
 		unsigned int targetLayer, unsigned int targetMem,
 		unsigned int targetInd, ap_uint<32> val) {
@@ -412,7 +376,7 @@ void BlackBoxJam(ap_uint<32> *in, ap_uint<32> *out, bool doInit,
 	if (doInit) {
 		DoMemInit(targetLayer, targetMem, targetInd, val);
 	} else {
-		DoCompute(in, out, targetLayer);
+		//DoCompute(in, out, targetLayer);
 	}
 }
 
