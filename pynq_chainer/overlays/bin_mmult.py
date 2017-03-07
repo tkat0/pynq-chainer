@@ -34,5 +34,5 @@ class BinMmult():
     
     #def __call__(self, op, x_cdata, w_cdata, y_cdata, w_nrows, xw_ncols):
     #    self.accel_fn(op, x_cdata, w_cdata, y_cdata, w_nrows, xw_ncols)
-    def __call__(self, in, out, init, target_layer, target_mem, target_ind, val):
-        self.accel_fn(in, out, init, target_layer, target_mem, target_ind, val)
+    def __call__(self, input, out, init, target_layer, target_mem, target_ind, val):
+        self.accel_fn(input, out, init, target_layer, target_mem, target_ind, val)
