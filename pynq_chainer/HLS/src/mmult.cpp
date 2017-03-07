@@ -7,7 +7,7 @@
 
 #include "sds_lib.h"
 
-void _p0_binary_connect_0(uint16_t op, outer_t x[32], outer_t w[1024], outer_t h[32], uint16_t n_x, uint16_t n_h);
+void _p0_binary_connect_0(uint16_t op, outer_t x[256], outer_t w[65536], outer_t h[256], uint16_t n_x, uint16_t n_h);
 int main_bin(void) {
 	outer_t *tin1Buf, *tin2Buf, *toutBufHw;
 
