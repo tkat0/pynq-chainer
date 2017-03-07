@@ -375,7 +375,11 @@ void DoCompute(ap_uint<32> * in, ap_uint<32> * out, const unsigned int targetLay
 
 //#pragma SDS data zero_copy(in[0:768])
 //#pragma SDS data zero_copy(out[0:1024])
-void BlackBoxJam(ap_uint<32> in[1024], ap_uint<32> out[1024], bool doInit,
+
+#pragma SDS data access_pattern(in:SEQUENTIAL, out:SEQUENTIAL)
+#pragma SDS data copy(in[0:768])
+#pragma SDS data copy(out[0:512])
+void BlackBoxJam(ap_uint<32> *in, ap_uint<32> *out, bool doInit,
 		unsigned int targetLayer, unsigned int targetMem,
 		unsigned int targetInd, ap_uint<32> val) {
 // pragmas for MLBP jam interface
@@ -420,21 +424,21 @@ void _p0_BlackBoxJam_0(ap_uint<32> * in, ap_uint<32> * out, bool doInit, unsigne
 {
   switch_to_next_partition(0);
   int start_seq[3];
-  start_seq[0] = 0x00001f01;
-  start_seq[1] = 0x00010001;
+  start_seq[0] = 0x00001f00;
+  start_seq[1] = 0x00010000;
   start_seq[2] = 0x00020000;
   cf_request_handle_t _p0_swinst_BlackBoxJam_0_cmd;
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.cmd_BlackBoxJam), start_seq, 3*sizeof(int), &_p0_swinst_BlackBoxJam_0_cmd);
   cf_wait(_p0_swinst_BlackBoxJam_0_cmd);
 
-  cf_send_i(&(_p0_swinst_BlackBoxJam_0.in_V_PORTA), in, 1024 * 4, &_p0_request_0);
+  cf_send_i(&(_p0_swinst_BlackBoxJam_0.in_V), in, (768) * 4, &_p0_request_0);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.doInit), &doInit, 1, &_p0_request_2);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetLayer), &targetLayer, 4, &_p0_request_3);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetMem), &targetMem, 4, &_p0_request_4);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetInd), &targetInd, 4, &_p0_request_5);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.val_V), &val, 4, &_p0_request_6);
 
-  cf_receive_i(&(_p0_swinst_BlackBoxJam_0.out_V_PORTA), out, 1024 * 4, &_p0_BlackBoxJam_0_num_out_V_PORTA, &_p0_request_1);
+  cf_receive_i(&(_p0_swinst_BlackBoxJam_0.out_V), out, (512) * 4, &_p0_BlackBoxJam_0_num_out_V, &_p0_request_1);
 
   cf_wait(_p0_request_0);
   cf_wait(_p0_request_1);

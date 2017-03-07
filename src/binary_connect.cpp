@@ -375,7 +375,11 @@ void DoCompute(ap_uint<32> * in, ap_uint<32> * out, const unsigned int targetLay
 
 //#pragma SDS data zero_copy(in[0:768])
 //#pragma SDS data zero_copy(out[0:1024])
-void BlackBoxJam(ap_uint<32> in[1024], ap_uint<32> out[1024], bool doInit,
+
+#pragma SDS data access_pattern(in:SEQUENTIAL, out:SEQUENTIAL)
+#pragma SDS data copy(in[0:768])
+#pragma SDS data copy(out[0:512])
+void BlackBoxJam(ap_uint<32> *in, ap_uint<32> *out, bool doInit,
 		unsigned int targetLayer, unsigned int targetMem,
 		unsigned int targetInd, ap_uint<32> val) {
 // pragmas for MLBP jam interface

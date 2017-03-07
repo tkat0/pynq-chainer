@@ -75,15 +75,13 @@ set BlackBoxJam_0_if [create_bd_cell -type ip -vlnv xilinx.com:ip:axis_accelerat
   
 set_property -dict [ list \
   CONFIG.C_AP_IARG_0_WIDTH {32} \
-  CONFIG.C_AP_IARG_0_TYPE {0} \
+  CONFIG.C_AP_IARG_0_TYPE {1} \
   CONFIG.C_AP_IARG_0_DWIDTH {32} \
   CONFIG.C_AP_IARG_0_DIM_1 {1024} \
-  CONFIG.C_AP_IARG_0_MB_DEPTH {1} \
   CONFIG.C_AP_OARG_0_WIDTH {32} \
-  CONFIG.C_AP_OARG_0_TYPE {0} \
+  CONFIG.C_AP_OARG_0_TYPE {1} \
   CONFIG.C_AP_OARG_0_DWIDTH {32} \
   CONFIG.C_AP_OARG_0_DIM_1 {1024} \
-  CONFIG.C_AP_OARG_0_MB_DEPTH {1} \
   CONFIG.C_INPUT_SCALAR_0_WIDTH {1} \
   CONFIG.C_INPUT_SCALAR_1_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_2_WIDTH {32} \
@@ -228,12 +226,12 @@ connect_bd_intf_net \
   [get_bd_intf_pins /BlackBoxJam_0/ap_ctrl] \
 
 connect_bd_intf_net \
-  [get_bd_intf_pins /BlackBoxJam_0/in_V_PORTA] \
-  [get_bd_intf_pins /BlackBoxJam_0_if/AP_BRAM_IARG_0] \
+  [get_bd_intf_pins /BlackBoxJam_0/in_V] \
+  [get_bd_intf_pins /BlackBoxJam_0_if/AP_FIFO_IARG_0] \
 
 connect_bd_intf_net \
-  [get_bd_intf_pins /BlackBoxJam_0/out_V_PORTA] \
-  [get_bd_intf_pins /BlackBoxJam_0_if/AP_BRAM_OARG_0] \
+  [get_bd_intf_pins /BlackBoxJam_0/out_V] \
+  [get_bd_intf_pins /BlackBoxJam_0_if/AP_FIFO_OARG_0] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /ps7/M_AXI_GP0] \
