@@ -4,7 +4,7 @@
 #include "mmult_accel.h"
 
 #ifndef __SYNTHESIS__
-#define debug(...) {printf(__VA_ARGS__);}
+#define debug(...) {printf(__VA_ARGS__);fflush(stdout);}
 #else
 #define debug(...) {}
 #endif
@@ -19,8 +19,10 @@ using namespace std;
 
 unsigned int popcount(unsigned int in) {
 	unsigned int cnt = 0;
-	for (unsigned int i = 0; i < 32; i++) {
-		cnt += in << i;
+	POPCOUNT:for (unsigned int i = 0; i < 32; i++) {
+#pragma HLS unroll
+
+		cnt += (in >> i) & 0x1;
 	}
 	return cnt;
 }
@@ -29,20 +31,20 @@ template<unsigned int N_X, unsigned int N_H>
 void init_weight(unsigned int bram_w[N_H][N_X / 32],
 		const int w[N_H * N_X]) {
 #pragma HLS INLINE self
-#pragma HLS dataflow
+//#pragma HLS dataflow
 #pragma HLS array_partition variable=bram_w complete dim=1
 	// init weight for complete loop
 
 	unsigned int i, j;
 
 	// read to cache w
-	for (j = 0; j < N_H; j++) {
-		for (i = 0; i < N_X; i++) {
+	READ_W_LOOP:for (j = 0; j < N_H; j++) {
 #pragma HLS PIPELINE II=1
-			debug("[%s] bram_w init [%d]\n", __func__, i*N_H + j);
+		for (i = 0; i < N_X; i++) {
+			debug("[%s] bram_w[%d][%d] init w[%d] << %d \n", __func__, j, i/32, j * N_X + i, i%32);
 
 			//bram_w[j][i] = (inter_t) w[j*n_x + i];// & 0x1;
-			bram_w[j][i / 32] |= w[j * N_X + i] << 32 % i; // & 0x1;
+			bram_w[j][i / 32] |= (w[j * N_X + i] << i%32); // slow
 
 		}
 	}
@@ -60,20 +62,21 @@ void xnor_mult(const unsigned int bram_w[N_H][N_X / 32], const int x[N_X],
 #pragma HLS array_partition variable=bram_x complete
 #pragma HLS array_partition variable=bram_h complete
 
-	debug("[%s] n_x: %d(max:%d), n_h: %d(max:%d)\n", __func__, n_x, MAX_X, n_h,
+	debug("[%s] n_x: %d(max:%d), n_h: %d(max:%d)\n", __func__, N_X, MAX_X, N_H,
 			MAX_H);
 
 	unsigned int i, j;
 
 	// read to cache x
 	// 32 elements -> 1 elements
-	READ_X_LOOP: for (i = 0; i < N_X; i++) {
+	READ_X_LOOP: for (i = 0; i < N_X / 32; i++) {
 #pragma HLS PIPELINE II=1
 		for (j = 0; j < 32; j++) {
-			bram_x[i] |= x[i * 32 + j] << j;
+			bram_x[i] |= x[i * 32 + j] << j; // slow
 		}
 	}
 
+	debug("[%s] read cache \n", __func__);
 	///
 	// init outbuf
 #if 0
@@ -88,15 +91,17 @@ void xnor_mult(const unsigned int bram_w[N_H][N_X / 32], const int x[N_X],
 
 	// XNOR mmult
 	XNOR_LOOP: for (i = 0; i < N_X / 32; i++) {
-//		if (i >= n_x)
-//			break;
+#pragma HLS PIPELINE II=1
 		for (j = 0; j < N_H; j++) {
 #pragma HLS unroll //factor=16
 			unsigned int product_term = ~(bram_x[i] ^ bram_w[j][i]);	// & 0x1; // XNOR
-			debug("[%s] %d,%d, xnor %d\n", __func__, j, i, bram_w[j][i]);
 			bram_h[j] += popcount(product_term);
+
 		}
+		debug("[%s] %d,%d, xnor 0x%x\n", __func__, j, i, bram_h[j]);
 	}
+
+	debug("[%s] xor \n", __func__);
 
 	////////////////////////////////////////
 
@@ -104,12 +109,25 @@ void xnor_mult(const unsigned int bram_w[N_H][N_X / 32], const int x[N_X],
 	// to [0, 1]
 	WRITE_H_LOOP: for (i = 0; i < N_H; i++) {
 #pragma HLS PIPELINE II=1
-		h[i] = ((bram_h[i] << 1) - N_X);
+		h[i] = ((bram_h[i] << 1) - N_H);
 		//h[i] = (outer_t) ((bram_h[i] << 1) - 32*n_x);
 		debug("[%s] %d\n", __func__, h[i]);
 	}
 
+	debug("[%s] done \n", __func__);
+
 }
+
+#define L1_X 32
+#define L1_H 32
+#define L2_X 32
+#define L2_H 32
+#define L3_X 32
+#define L3_H 10
+
+static unsigned int bram_w1[L1_H][L1_X / 32];
+//static unsigned int bram_w2[L2_H][L2_X / 32];
+//static unsigned int bram_w3[L3_H][L3_X / 32];
 
 #pragma SDS data sys_port(x:AFI)
 #pragma SDS data sys_port(w:AFI)
@@ -121,15 +139,33 @@ void xnor_mult(const unsigned int bram_w[N_H][N_X / 32], const int x[N_X],
 void binary_connect(int op, int *x, int *w, int *h, int layer) {
 //#pragma HLS INLINE self
 
-#define L1_X 64
-#define L1_H 32
-	static unsigned int bram_w1[L1_H][L1_X / 32];
 
-	if (op == 0)
-		init_weight<L1_X, L1_H>(bram_w1, w);
+	if (op == 0) {
+		switch (layer) {
+		case 0:
+			init_weight<L1_X, L1_H>(bram_w1, w);
+			break;
+		case 1:
+//			init_weight<L2_X, L2_H>(bram_w2, w);
+			break;
+		case 2:
+//			init_weight<L3_X, L3_H>(bram_w3, w);
+			break;
+		}
+	} else if (op == 1) {
+		switch (layer) {
+		case 0:
+			xnor_mult<L1_X, L1_H>(bram_w1, x, h);
+			break;
+		case 1:
+//			xnor_mult<L2_X, L2_H>(bram_w2, x, h);
+			break;
+		case 2:
+//			xnor_mult<L3_X, L3_H>(bram_w3, x, h);
+			break;
+		}
+	}
 
-	if (op == 1)
-		xnor_mult<L1_X, L1_H>(bram_w1, x, h);
 }
 
 #include <stdio.h>

@@ -167,16 +167,16 @@ set_property -dict [ list \
 # Connectivity
 #---------------------------
 connect_bd_net  \
+  [get_bd_pins /binary_connect_0_if/aresetn] \
+  [get_bd_pins /binary_connect_0/ap_rst_n] \
+
+connect_bd_net  \
   [get_bd_pins /binary_connect_0_if/ap_iscalar_0_dout] \
   [get_bd_pins /binary_connect_0/op] \
 
 connect_bd_net  \
   [get_bd_pins /binary_connect_0_if/ap_iscalar_1_dout] \
   [get_bd_pins /binary_connect_0/layer] \
-
-connect_bd_net  \
-  [get_bd_pins /binary_connect_0_if/aresetn] \
-  [get_bd_pins /binary_connect_0/ap_rst_n] \
 
 connect_bd_net  \
   [get_bd_pins /ps7/FCLK_CLK0] \
@@ -246,6 +246,10 @@ connect_bd_net  \
   [get_bd_pins /xlconcat/In2] \
 
 connect_bd_intf_net \
+  [get_bd_intf_pins /binary_connect_0_if/ap_ctrl] \
+  [get_bd_intf_pins /binary_connect_0/ap_ctrl] \
+
+connect_bd_intf_net \
   [get_bd_intf_pins /binary_connect_0/x] \
   [get_bd_intf_pins /binary_connect_0_if/AP_FIFO_IARG_0] \
 
@@ -256,10 +260,6 @@ connect_bd_intf_net \
 connect_bd_intf_net \
   [get_bd_intf_pins /binary_connect_0/h] \
   [get_bd_intf_pins /binary_connect_0_if/AP_FIFO_OARG_0] \
-
-connect_bd_intf_net \
-  [get_bd_intf_pins /binary_connect_0_if/ap_ctrl] \
-  [get_bd_intf_pins /binary_connect_0/ap_ctrl] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /ps7/M_AXI_GP0] \
