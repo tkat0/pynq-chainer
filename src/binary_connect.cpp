@@ -340,9 +340,9 @@ void DoCompute(ap_uint<32> * in, ap_uint<32> * out, const unsigned int targetLay
 
 //#pragma SDS data sys_port(in:AFI)
 //#pragma SDS data sys_port(out:AFI)
-#pragma SDS data access_pattern(in:SEQUENTIAL, out:SEQUENTIAL)
-#pragma SDS data copy(in) // max
-#pragma SDS data copy(out)
+//#pragma SDS data access_pattern(in:SEQUENTIAL, out:SEQUENTIAL)
+//#pragma SDS data copy(in[0:1024]) // max
+//#pragma SDS data copy(out[0:1024])
 void BlackBoxJam(int *in, int *out, int doInit,
 		int targetLayer, int targetMem,
 		int targetInd, int val) {
