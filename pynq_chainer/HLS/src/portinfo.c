@@ -18,12 +18,12 @@ axi_lite_info_t _p0_swinst_BlackBoxJam_0_cmd_BlackBoxJam_info = {
   .reg_name = "0x28"
 };
 
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_in_V_info = {
+axi_lite_info_t _p0_swinst_BlackBoxJam_0_in_r_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
   .reg_name = "0x80"
 };
 
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_out_V_info = {
+axi_lite_info_t _p0_swinst_BlackBoxJam_0_out_r_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
   .reg_name = "0xC0"
 };
@@ -48,7 +48,7 @@ axi_lite_info_t _p0_swinst_BlackBoxJam_0_targetInd_info = {
   .reg_name = "0x90"
 };
 
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_val_V_info = {
+axi_lite_info_t _p0_swinst_BlackBoxJam_0_val_r_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
   .reg_name = "0x94"
 };
@@ -59,13 +59,13 @@ struct _p0_swblk_BlackBoxJam _p0_swinst_BlackBoxJam_0 = {
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
 		.send_i = &axi_lite_send },
-  .in_V = { .base = { 
-		.channel_info = &_p0_swinst_BlackBoxJam_0_in_V_info, 
+  .in_r = { .base = { 
+		.channel_info = &_p0_swinst_BlackBoxJam_0_in_r_info, 
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
 		.send_i = &axi_lite_send },
-  .out_V = { .base = { 
-		.channel_info = &_p0_swinst_BlackBoxJam_0_out_V_info, 
+  .out_r = { .base = { 
+		.channel_info = &_p0_swinst_BlackBoxJam_0_out_r_info, 
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
 		.receive_i = &axi_lite_recv },
@@ -89,8 +89,8 @@ struct _p0_swblk_BlackBoxJam _p0_swinst_BlackBoxJam_0 = {
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
 		.send_i = &axi_lite_send },
-  .val_V = { .base = { 
-		.channel_info = &_p0_swinst_BlackBoxJam_0_val_V_info, 
+  .val_r = { .base = { 
+		.channel_info = &_p0_swinst_BlackBoxJam_0_val_r_info, 
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
 		.send_i = &axi_lite_send },
@@ -109,25 +109,25 @@ void _p0_cf_framework_open(int first)
   cf_get_current_context();
   accel_open(&_sds__p0_BlackBoxJam_0);
   _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.cmd_BlackBoxJam.base );
-  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.in_V.base );
-  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.out_V.base );
+  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.in_r.base );
+  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.out_r.base );
   _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.doInit.base );
   _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.targetLayer.base );
   _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.targetMem.base );
   _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.targetInd.base );
-  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.val_V.base );
+  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.val_r.base );
 }
 
 void _p0_cf_framework_close(int last)
 {
   cf_close_i( &_p0_swinst_BlackBoxJam_0.cmd_BlackBoxJam, NULL);
-  cf_close_i( &_p0_swinst_BlackBoxJam_0.in_V, NULL);
-  cf_close_i( &_p0_swinst_BlackBoxJam_0.out_V, NULL);
+  cf_close_i( &_p0_swinst_BlackBoxJam_0.in_r, NULL);
+  cf_close_i( &_p0_swinst_BlackBoxJam_0.out_r, NULL);
   cf_close_i( &_p0_swinst_BlackBoxJam_0.doInit, NULL);
   cf_close_i( &_p0_swinst_BlackBoxJam_0.targetLayer, NULL);
   cf_close_i( &_p0_swinst_BlackBoxJam_0.targetMem, NULL);
   cf_close_i( &_p0_swinst_BlackBoxJam_0.targetInd, NULL);
-  cf_close_i( &_p0_swinst_BlackBoxJam_0.val_V, NULL);
+  cf_close_i( &_p0_swinst_BlackBoxJam_0.val_r, NULL);
   accel_close(&_sds__p0_BlackBoxJam_0);
   _p0_cf_unregister(last);
 }

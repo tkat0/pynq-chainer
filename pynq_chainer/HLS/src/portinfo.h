@@ -7,13 +7,13 @@ extern "C" {
 
 struct _p0_swblk_BlackBoxJam {
   cf_port_send_t cmd_BlackBoxJam;
-  cf_port_send_t in_V;
-  cf_port_receive_t out_V;
+  cf_port_send_t in_r;
+  cf_port_receive_t out_r;
   cf_port_send_t doInit;
   cf_port_send_t targetLayer;
   cf_port_send_t targetMem;
   cf_port_send_t targetInd;
-  cf_port_send_t val_V;
+  cf_port_send_t val_r;
 };
 
 extern struct _p0_swblk_BlackBoxJam _p0_swinst_BlackBoxJam_0;

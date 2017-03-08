@@ -343,9 +343,9 @@ void DoCompute(ap_uint<32> * in, ap_uint<32> * out, const unsigned int targetLay
 //#pragma SDS data access_pattern(in:SEQUENTIAL, out:SEQUENTIAL)
 //#pragma SDS data zero_copy(in[0:768]) // max
 //#pragma SDS data zero_copy(out[0:512])
-void BlackBoxJam(ap_uint<32> *in, ap_uint<32> *out, bool doInit,
-		unsigned int targetLayer, unsigned int targetMem,
-		unsigned int targetInd, ap_uint<32> val) {
+void BlackBoxJam(int *in, int *out, int doInit,
+		int targetLayer, int targetMem,
+		int targetInd, int val) {
 // pragmas for MLBP jam interface
 // signals to be mapped to the AXI Lite slave port
 //#pragma HLS INTERFACE s_axilite port=return bundle=control
@@ -379,7 +379,7 @@ void BlackBoxJam(ap_uint<32> *in, ap_uint<32> *out, bool doInit,
 		//DoCompute(in, out, targetLayer);
 	}
 
-	out[0] = 5;
+	out[0] = 5* in[0];
 
 }
 

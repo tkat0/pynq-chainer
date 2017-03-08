@@ -343,9 +343,9 @@ void DoCompute(ap_uint<32> * in, ap_uint<32> * out, const unsigned int targetLay
 //#pragma SDS data access_pattern(in:SEQUENTIAL, out:SEQUENTIAL)
 //#pragma SDS data zero_copy(in[0:768]) // max
 //#pragma SDS data zero_copy(out[0:512])
-void BlackBoxJam(ap_uint<32> *in, ap_uint<32> *out, bool doInit,
-		unsigned int targetLayer, unsigned int targetMem,
-		unsigned int targetInd, ap_uint<32> val) {
+void BlackBoxJam(int *in, int *out, int doInit,
+		int targetLayer, int targetMem,
+		int targetInd, int val) {
 // pragmas for MLBP jam interface
 // signals to be mapped to the AXI Lite slave port
 //#pragma HLS INTERFACE s_axilite port=return bundle=control
@@ -379,7 +379,7 @@ void BlackBoxJam(ap_uint<32> *in, ap_uint<32> *out, bool doInit,
 		//DoCompute(in, out, targetLayer);
 	}
 
-	out[0] = 5;
+	out[0] = 5* in[0];
 
 }
 
@@ -398,14 +398,14 @@ void _p0_BlackBoxJam_0(ap_uint<32> * in, ap_uint<32> * out, bool doInit, unsigne
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.cmd_BlackBoxJam), start_seq, 3*sizeof(int), &_p0_swinst_BlackBoxJam_0_cmd);
   cf_wait(_p0_swinst_BlackBoxJam_0_cmd);
 
-  cf_send_i(&(_p0_swinst_BlackBoxJam_0.in_V), in, 4, &_p0_request_0);
-  cf_send_i(&(_p0_swinst_BlackBoxJam_0.doInit), &doInit, 1, &_p0_request_2);
+  cf_send_i(&(_p0_swinst_BlackBoxJam_0.in_r), in, 4, &_p0_request_0);
+  cf_send_i(&(_p0_swinst_BlackBoxJam_0.doInit), &doInit, 4, &_p0_request_2);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetLayer), &targetLayer, 4, &_p0_request_3);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetMem), &targetMem, 4, &_p0_request_4);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetInd), &targetInd, 4, &_p0_request_5);
-  cf_send_i(&(_p0_swinst_BlackBoxJam_0.val_V), &val, 4, &_p0_request_6);
+  cf_send_i(&(_p0_swinst_BlackBoxJam_0.val_r), &val, 4, &_p0_request_6);
 
-  cf_receive_i(&(_p0_swinst_BlackBoxJam_0.out_V), out, 4, &_p0_BlackBoxJam_0_num_out_V, &_p0_request_1);
+  cf_receive_i(&(_p0_swinst_BlackBoxJam_0.out_r), out, 4, &_p0_BlackBoxJam_0_num_out_r, &_p0_request_1);
 
   cf_wait(_p0_request_0);
   cf_wait(_p0_request_1);
