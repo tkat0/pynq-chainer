@@ -7,25 +7,25 @@
 
 #include "sds_lib.h"
 
-void _p0_BlackBoxJam_0(int * in, int * out, int doInit, int targetLayer, int targetMem, int targetInd, int val);
 int main_BlackBoxJam(void) {
 
 	int *in = (int *)sds_alloc(32 * sizeof(int));
 	int *out = (int *)sds_alloc(32 * sizeof(int));
 
-	_p0_BlackBoxJam_0(in, out, 1, 0, 0, 0, 0);
+	BlackBoxJam(in, out, 1, 0, 0, 0, 0);
 	return 0;
 }
 
+void _p0_binary_connect_0(int op, int * x, int * w, int * h, int layer);
 int main_bin(void) {
-	outer_t *tin1Buf, *tin2Buf, *toutBufHw;
+	int *tin1Buf, *tin2Buf, *toutBufHw;
 
-	tin1Buf = (outer_t *)sds_alloc(MAX_X * sizeof(outer_t));
-	tin2Buf = (outer_t *)sds_alloc(MAX_H * MAX_X * sizeof(outer_t));
-	toutBufHw = (outer_t *)sds_alloc(MAX_H * sizeof(outer_t));
+	tin1Buf = (int *)sds_alloc(MAX_X * sizeof(int));
+	tin2Buf = (int *)sds_alloc(MAX_H * MAX_X * sizeof(int));
+	toutBufHw = (int *)sds_alloc(MAX_H * sizeof(int));
 
-	binary_connect(0, tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_H);
-	binary_connect(1, tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_H);
+	_p0_binary_connect_0(0, tin1Buf, tin2Buf, toutBufHw, 0);
+	_p0_binary_connect_0(1, tin1Buf, tin2Buf, toutBufHw, 0);
 
 	return 0;
 }

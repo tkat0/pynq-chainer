@@ -361,6 +361,9 @@ void BlackBoxJam(int *in, int *out, int doInit,
 //#pragma HLS INTERFACE m_axi offset=slave port=out bundle=hostmem depth=256
 //#pragma HLS INTERFACE s_axilite port=out bundle=control
 
+#pragma HLS interface ap_fifo port=in
+#pragma HLS interface ap_fifo port=out
+
 // partition PE arrays
 #pragma HLS ARRAY_PARTITION variable=weightMem0 complete dim=1
 //#pragma HLS ARRAY_PARTITION variable=thresMem0 complete dim=1
@@ -391,15 +394,15 @@ void _p0_BlackBoxJam_0(int * in, int * out, int doInit, int targetLayer, int tar
 {
   switch_to_next_partition(0);
   int start_seq[3];
-  start_seq[0] = 0x00007f00;
+  start_seq[0] = 0x00001f00;
   start_seq[1] = 0x00010000;
   start_seq[2] = 0x00020000;
   cf_request_handle_t _p0_swinst_BlackBoxJam_0_cmd;
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.cmd_BlackBoxJam), start_seq, 3*sizeof(int), &_p0_swinst_BlackBoxJam_0_cmd);
   cf_wait(_p0_swinst_BlackBoxJam_0_cmd);
 
-  cf_send_i(&(_p0_swinst_BlackBoxJam_0.in_r), in, 4, &_p0_request_0);
-  cf_send_i(&(_p0_swinst_BlackBoxJam_0.out_r), out, 4, &_p0_request_1);
+  cf_send_i(&(_p0_swinst_BlackBoxJam_0.in_r), in, 128, &_p0_request_0);
+  cf_send_i(&(_p0_swinst_BlackBoxJam_0.out_r), out, 128, &_p0_request_1);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.doInit), &doInit, 4, &_p0_request_2);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetLayer), &targetLayer, 4, &_p0_request_3);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetMem), &targetMem, 4, &_p0_request_4);

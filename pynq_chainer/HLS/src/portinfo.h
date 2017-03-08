@@ -5,18 +5,16 @@
 extern "C" {
 #endif
 
-struct _p0_swblk_BlackBoxJam {
-  cf_port_send_t cmd_BlackBoxJam;
-  cf_port_send_t in_r;
-  cf_port_send_t out_r;
-  cf_port_send_t doInit;
-  cf_port_send_t targetLayer;
-  cf_port_send_t targetMem;
-  cf_port_send_t targetInd;
-  cf_port_send_t val_r;
+struct _p0_swblk_binary_connect {
+  cf_port_send_t cmd_binary_connect;
+  cf_port_send_t op;
+  cf_port_send_t x;
+  cf_port_send_t w;
+  cf_port_receive_t h;
+  cf_port_send_t layer;
 };
 
-extern struct _p0_swblk_BlackBoxJam _p0_swinst_BlackBoxJam_0;
+extern struct _p0_swblk_binary_connect _p0_swinst_binary_connect_0;
 void _p0_cf_framework_open(int);
 void _p0_cf_framework_close(int);
 

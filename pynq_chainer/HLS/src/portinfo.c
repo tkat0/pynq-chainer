@@ -9,88 +9,76 @@
 
 #include "xlnk_core_cf.h"
 #include "accel_info.h"
+#include "axi_dma_simple_dm.h"
 #include "axi_lite_dm.h"
 
-extern accel_info_t _sds__p0_BlackBoxJam_0;
+extern axi_dma_simple_info_t _p0_dm_0;
+extern axi_dma_simple_info_t _p0_dm_1;
+extern axi_dma_simple_info_t _p0_dm_2;
+extern accel_info_t _sds__p0_binary_connect_0;
 
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_cmd_BlackBoxJam_info = {
-  .accel_info = &_sds__p0_BlackBoxJam_0,
+axi_lite_info_t _p0_swinst_binary_connect_0_cmd_binary_connect_info = {
+  .accel_info = &_sds__p0_binary_connect_0,
   .reg_name = "0x28"
 };
 
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_in_r_info = {
-  .accel_info = &_sds__p0_BlackBoxJam_0,
+axi_lite_info_t _p0_swinst_binary_connect_0_op_info = {
+  .accel_info = &_sds__p0_binary_connect_0,
   .reg_name = "0x80"
 };
 
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_out_r_info = {
-  .accel_info = &_sds__p0_BlackBoxJam_0,
+axi_dma_simple_channel_info_t _p0_swinst_binary_connect_0_x_info = {
+  .dma_info = &_p0_dm_1,
+  .in_use = 0,
+  .needs_cache_flush_invalidate = 1
+};
+
+axi_dma_simple_channel_info_t _p0_swinst_binary_connect_0_w_info = {
+  .dma_info = &_p0_dm_0,
+  .in_use = 0,
+  .needs_cache_flush_invalidate = 1
+};
+
+axi_dma_simple_channel_info_t _p0_swinst_binary_connect_0_h_info = {
+  .dma_info = &_p0_dm_2,
+  .in_use = 0,
+  .needs_cache_flush_invalidate = 1
+};
+
+axi_lite_info_t _p0_swinst_binary_connect_0_layer_info = {
+  .accel_info = &_sds__p0_binary_connect_0,
   .reg_name = "0x84"
 };
 
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_doInit_info = {
-  .accel_info = &_sds__p0_BlackBoxJam_0,
-  .reg_name = "0x88"
-};
-
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_targetLayer_info = {
-  .accel_info = &_sds__p0_BlackBoxJam_0,
-  .reg_name = "0x8C"
-};
-
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_targetMem_info = {
-  .accel_info = &_sds__p0_BlackBoxJam_0,
-  .reg_name = "0x90"
-};
-
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_targetInd_info = {
-  .accel_info = &_sds__p0_BlackBoxJam_0,
-  .reg_name = "0x94"
-};
-
-axi_lite_info_t _p0_swinst_BlackBoxJam_0_val_r_info = {
-  .accel_info = &_sds__p0_BlackBoxJam_0,
-  .reg_name = "0x98"
-};
-
-struct _p0_swblk_BlackBoxJam _p0_swinst_BlackBoxJam_0 = {
-  .cmd_BlackBoxJam = { .base = { 
-		.channel_info = &_p0_swinst_BlackBoxJam_0_cmd_BlackBoxJam_info, 
+struct _p0_swblk_binary_connect _p0_swinst_binary_connect_0 = {
+  .cmd_binary_connect = { .base = { 
+		.channel_info = &_p0_swinst_binary_connect_0_cmd_binary_connect_info, 
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
 		.send_i = &axi_lite_send },
-  .in_r = { .base = { 
-		.channel_info = &_p0_swinst_BlackBoxJam_0_in_r_info, 
+  .op = { .base = { 
+		.channel_info = &_p0_swinst_binary_connect_0_op_info, 
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
 		.send_i = &axi_lite_send },
-  .out_r = { .base = { 
-		.channel_info = &_p0_swinst_BlackBoxJam_0_out_r_info, 
-		.open_i = &axi_lite_open, 
-		.close_i = &axi_lite_close },
-		.send_i = &axi_lite_send },
-  .doInit = { .base = { 
-		.channel_info = &_p0_swinst_BlackBoxJam_0_doInit_info, 
-		.open_i = &axi_lite_open, 
-		.close_i = &axi_lite_close },
-		.send_i = &axi_lite_send },
-  .targetLayer = { .base = { 
-		.channel_info = &_p0_swinst_BlackBoxJam_0_targetLayer_info, 
-		.open_i = &axi_lite_open, 
-		.close_i = &axi_lite_close },
-		.send_i = &axi_lite_send },
-  .targetMem = { .base = { 
-		.channel_info = &_p0_swinst_BlackBoxJam_0_targetMem_info, 
-		.open_i = &axi_lite_open, 
-		.close_i = &axi_lite_close },
-		.send_i = &axi_lite_send },
-  .targetInd = { .base = { 
-		.channel_info = &_p0_swinst_BlackBoxJam_0_targetInd_info, 
-		.open_i = &axi_lite_open, 
-		.close_i = &axi_lite_close },
-		.send_i = &axi_lite_send },
-  .val_r = { .base = { 
-		.channel_info = &_p0_swinst_BlackBoxJam_0_val_r_info, 
+  .x = { .base = { 
+		.channel_info = &_p0_swinst_binary_connect_0_x_info, 
+		.open_i = &axi_dma_simple_open, 
+		.close_i = &axi_dma_simple_close },
+		.send_i = &axi_dma_simple_send_i },
+  .w = { .base = { 
+		.channel_info = &_p0_swinst_binary_connect_0_w_info, 
+		.open_i = &axi_dma_simple_open, 
+		.close_i = &axi_dma_simple_close },
+		.send_i = &axi_dma_simple_send_i },
+  .h = { .base = { 
+		.channel_info = &_p0_swinst_binary_connect_0_h_info, 
+		.open_i = &axi_dma_simple_open, 
+		.close_i = &axi_dma_simple_close },
+		.receive_ref_i = 0,
+		.receive_i = &axi_dma_simple_recv_i },
+  .layer = { .base = { 
+		.channel_info = &_p0_swinst_binary_connect_0_layer_info, 
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
 		.send_i = &axi_lite_send },
@@ -107,28 +95,24 @@ void _p0_cf_framework_open(int first)
   xlnkCounterMap();
   _p0_cf_register(first);
   cf_get_current_context();
-  accel_open(&_sds__p0_BlackBoxJam_0);
-  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.cmd_BlackBoxJam.base );
-  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.in_r.base );
-  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.out_r.base );
-  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.doInit.base );
-  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.targetLayer.base );
-  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.targetMem.base );
-  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.targetInd.base );
-  _p0_cf_open_port( &_p0_swinst_BlackBoxJam_0.val_r.base );
+  accel_open(&_sds__p0_binary_connect_0);
+  _p0_cf_open_port( &_p0_swinst_binary_connect_0.cmd_binary_connect.base );
+  _p0_cf_open_port( &_p0_swinst_binary_connect_0.op.base );
+  _p0_cf_open_port( &_p0_swinst_binary_connect_0.x.base );
+  _p0_cf_open_port( &_p0_swinst_binary_connect_0.w.base );
+  _p0_cf_open_port( &_p0_swinst_binary_connect_0.h.base );
+  _p0_cf_open_port( &_p0_swinst_binary_connect_0.layer.base );
 }
 
 void _p0_cf_framework_close(int last)
 {
-  cf_close_i( &_p0_swinst_BlackBoxJam_0.cmd_BlackBoxJam, NULL);
-  cf_close_i( &_p0_swinst_BlackBoxJam_0.in_r, NULL);
-  cf_close_i( &_p0_swinst_BlackBoxJam_0.out_r, NULL);
-  cf_close_i( &_p0_swinst_BlackBoxJam_0.doInit, NULL);
-  cf_close_i( &_p0_swinst_BlackBoxJam_0.targetLayer, NULL);
-  cf_close_i( &_p0_swinst_BlackBoxJam_0.targetMem, NULL);
-  cf_close_i( &_p0_swinst_BlackBoxJam_0.targetInd, NULL);
-  cf_close_i( &_p0_swinst_BlackBoxJam_0.val_r, NULL);
-  accel_close(&_sds__p0_BlackBoxJam_0);
+  cf_close_i( &_p0_swinst_binary_connect_0.cmd_binary_connect, NULL);
+  cf_close_i( &_p0_swinst_binary_connect_0.op, NULL);
+  cf_close_i( &_p0_swinst_binary_connect_0.x, NULL);
+  cf_close_i( &_p0_swinst_binary_connect_0.w, NULL);
+  cf_close_i( &_p0_swinst_binary_connect_0.h, NULL);
+  cf_close_i( &_p0_swinst_binary_connect_0.layer, NULL);
+  accel_close(&_sds__p0_binary_connect_0);
   _p0_cf_unregister(last);
 }
 

@@ -17,14 +17,14 @@ int main_BlackBoxJam(void) {
 }
 
 int main_bin(void) {
-	outer_t *tin1Buf, *tin2Buf, *toutBufHw;
+	int *tin1Buf, *tin2Buf, *toutBufHw;
 
-	tin1Buf = (outer_t *)sds_alloc(MAX_X * sizeof(outer_t));
-	tin2Buf = (outer_t *)sds_alloc(MAX_H * MAX_X * sizeof(outer_t));
-	toutBufHw = (outer_t *)sds_alloc(MAX_H * sizeof(outer_t));
+	tin1Buf = (int *)sds_alloc(MAX_X * sizeof(int));
+	tin2Buf = (int *)sds_alloc(MAX_H * MAX_X * sizeof(int));
+	toutBufHw = (int *)sds_alloc(MAX_H * sizeof(int));
 
-	binary_connect(0, tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_H);
-	binary_connect(1, tin1Buf, tin2Buf, toutBufHw, MAX_X, MAX_H);
+	binary_connect(0, tin1Buf, tin2Buf, toutBufHw, 0);
+	binary_connect(1, tin1Buf, tin2Buf, toutBufHw, 0);
 
 	return 0;
 }

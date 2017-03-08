@@ -15,7 +15,7 @@ typedef int outer_t;
 #ifdef __SYNTHESIS__
 #include <ap_int.h>
 
-typedef ap_uint<1> inter_t;
+typedef ap_uint<32> inter_t;
 #else
 typedef unsigned int inter_t;
 #endif
@@ -41,11 +41,10 @@ void mmult_accel (outer_t* in_A,
 		outer_t* in_B,
 		outer_t* out_C, int b_ncols, int a_ncols);
 
-#define MAX_X 32
-#define MAX_H 32
+#define MAX_X 1024
+#define MAX_H 1024
 
-void binary_connect (uint16_t op, outer_t* x, outer_t* w, outer_t* h,
-		uint16_t n_x, uint16_t n_h);
+void binary_connect(int op, int *x, int *w,	int *h, int layer);
 #endif
 
 

@@ -361,6 +361,9 @@ void BlackBoxJam(int *in, int *out, int doInit,
 //#pragma HLS INTERFACE m_axi offset=slave port=out bundle=hostmem depth=256
 //#pragma HLS INTERFACE s_axilite port=out bundle=control
 
+#pragma HLS interface ap_fifo port=in
+#pragma HLS interface ap_fifo port=out
+
 // partition PE arrays
 #pragma HLS ARRAY_PARTITION variable=weightMem0 complete dim=1
 //#pragma HLS ARRAY_PARTITION variable=thresMem0 complete dim=1
