@@ -30,7 +30,7 @@ axi_lite_info_t _p0_swinst_binary_connect_0_op_info = {
 axi_dma_simple_channel_info_t _p0_swinst_binary_connect_0_x_info = {
   .dma_info = &_p0_dm_1,
   .in_use = 0,
-  .needs_cache_flush_invalidate = 1
+  .needs_cache_flush_invalidate = 0
 };
 
 axi_dma_simple_channel_info_t _p0_swinst_binary_connect_0_w_info = {
@@ -42,7 +42,7 @@ axi_dma_simple_channel_info_t _p0_swinst_binary_connect_0_w_info = {
 axi_dma_simple_channel_info_t _p0_swinst_binary_connect_0_h_info = {
   .dma_info = &_p0_dm_2,
   .in_use = 0,
-  .needs_cache_flush_invalidate = 1
+  .needs_cache_flush_invalidate = 0
 };
 
 axi_lite_info_t _p0_swinst_binary_connect_0_layer_info = {

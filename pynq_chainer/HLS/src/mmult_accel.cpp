@@ -129,16 +129,16 @@ static unsigned int bram_w1[L1_H][L1_X / 32];
 //static unsigned int bram_w2[L2_H][L2_X / 32];
 //static unsigned int bram_w3[L3_H][L3_X / 32];
 
-#pragma SDS data sys_port(x:AFI)
-#pragma SDS data sys_port(w:AFI)
-#pragma SDS data sys_port(h:AFI)
+//#pragma SDS data sys_port(x:AFI)
+//#pragma SDS data sys_port(w:AFI)
+//#pragma SDS data sys_port(h:AFI)
 #pragma SDS data access_pattern(x:SEQUENTIAL, w:SEQUENTIAL, h:SEQUENTIAL)
 #pragma SDS data copy(x[0:MAX_X])
 #pragma SDS data copy(w[0:MAX_H*MAX_X])
 #pragma SDS data copy(h[0:MAX_H])
 void binary_connect(int op, int *x, int *w, int *h, int layer) {
 //#pragma HLS INLINE self
-
+#pragma HLS DATAFLOW
 
 	if (op == 0) {
 		switch (layer) {
