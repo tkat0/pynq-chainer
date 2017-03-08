@@ -8,7 +8,7 @@ extern "C" {
 struct _p0_swblk_BlackBoxJam {
   cf_port_send_t cmd_BlackBoxJam;
   cf_port_send_t in_r;
-  cf_port_receive_t out_r;
+  cf_port_send_t out_r;
   cf_port_send_t doInit;
   cf_port_send_t targetLayer;
   cf_port_send_t targetMem;

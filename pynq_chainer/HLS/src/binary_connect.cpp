@@ -340,9 +340,9 @@ void DoCompute(ap_uint<32> * in, ap_uint<32> * out, const unsigned int targetLay
 
 //#pragma SDS data sys_port(in:AFI)
 //#pragma SDS data sys_port(out:AFI)
-//#pragma SDS data access_pattern(in:SEQUENTIAL, out:SEQUENTIAL)
-//#pragma SDS data zero_copy(in[0:768]) // max
-//#pragma SDS data zero_copy(out[0:512])
+#pragma SDS data access_pattern(in:SEQUENTIAL, out:SEQUENTIAL)
+#pragma SDS data copy(in) // max
+#pragma SDS data copy(out)
 void BlackBoxJam(int *in, int *out, int doInit,
 		int targetLayer, int targetMem,
 		int targetInd, int val) {
@@ -376,10 +376,10 @@ void BlackBoxJam(int *in, int *out, int doInit,
 	if (doInit) {
 		DoMemInit(targetLayer, targetMem, targetInd, val);
 	} else {
-		//DoCompute(in, out, targetLayer);
+		DoCompute((ap_uint<32>*)in, (ap_uint<32>*)out, targetLayer);
 	}
 
-	out[0] = 5* in[0];
+//	out[0] = 5* in[0];
 
 }
 
@@ -391,21 +391,21 @@ void _p0_BlackBoxJam_0(int * in, int * out, int doInit, int targetLayer, int tar
 {
   switch_to_next_partition(0);
   int start_seq[3];
-  start_seq[0] = 0x00003f00;
-  start_seq[1] = 0x00010100;
+  start_seq[0] = 0x00001f00;
+  start_seq[1] = 0x00010000;
   start_seq[2] = 0x00020000;
   cf_request_handle_t _p0_swinst_BlackBoxJam_0_cmd;
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.cmd_BlackBoxJam), start_seq, 3*sizeof(int), &_p0_swinst_BlackBoxJam_0_cmd);
   cf_wait(_p0_swinst_BlackBoxJam_0_cmd);
 
-  cf_send_i(&(_p0_swinst_BlackBoxJam_0.in_r), in, 4, &_p0_request_0);
+  cf_send_i(&(_p0_swinst_BlackBoxJam_0.in_r), in, 128, &_p0_request_0);
+  cf_send_i(&(_p0_swinst_BlackBoxJam_0.out_r), out, 128, &_p0_request_1);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.doInit), &doInit, 4, &_p0_request_2);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetLayer), &targetLayer, 4, &_p0_request_3);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetMem), &targetMem, 4, &_p0_request_4);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetInd), &targetInd, 4, &_p0_request_5);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.val_r), &val, 4, &_p0_request_6);
 
-  cf_receive_i(&(_p0_swinst_BlackBoxJam_0.out_r), out, 4, &_p0_BlackBoxJam_0_num_out_r, &_p0_request_1);
 
   cf_wait(_p0_request_0);
   cf_wait(_p0_request_1);

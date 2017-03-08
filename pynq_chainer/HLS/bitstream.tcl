@@ -17,12 +17,50 @@ set ps7 [get_bd_cell /ps7]
     
 set_property -dict [ list \
   CONFIG.PCW_USE_M_AXI_GP0 1 \
+  CONFIG.PCW_USE_S_AXI_ACP 1 \
+  CONFIG.PCW_USE_DEFAULT_ACP_USER_VAL 1 \
   ] $ps7
 set xlconcat [get_bd_cell /xlconcat]
     
 set_property -dict [ list \
-  CONFIG.NUM_PORTS 1 \
+  CONFIG.NUM_PORTS 2 \
   ] $xlconcat
+
+#---------------------------
+# Instantiating dm_0
+#---------------------------
+set dm_0 [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dma:7.1 dm_0]
+  
+set_property -dict [ list \
+  CONFIG.C_DLYTMR_RESOLUTION {1250} \
+  CONFIG.C_SG_LENGTH_WIDTH {23} \
+  CONFIG.C_INCLUDE_SG {0} \
+  CONFIG.C_INCLUDE_MM2S {1} \
+  CONFIG.C_INCLUDE_S2MM {0} \
+  CONFIG.C_INCLUDE_MM2S_SF {1} \
+  CONFIG.C_INCLUDE_MM2S_DRE {1} \
+  CONFIG.C_MM2S_BURST_SIZE {64} \
+  CONFIG.C_M_AXI_MM2S_DATA_WIDTH {64} \
+  CONFIG.C_M_AXIS_MM2S_TDATA_WIDTH {64} \
+  ] $dm_0
+
+#---------------------------
+# Instantiating dm_1
+#---------------------------
+set dm_1 [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dma:7.1 dm_1]
+  
+set_property -dict [ list \
+  CONFIG.C_DLYTMR_RESOLUTION {1250} \
+  CONFIG.C_SG_LENGTH_WIDTH {23} \
+  CONFIG.C_INCLUDE_SG {0} \
+  CONFIG.C_INCLUDE_MM2S {1} \
+  CONFIG.C_INCLUDE_S2MM {0} \
+  CONFIG.C_INCLUDE_MM2S_SF {1} \
+  CONFIG.C_INCLUDE_MM2S_DRE {1} \
+  CONFIG.C_MM2S_BURST_SIZE {64} \
+  CONFIG.C_M_AXI_MM2S_DATA_WIDTH {64} \
+  CONFIG.C_M_AXIS_MM2S_TDATA_WIDTH {64} \
+  ] $dm_1
 
 #---------------------------
 # Instantiating BlackBoxJam_0
@@ -36,28 +74,24 @@ set BlackBoxJam_0 [create_bd_cell -type ip -vlnv xilinx.com:hls:BlackBoxJam:1.0 
 set BlackBoxJam_0_if [create_bd_cell -type ip -vlnv xilinx.com:ip:axis_accelerator_adapter:2.1 BlackBoxJam_0_if]
   
 set_property -dict [ list \
+  CONFIG.C_AP_IARG_0_WIDTH {32} \
+  CONFIG.C_AP_IARG_0_TYPE {1} \
+  CONFIG.C_AP_IARG_0_DWIDTH {32} \
+  CONFIG.C_AP_IARG_0_DIM_1 {1024} \
+  CONFIG.C_AP_IARG_1_WIDTH {32} \
+  CONFIG.C_AP_IARG_1_TYPE {1} \
+  CONFIG.C_AP_IARG_1_DWIDTH {32} \
+  CONFIG.C_AP_IARG_1_DIM_1 {1024} \
   CONFIG.C_INPUT_SCALAR_0_WIDTH {32} \
-  CONFIG.C_OUTPUT_SCALAR_0_WIDTH {32} \
-  CONFIG.C_OSCALAR_0_MODE {AP_VLD} \
   CONFIG.C_INPUT_SCALAR_1_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_2_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_3_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_4_WIDTH {32} \
-  CONFIG.C_INPUT_SCALAR_5_WIDTH {32} \
   CONFIG.C_N_OUTPUT_ARGS {0} \
-  CONFIG.C_N_INPUT_ARGS {0} \
-  CONFIG.C_N_INPUT_SCALARS {6} \
-  CONFIG.C_N_OUTPUT_SCALARS {1} \
+  CONFIG.C_N_INPUT_ARGS {2} \
+  CONFIG.C_N_INPUT_SCALARS {5} \
+  CONFIG.C_S_AXIS_TDATA_WIDTH {64} \
   ] $BlackBoxJam_0_if
-
-#---------------------------
-# Instantiating BlackBoxJam_0_out_r
-#---------------------------
-set BlackBoxJam_0_out_r [create_bd_cell -type ip -vlnv xilinx.com:ip:ovld_reg:1.0 BlackBoxJam_0_out_r]
-  
-set_property -dict [ list \
-  CONFIG.DATA_WIDTH {32} \
-  ] $BlackBoxJam_0_out_r
 
 #---------------------------
 # Instantiating axi_ic_ps7_M_AXI_GP0
@@ -65,22 +99,41 @@ set_property -dict [ list \
 set axi_ic_ps7_M_AXI_GP0 [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_ic_ps7_M_AXI_GP0]
   
 set_property -dict [ list \
-  CONFIG.NUM_MI {1} \
+  CONFIG.NUM_MI {3} \
   CONFIG.NUM_SI {1} \
   CONFIG.STRATEGY {2} \
   CONFIG.M00_HAS_REGSLICE {1} \
+  CONFIG.M01_HAS_REGSLICE {1} \
+  CONFIG.M02_HAS_REGSLICE {1} \
   CONFIG.S00_HAS_REGSLICE {1} \
   ] $axi_ic_ps7_M_AXI_GP0
 
 #---------------------------
-# Instantiating ps7_irq_const
+# Instantiating axi_ic_ps7_S_AXI_ACP
 #---------------------------
-set ps7_irq_const [create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 ps7_irq_const]
+set axi_ic_ps7_S_AXI_ACP [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_ic_ps7_S_AXI_ACP]
   
 set_property -dict [ list \
-  CONFIG.CONST_WIDTH {1} \
-  CONFIG.CONST_VAL {0} \
-  ] $ps7_irq_const
+  CONFIG.NUM_MI {1} \
+  CONFIG.NUM_SI {2} \
+  CONFIG.STRATEGY {2} \
+  CONFIG.M00_HAS_REGSLICE {1} \
+  CONFIG.M00_HAS_DATA_FIFO {2} \
+  CONFIG.S00_HAS_REGSLICE {1} \
+  CONFIG.S00_HAS_DATA_FIFO {2} \
+  CONFIG.S01_HAS_REGSLICE {1} \
+  CONFIG.S01_HAS_DATA_FIFO {2} \
+  ] $axi_ic_ps7_S_AXI_ACP
+
+#---------------------------
+# Instantiating acp_axcache_0xF
+#---------------------------
+set acp_axcache_0xF [create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 acp_axcache_0xF]
+  
+set_property -dict [ list \
+  CONFIG.CONST_WIDTH {4} \
+  CONFIG.CONST_VAL {15} \
+  ] $acp_axcache_0xF
 
 #---------------------------
 # Connectivity
@@ -91,84 +144,125 @@ connect_bd_net  \
 
 connect_bd_net  \
   [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_0_dout] \
-  [get_bd_pins /BlackBoxJam_0/in_r] \
-
-connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0/out_r] \
-  [get_bd_pins /BlackBoxJam_0_out_r/data_in] \
-
-connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0/out_r_ap_vld] \
-  [get_bd_pins /BlackBoxJam_0_out_r/vld_in] \
-
-connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0_out_r/vld_out] \
-  [get_bd_pins /BlackBoxJam_0_if/ap_oscalar_0_vld] \
-
-connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0_out_r/data_out] \
-  [get_bd_pins /BlackBoxJam_0_if/ap_oscalar_0_din] \
-
-connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_1_dout] \
   [get_bd_pins /BlackBoxJam_0/doInit] \
 
 connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_2_dout] \
+  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_1_dout] \
   [get_bd_pins /BlackBoxJam_0/targetLayer] \
 
 connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_3_dout] \
+  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_2_dout] \
   [get_bd_pins /BlackBoxJam_0/targetMem] \
 
 connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_4_dout] \
+  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_3_dout] \
   [get_bd_pins /BlackBoxJam_0/targetInd] \
 
 connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_5_dout] \
+  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_4_dout] \
   [get_bd_pins /BlackBoxJam_0/val_r] \
 
 connect_bd_net  \
   [get_bd_pins /ps7/FCLK_CLK0] \
+  [get_bd_pins /dm_0/s_axi_lite_aclk] \
+  [get_bd_pins /dm_0/m_axi_mm2s_aclk] \
+  [get_bd_pins /dm_1/s_axi_lite_aclk] \
+  [get_bd_pins /dm_1/m_axi_mm2s_aclk] \
   [get_bd_pins /ps7/M_AXI_GP0_ACLK] \
+  [get_bd_pins /ps7/S_AXI_ACP_ACLK] \
   [get_bd_pins /BlackBoxJam_0/ap_clk] \
   [get_bd_pins /BlackBoxJam_0_if/s_axi_aclk] \
   [get_bd_pins /BlackBoxJam_0_if/aclk] \
-  [get_bd_pins /BlackBoxJam_0_out_r/clk] \
+  [get_bd_pins /BlackBoxJam_0_if/s_axis_aclk] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/ACLK] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/S00_ACLK] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/M00_ACLK] \
+  [get_bd_pins /axi_ic_ps7_M_AXI_GP0/M01_ACLK] \
+  [get_bd_pins /axi_ic_ps7_M_AXI_GP0/M02_ACLK] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/ACLK] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/M00_ACLK] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S00_ACLK] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S01_ACLK] \
 
 connect_bd_net  \
   [get_bd_pins /proc_sys_reset_0_100M/interconnect_aresetn] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/ARESETN] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/S00_ARESETN] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/M00_ARESETN] \
+  [get_bd_pins /axi_ic_ps7_M_AXI_GP0/M01_ARESETN] \
+  [get_bd_pins /axi_ic_ps7_M_AXI_GP0/M02_ARESETN] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/ARESETN] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/M00_ARESETN] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S00_ARESETN] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S01_ARESETN] \
 
 connect_bd_net  \
   [get_bd_pins /proc_sys_reset_0_100M/peripheral_aresetn] \
+  [get_bd_pins /dm_0/axi_resetn] \
+  [get_bd_pins /dm_1/axi_resetn] \
   [get_bd_pins /BlackBoxJam_0_if/s_axi_aresetn] \
+  [get_bd_pins /BlackBoxJam_0_if/s_axis_aresetn] \
 
 connect_bd_net  \
-  [get_bd_pins /ps7_irq_const/dout] \
+  [get_bd_pins /dm_0/mm2s_introut] \
   [get_bd_pins /xlconcat/In0] \
+
+connect_bd_net  \
+  [get_bd_pins /dm_1/mm2s_introut] \
+  [get_bd_pins /xlconcat/In1] \
+
+connect_bd_net  \
+  [get_bd_pins /acp_axcache_0xF/dout] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S00_AXI_arcache] \
+  [get_bd_pins /axi_ic_ps7_S_AXI_ACP/S01_AXI_arcache] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /BlackBoxJam_0_if/ap_ctrl] \
   [get_bd_intf_pins /BlackBoxJam_0/ap_ctrl] \
 
 connect_bd_intf_net \
-  [get_bd_intf_pins /BlackBoxJam_0_if/ap_ctrl] \
-  [get_bd_intf_pins /BlackBoxJam_0_out_r/AP_CTRL] \
+  [get_bd_intf_pins /BlackBoxJam_0/in_r] \
+  [get_bd_intf_pins /BlackBoxJam_0_if/AP_FIFO_IARG_0] \
+
+connect_bd_intf_net \
+  [get_bd_intf_pins /BlackBoxJam_0/out_r] \
+  [get_bd_intf_pins /BlackBoxJam_0_if/AP_FIFO_IARG_1] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /ps7/M_AXI_GP0] \
   [get_bd_intf_pins /axi_ic_ps7_M_AXI_GP0/S00_AXI] \
 
 connect_bd_intf_net \
+  [get_bd_intf_pins /axi_ic_ps7_S_AXI_ACP/M00_AXI] \
+  [get_bd_intf_pins /ps7/S_AXI_ACP] \
+
+connect_bd_intf_net \
   [get_bd_intf_pins /axi_ic_ps7_M_AXI_GP0/M00_AXI] \
   [get_bd_intf_pins /BlackBoxJam_0_if/S_AXI] \
+
+connect_bd_intf_net \
+  [get_bd_intf_pins /axi_ic_ps7_M_AXI_GP0/M01_AXI] \
+  [get_bd_intf_pins /dm_0/S_AXI_LITE] \
+
+connect_bd_intf_net \
+  [get_bd_intf_pins /dm_0/M_AXI_MM2S] \
+  [get_bd_intf_pins /axi_ic_ps7_S_AXI_ACP/S00_AXI] \
+
+connect_bd_intf_net \
+  [get_bd_intf_pins /dm_0/M_AXIS_MM2S] \
+  [get_bd_intf_pins /BlackBoxJam_0_if/S_AXIS_1] \
+
+connect_bd_intf_net \
+  [get_bd_intf_pins /axi_ic_ps7_M_AXI_GP0/M02_AXI] \
+  [get_bd_intf_pins /dm_1/S_AXI_LITE] \
+
+connect_bd_intf_net \
+  [get_bd_intf_pins /dm_1/M_AXI_MM2S] \
+  [get_bd_intf_pins /axi_ic_ps7_S_AXI_ACP/S01_AXI] \
+
+connect_bd_intf_net \
+  [get_bd_intf_pins /dm_1/M_AXIS_MM2S] \
+  [get_bd_intf_pins /BlackBoxJam_0_if/S_AXIS_0] \
 
 #---------------------------
 # Automation Commands
