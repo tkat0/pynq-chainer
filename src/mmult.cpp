@@ -9,10 +9,10 @@
 
 int main_BlackBoxJam(void) {
 
-	ap_uint<32> *in = (ap_uint<32> *)sds_alloc(32 * sizeof(ap_uint<32>));
-	ap_uint<32> *out = (ap_uint<32> *)sds_alloc(32 * sizeof(ap_uint<32>));
+	int *in = (int *)sds_alloc(32 * sizeof(int));
+	int *out = (int *)sds_alloc(32 * sizeof(int));
 
-	BlackBoxJam(in, out, true, 0, 0, 0, 0);
+	BlackBoxJam(in, out, 1, 0, 0, 0, 0);
 	return 0;
 }
 

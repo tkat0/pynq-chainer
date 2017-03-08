@@ -386,8 +386,8 @@ void BlackBoxJam(int *in, int *out, int doInit,
 #include <stdio.h>
 #include <stdlib.h>
 #include "cf_stub.h"
-void _p0_BlackBoxJam_0(ap_uint<32> * in, ap_uint<32> * out, bool doInit, unsigned int targetLayer, unsigned int targetMem, unsigned int targetInd, ap_uint<32> val);
-void _p0_BlackBoxJam_0(ap_uint<32> * in, ap_uint<32> * out, bool doInit, unsigned int targetLayer, unsigned int targetMem, unsigned int targetInd, ap_uint<32> val)
+void _p0_BlackBoxJam_0(int * in, int * out, int doInit, int targetLayer, int targetMem, int targetInd, int val);
+void _p0_BlackBoxJam_0(int * in, int * out, int doInit, int targetLayer, int targetMem, int targetInd, int val)
 {
   switch_to_next_partition(0);
   int start_seq[3];

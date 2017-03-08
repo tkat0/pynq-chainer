@@ -59,9 +59,9 @@ extern "C" { // for CFFI compiler
 #define L2_MH 10
 #endif
 
-void BlackBoxJam(ap_uint<32> * in, ap_uint<32> * out, bool doInit,
-		unsigned int targetLayer, unsigned int targetMem,
-		unsigned int targetInd, ap_uint<32> val);
+void BlackBoxJam(int *in, int *out, int doInit,
+		int targetLayer, int targetMem,
+		int targetInd, int val);
 
 #ifndef __SYNTHESIS__
 } // extern "C"

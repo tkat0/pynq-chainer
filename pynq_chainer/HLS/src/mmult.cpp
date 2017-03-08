@@ -7,13 +7,13 @@
 
 #include "sds_lib.h"
 
-void _p0_BlackBoxJam_0(ap_uint<32> * in, ap_uint<32> * out, bool doInit, unsigned int targetLayer, unsigned int targetMem, unsigned int targetInd, ap_uint<32> val);
+void _p0_BlackBoxJam_0(int * in, int * out, int doInit, int targetLayer, int targetMem, int targetInd, int val);
 int main_BlackBoxJam(void) {
 
-	ap_uint<32> *in = (ap_uint<32> *)sds_alloc(32 * sizeof(ap_uint<32>));
-	ap_uint<32> *out = (ap_uint<32> *)sds_alloc(32 * sizeof(ap_uint<32>));
+	int *in = (int *)sds_alloc(32 * sizeof(int));
+	int *out = (int *)sds_alloc(32 * sizeof(int));
 
-	_p0_BlackBoxJam_0(in, out, true, 0, 0, 0, 0);
+	_p0_BlackBoxJam_0(in, out, 1, 0, 0, 0, 0);
 	return 0;
 }
 
