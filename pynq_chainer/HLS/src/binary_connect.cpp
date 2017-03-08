@@ -371,13 +371,16 @@ void BlackBoxJam(ap_uint<32> *in, ap_uint<32> *out, bool doInit,
 //#pragma HLS ARRAY_PARTITION variable=weightMem3 complete dim=1
 //#pragma HLS ARRAY_PARTITION variable=thresMem3 complete dim=1
 
-#pragma HLS RESOURCE variable=weightMem0 core=RAM_S2P_LUTRAM
+//#pragma HLS RESOURCE variable=weightMem0 core=RAM_S2P_LUTRAM
 
 	if (doInit) {
 		DoMemInit(targetLayer, targetMem, targetInd, val);
 	} else {
 		//DoCompute(in, out, targetLayer);
 	}
+
+	out[0] = 5;
+
 }
 
 #include <stdio.h>
@@ -388,21 +391,21 @@ void _p0_BlackBoxJam_0(ap_uint<32> * in, ap_uint<32> * out, bool doInit, unsigne
 {
   switch_to_next_partition(0);
   int start_seq[3];
-  start_seq[0] = 0x00007f00;
-  start_seq[1] = 0x00010000;
+  start_seq[0] = 0x00003f00;
+  start_seq[1] = 0x00010100;
   start_seq[2] = 0x00020000;
   cf_request_handle_t _p0_swinst_BlackBoxJam_0_cmd;
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.cmd_BlackBoxJam), start_seq, 3*sizeof(int), &_p0_swinst_BlackBoxJam_0_cmd);
   cf_wait(_p0_swinst_BlackBoxJam_0_cmd);
 
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.in_V), in, 4, &_p0_request_0);
-  cf_send_i(&(_p0_swinst_BlackBoxJam_0.out_V), out, 4, &_p0_request_1);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.doInit), &doInit, 1, &_p0_request_2);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetLayer), &targetLayer, 4, &_p0_request_3);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetMem), &targetMem, 4, &_p0_request_4);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.targetInd), &targetInd, 4, &_p0_request_5);
   cf_send_i(&(_p0_swinst_BlackBoxJam_0.val_V), &val, 4, &_p0_request_6);
 
+  cf_receive_i(&(_p0_swinst_BlackBoxJam_0.out_V), out, 4, &_p0_BlackBoxJam_0_num_out_V, &_p0_request_1);
 
   cf_wait(_p0_request_0);
   cf_wait(_p0_request_1);

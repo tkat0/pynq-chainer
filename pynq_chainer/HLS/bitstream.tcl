@@ -37,16 +37,27 @@ set BlackBoxJam_0_if [create_bd_cell -type ip -vlnv xilinx.com:ip:axis_accelerat
   
 set_property -dict [ list \
   CONFIG.C_INPUT_SCALAR_0_WIDTH {32} \
-  CONFIG.C_INPUT_SCALAR_1_WIDTH {32} \
-  CONFIG.C_INPUT_SCALAR_2_WIDTH {1} \
+  CONFIG.C_OUTPUT_SCALAR_0_WIDTH {32} \
+  CONFIG.C_OSCALAR_0_MODE {AP_VLD} \
+  CONFIG.C_INPUT_SCALAR_1_WIDTH {1} \
+  CONFIG.C_INPUT_SCALAR_2_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_3_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_4_WIDTH {32} \
   CONFIG.C_INPUT_SCALAR_5_WIDTH {32} \
-  CONFIG.C_INPUT_SCALAR_6_WIDTH {32} \
   CONFIG.C_N_OUTPUT_ARGS {0} \
   CONFIG.C_N_INPUT_ARGS {0} \
-  CONFIG.C_N_INPUT_SCALARS {7} \
+  CONFIG.C_N_INPUT_SCALARS {6} \
+  CONFIG.C_N_OUTPUT_SCALARS {1} \
   ] $BlackBoxJam_0_if
+
+#---------------------------
+# Instantiating BlackBoxJam_0_out_V
+#---------------------------
+set BlackBoxJam_0_out_V [create_bd_cell -type ip -vlnv xilinx.com:ip:ovld_reg:1.0 BlackBoxJam_0_out_V]
+  
+set_property -dict [ list \
+  CONFIG.DATA_WIDTH {32} \
+  ] $BlackBoxJam_0_out_V
 
 #---------------------------
 # Instantiating axi_ic_ps7_M_AXI_GP0
@@ -83,27 +94,39 @@ connect_bd_net  \
   [get_bd_pins /BlackBoxJam_0/in_V] \
 
 connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_1_dout] \
   [get_bd_pins /BlackBoxJam_0/out_V] \
+  [get_bd_pins /BlackBoxJam_0_out_V/data_in] \
 
 connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_2_dout] \
+  [get_bd_pins /BlackBoxJam_0/out_V_ap_vld] \
+  [get_bd_pins /BlackBoxJam_0_out_V/vld_in] \
+
+connect_bd_net  \
+  [get_bd_pins /BlackBoxJam_0_out_V/vld_out] \
+  [get_bd_pins /BlackBoxJam_0_if/ap_oscalar_0_vld] \
+
+connect_bd_net  \
+  [get_bd_pins /BlackBoxJam_0_out_V/data_out] \
+  [get_bd_pins /BlackBoxJam_0_if/ap_oscalar_0_din] \
+
+connect_bd_net  \
+  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_1_dout] \
   [get_bd_pins /BlackBoxJam_0/doInit] \
 
 connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_3_dout] \
+  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_2_dout] \
   [get_bd_pins /BlackBoxJam_0/targetLayer] \
 
 connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_4_dout] \
+  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_3_dout] \
   [get_bd_pins /BlackBoxJam_0/targetMem] \
 
 connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_5_dout] \
+  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_4_dout] \
   [get_bd_pins /BlackBoxJam_0/targetInd] \
 
 connect_bd_net  \
-  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_6_dout] \
+  [get_bd_pins /BlackBoxJam_0_if/ap_iscalar_5_dout] \
   [get_bd_pins /BlackBoxJam_0/val_V] \
 
 connect_bd_net  \
@@ -112,6 +135,7 @@ connect_bd_net  \
   [get_bd_pins /BlackBoxJam_0/ap_clk] \
   [get_bd_pins /BlackBoxJam_0_if/s_axi_aclk] \
   [get_bd_pins /BlackBoxJam_0_if/aclk] \
+  [get_bd_pins /BlackBoxJam_0_out_V/clk] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/ACLK] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/S00_ACLK] \
   [get_bd_pins /axi_ic_ps7_M_AXI_GP0/M00_ACLK] \
@@ -133,6 +157,10 @@ connect_bd_net  \
 connect_bd_intf_net \
   [get_bd_intf_pins /BlackBoxJam_0_if/ap_ctrl] \
   [get_bd_intf_pins /BlackBoxJam_0/ap_ctrl] \
+
+connect_bd_intf_net \
+  [get_bd_intf_pins /BlackBoxJam_0_if/ap_ctrl] \
+  [get_bd_intf_pins /BlackBoxJam_0_out_V/AP_CTRL] \
 
 connect_bd_intf_net \
   [get_bd_intf_pins /ps7/M_AXI_GP0] \

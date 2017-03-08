@@ -371,13 +371,16 @@ void BlackBoxJam(ap_uint<32> *in, ap_uint<32> *out, bool doInit,
 //#pragma HLS ARRAY_PARTITION variable=weightMem3 complete dim=1
 //#pragma HLS ARRAY_PARTITION variable=thresMem3 complete dim=1
 
-#pragma HLS RESOURCE variable=weightMem0 core=RAM_S2P_LUTRAM
+//#pragma HLS RESOURCE variable=weightMem0 core=RAM_S2P_LUTRAM
 
 	if (doInit) {
 		DoMemInit(targetLayer, targetMem, targetInd, val);
 	} else {
 		//DoCompute(in, out, targetLayer);
 	}
+
+	out[0] = 5;
+
 }
 
 

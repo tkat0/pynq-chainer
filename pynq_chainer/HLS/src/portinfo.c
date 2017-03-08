@@ -25,32 +25,32 @@ axi_lite_info_t _p0_swinst_BlackBoxJam_0_in_V_info = {
 
 axi_lite_info_t _p0_swinst_BlackBoxJam_0_out_V_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
-  .reg_name = "0x84"
+  .reg_name = "0xC0"
 };
 
 axi_lite_info_t _p0_swinst_BlackBoxJam_0_doInit_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
-  .reg_name = "0x88"
+  .reg_name = "0x84"
 };
 
 axi_lite_info_t _p0_swinst_BlackBoxJam_0_targetLayer_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
-  .reg_name = "0x8C"
+  .reg_name = "0x88"
 };
 
 axi_lite_info_t _p0_swinst_BlackBoxJam_0_targetMem_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
-  .reg_name = "0x90"
+  .reg_name = "0x8C"
 };
 
 axi_lite_info_t _p0_swinst_BlackBoxJam_0_targetInd_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
-  .reg_name = "0x94"
+  .reg_name = "0x90"
 };
 
 axi_lite_info_t _p0_swinst_BlackBoxJam_0_val_V_info = {
   .accel_info = &_sds__p0_BlackBoxJam_0,
-  .reg_name = "0x98"
+  .reg_name = "0x94"
 };
 
 struct _p0_swblk_BlackBoxJam _p0_swinst_BlackBoxJam_0 = {
@@ -68,7 +68,7 @@ struct _p0_swblk_BlackBoxJam _p0_swinst_BlackBoxJam_0 = {
 		.channel_info = &_p0_swinst_BlackBoxJam_0_out_V_info, 
 		.open_i = &axi_lite_open, 
 		.close_i = &axi_lite_close },
-		.send_i = &axi_lite_send },
+		.receive_i = &axi_lite_recv },
   .doInit = { .base = { 
 		.channel_info = &_p0_swinst_BlackBoxJam_0_doInit_info, 
 		.open_i = &axi_lite_open, 
